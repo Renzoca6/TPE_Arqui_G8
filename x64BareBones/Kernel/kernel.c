@@ -2,7 +2,8 @@
 #include <string.h>
 #include <lib.h>
 #include <moduleLoader.h>
-#include <naiveConsole.h>
+#include <video.h>
+#include <realTimeClock.h>
 
 extern uint8_t text;
 extern uint8_t rodata;
@@ -98,6 +99,10 @@ int main()
 	ncPrint("  Sample data module contents: ");
 	ncPrint((char*)sampleDataModuleAddress);
 	ncNewline();
+
+	char buf1[16];
+	getTimeString(buf1);
+	ncPrint(buf1);
 
 	ncPrint("[Finished]");
 	return 0;

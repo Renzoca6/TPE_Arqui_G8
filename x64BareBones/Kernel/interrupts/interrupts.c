@@ -2,8 +2,8 @@
 #include "interrupts.h"
 #include "idt.h"
 #include "pic.h"
-#include <naiveConsole.h>
-#include <keyboard_handler.h>
+#include "video.h"
+#include "keyboard_handler.h"
 
 // contador de ticks
 static uint64_t ticks = 0;

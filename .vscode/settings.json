@@ -1,6 +1,7 @@
 {
     "files.associations": {
         "stdint.h": "c",
-        "io.h": "c"
+        "io.h": "c",
+        "realtimeclock.h": "c"
     }
 }
