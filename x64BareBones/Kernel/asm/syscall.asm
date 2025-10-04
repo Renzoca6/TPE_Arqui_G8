@@ -1,3 +1,0 @@
-global syscall
-
-section .text

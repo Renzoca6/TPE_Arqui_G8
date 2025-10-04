@@ -13,14 +13,18 @@ GLOBAL _irq02Handler
 GLOBAL _irq03Handler
 GLOBAL _irq04Handler
 GLOBAL _irq05Handler
+GLOBAL _irq06Handler
 
 ;GLOBAL _exception0Handler
 
+EXTERN syscall_handler
 EXTERN irqDispatcher
 ;EXTERN exceptionDispatcher
 
 
 SECTION .text
+
+
 
 %macro pushState 0
 	push rax
@@ -122,6 +126,51 @@ _irq05Handler:
 ;	exceptionHandler 0
 
 
+; syscall 
+_irq06Handler:
+	
+	push rbp
+	push rdi
+	push rsi
+	push r8
+	push r9
+	push r10
+	push r11
+	push r12
+	push r13
+	push r14
+	push r15
+
+
+	mov [registers], rax
+	mov [registers+8], rbx
+	mov [registers+16], rcx
+	mov [registers+24], rdx
+
+
+	mov rdi, registers
+	call syscall_handler
+
+	; signal pic EOI (End of Interrupt)
+	mov al, 20h
+	out 20h, al
+
+
+	pop r15
+	pop r14
+	pop r13
+	pop r12
+	pop r11
+	pop r10
+	pop r9
+	pop r8
+	pop rsi
+	pop rdi
+	pop rbp
+
+	iretq 
+	
+
 haltcpu:
 	cli
 	hlt
@@ -131,3 +180,10 @@ haltcpu:
 
 SECTION .bss
 	aux resq 1
+
+SECTION .data
+	registers:
+	dq 0
+	dq 0
+	dq 0
+	dq 0
