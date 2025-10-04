@@ -1,4 +1,6 @@
 #include "idt.h"
+#include <stdint.h>
+#include <interrupts.h>
 
 #define IDT_ENTRIES 256
 
@@ -45,10 +47,9 @@ void idt_init(void) {
     idt_desc.base  = (uint64_t)&idt;        // puntero a donde empieza el idt
 
     //cargo a la tabla mi timer
-    extern void timer_tick_asm(void);
-    idt_set_entry(0x20, (uint64_t)timer_tick_asm);
-    extern void (keyboard_acm(void));
-    idt_set_entry(0x21, (uint64_t)keyboard_acm);
+    idt_set_entry(0x20, (uint64_t)&_irq00Handler);
+    idt_set_entry(0x21, (uint64_t)&_irq01Handler);
+    // idt_set_entry(0x00, (uint64_t)&_exception0Handler); //
     
     // llamo a funcion de asm que manda la direccion de memoria donde esta el idt_desc que es el foramto que me piden para la tabla IDT  a LIDT que carga la tabla
     load_idt(&idt_desc);    

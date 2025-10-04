@@ -4,6 +4,8 @@
 #include <moduleLoader.h>
 #include <video.h>
 #include <realTimeClock.h>
+#include "interrups_dispatcher.h"
+#include "keyboard_handler.h"
 
 extern uint8_t text;
 extern uint8_t rodata;
@@ -84,7 +86,9 @@ void * initializeKernelBinary()
 }
 
 int main()
-{	
+{
+
+	init_interrupts();
 	ncPrint("[Kernel Main]");
 	ncNewline();
 	ncPrint("  Sample code module at 0x");
@@ -106,6 +110,12 @@ int main()
 	getTimeString(buf1);
 	ncPrint(buf1);
 
-	ncPrint("[Finished]");
+	while (1){
+		if (hasNext()){
+		ncPrintChar(getNext().key);
+		}
+	}
+
+
 	return 0;
 }
