@@ -2,6 +2,7 @@
     "files.associations": {
         "stdint.h": "c",
         "io.h": "c",
-        "realtimeclock.h": "c"
+        "realtimeclock.h": "c",
+        "inout.h": "c"
     }
 }

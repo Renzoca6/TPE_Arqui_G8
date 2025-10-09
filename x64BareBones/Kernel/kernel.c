@@ -23,7 +23,6 @@ static void * const shellAddress = (void*)0x600000;
 
 typedef int (*EntryPoint)();
 
-
 void clearBSS(void * bssAddress, uint64_t bssSize)
 {
 	memset(bssAddress, 0, bssSize);
@@ -89,6 +88,8 @@ int main()
 {
 
 	init_interrupts();
+
+	/*
 	ncPrint("[Kernel Main]");
 	ncNewline();
 	ncPrint("  Sample code module at 0x");
@@ -115,7 +116,7 @@ int main()
 		ncPrintChar(getNext().key);
 		}
 	}
-
+*/
 
 	return 0;
 }

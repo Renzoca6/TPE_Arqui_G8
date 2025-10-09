@@ -4,9 +4,8 @@
  *  Created on: Apr 18, 2010
  *      Author: anizzomc
  */
-
-#ifndef INTERRUPS_H_
-#define INTERRUPS_H_
+#ifndef INTERRUPS_H
+#define INTERRUPS_H
 
 
 void _irq00Handler(void);
