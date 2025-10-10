@@ -165,8 +165,7 @@ void vdPrintCharStyled(char c, uint32_t fColor, uint32_t bgColor){
 
     // salto de linea
     if (c == '\n') {
-        x = 0;
-        y += FONT_H;  // alto del glyph
+		vdNewline();
         return;
     }
 
@@ -256,7 +255,7 @@ void vdBackspace(void) {
 
 }
 
-void clearScreen(void){
+void vdclearScreen(void){
     const uint32_t H = VBE_mode_info->height;
 
 	for (int i = 0; i < y; i++){
@@ -270,6 +269,12 @@ void clearScreen(void){
 	y = 0;
 	
 }
+
+void vdNewline(){
+	x=0;
+	y+=FONT_H;
+}
+
 
 
 // Convierte un entero a string en base arbitraria (2, 10, 16, etc.)
@@ -304,4 +309,25 @@ static uint32_t uintToBase(uint64_t value, char * buffer, uint32_t base)
 	}
 
 	return digits;  // devuelve cuántos dígitos tiene el número
+}
+
+// Imprime un número decimal
+void vdPrintDec(uint64_t value){
+	vdPrintBase(value, 10);
+}
+
+// Imprime un número en hexadecimal
+void vdPrintHex(uint64_t value){
+	vdPrintBase(value, 16);
+}
+
+// Imprime un número en binario
+void vdPrintBin(uint64_t value){
+	vdPrintBase(value, 2);
+}
+
+// Función genérica: convierte un valor a string en base dada y lo imprime
+void vdPrintBase(uint64_t value, uint32_t base){
+    uintToBase(value, buffer, base); // convierte el número en string
+    vdPrint(buffer);                 // lo imprime con ncPrint
 }

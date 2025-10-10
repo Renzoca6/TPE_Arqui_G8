@@ -41,7 +41,7 @@ void * initializeKernelBinary()
 {
 	char buffer[10];
 
-	ncPrint("[x64BareBones]");
+	ncPrint("[x64BareBones]"); //POR EJEMPLO ACA 
 	ncNewline();
 
 	ncPrint("CPU Vendor:");
@@ -88,14 +88,12 @@ int main()
 {
 
 	init_interrupts();
-
 	vdPrint("NIGGER holasdddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddholaabcdefghijkaaa");
 	vdPrint("NIGGER holasdddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddholaabcdefghijkaaa");
 	vdPrint("NIGGER holasdddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddholaabcdefghijkaaa");vdPrint("NIGGER holasdddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddholaabcdefghijkaaa");
 	vdPrint("NIGGER holasdddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddholaabcdefghijkaaa");
 	vdPrint("NIGGER holasdddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddholaabcdefghijkaaa");
-	vdPrint("NIGGER holasdddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddholaabcdefghijkaaa");
-	vdPrint("NIGGER holasdddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddholaabcdefghijkaaa");
+	
 
 
 	/*
@@ -119,13 +117,12 @@ int main()
 	char buf1[16];
 	getTimeString(buf1);
 	ncPrint(buf1);
-
+*/
 	while (1){
 		if (hasNext()){
-		ncPrintChar(getNext().key);
+		vdPrintChar(getNext().key);
 		}
 	}
-*/
 
 	return 0;
 }

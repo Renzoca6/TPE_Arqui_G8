@@ -25,7 +25,7 @@
 
     int syscall_write(syscall_Registers *regs){
         char * str = (char*)regs->rbx;  // me guardo el puntero al inicio del string 
-        ncPrint(str);                   // printeo el string
+        vdPrint(str);                   // printeo el string
         return 1;
     }
 
