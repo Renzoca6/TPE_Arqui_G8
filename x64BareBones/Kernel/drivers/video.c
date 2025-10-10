@@ -1,5 +1,4 @@
 #include "video.h"
-#include "realTimeClock.h"
 #include "font8x16.h"
 
 // Prototipo de la función auxiliar que convierte enteros a string en base dada
@@ -7,83 +6,6 @@ static uint32_t uintToBase(uint64_t value, char * buffer, uint32_t base);
 
 // Buffer temporal para almacenar strings numéricos
 static char buffer[64] = { '0' };
-
-// Dirección base de la memoria de video en modo texto VGA (0xB8000)
-static uint8_t * const video = (uint8_t*)0xB8000;
-
-// Puntero que avanza según vamos escribiendo en pantalla
-static uint8_t * currentVideo = (uint8_t*)0xB8000;
-
-// Ancho y alto de la pantalla en modo texto (80 columnas x 25 filas)
-static const uint32_t width = 80;
-static const uint32_t height = 25 ;
-
-// Imprime un string con colores específicos (fg y bg)
-void ncPrintColor(const char * string, uint8_t fc, uint8_t bg){
-	int i;
-	for (i = 0; string[i] != 0; i++)
-		ncPrintCharColor(string[i], fc, bg);
-}
-
-// Imprime un carácter con color de foreground (fc) y background (bg)
-void ncPrintCharColor(char character, uint8_t fc, uint8_t bg) {
-    uint8_t attr = (bg << 4) | (fc & 0x0F);  // arma el byte de atributo
-    *currentVideo = character;               // byte 0 = carácter
-    *(currentVideo + 1) = attr;              // byte 1 = atributo
-    currentVideo += 2;                       // avanza a la próxima celda
-}
-
-// Inserta un salto de línea (llena con espacios hasta el inicio de la siguiente línea)
-void ncNewline()
-{
-	do
-	{
-		ncPrintChar(' ');  // imprime espacios para completar la línea actual
-	}
-	while((uint64_t)(currentVideo - video) % (width * 2) != 0); // hasta alinear al inicio
-}
-
-// Imprime un número decimal
-void ncPrintDec(uint64_t value)
-{
-	ncPrintBase(value, 10);
-}
-
-void ncPrint(const char * string){
-	return;
-}
-
-// Imprime un número en hexadecimal
-void ncPrintHex(uint64_t value)
-{
-	ncPrintBase(value, 16);
-}
-
-// Imprime un número en binario
-void ncPrintBin(uint64_t value)
-{
-	ncPrintBase(value, 2);
-}
-
-// Función genérica: convierte un valor a string en base dada y lo imprime
-void ncPrintBase(uint64_t value, uint32_t base)
-{
-    uintToBase(value, buffer, base); // convierte el número en string
-    ncPrint(buffer);                 // lo imprime con ncPrint
-}
-
-// Limpia toda la pantalla con espacios y resetea el cursor
-void ncClear()
-{
-	int i;
-	for (i = 0; i <height * width; i++)
-		video[i * 2] = ' ';  // pone espacio en cada celda (byte de carácter)
-	currentVideo = video;     // reinicia el puntero al inicio de la VRAM
-}
-void ncPrintChar(char c){
-	return;
-}
-
 
 struct vbe_mode_info_structure {
 	uint16_t attributes;		// deprecated, only bit 7 should be of interest to you, and it indicates the mode supports a linear frame buffer.
@@ -140,25 +62,25 @@ void putPixel(uint32_t hexColor, uint64_t x, uint64_t y) {
 }
 
 
-void vdPrint(const char * str){
+void vdPrint(const char * str) {
 	int i;
 	for (i = 0; str[i] != 0; i++){
 		vdPrintChar(str[i]);
 	}
 }
 
-void vdPrintStyled(const char * str, uint32_t fColor, uint32_t bgColor){
+void vdPrintStyled(const char * str, uint32_t fColor, uint32_t bgColor) {
 	int i;
 	for (i = 0; str[i] != 0; i++){
 		vdPrintCharStyled(str[i], fColor, bgColor);
 	}
 }
 
-void vdPrintChar(char c){
+void vdPrintChar(char c) {
 	vdPrintCharStyled(c, 0x00ffffff, 0x00000000);
 }
 
-void vdPrintCharStyled(char c, uint32_t fColor, uint32_t bgColor){
+void vdPrintCharStyled(char c, uint32_t fColor, uint32_t bgColor) {
     // Si te pasás del borde, opcionalmente “clipeá”
     const uint32_t W = VBE_mode_info->width;
     const uint32_t H = VBE_mode_info->height;
@@ -176,6 +98,7 @@ void vdPrintCharStyled(char c, uint32_t fColor, uint32_t bgColor){
 
 	if (c == '\b'){
 		vdBackSpace();
+		return;
 	}
 	
     // recorro las 16 filas
@@ -207,60 +130,34 @@ void vdPrintCharStyled(char c, uint32_t fColor, uint32_t bgColor){
     x += FONT_W; 
 }
 
-void vdBackSpace(){
-	const uint32_t W = VBE_mode_info->width;
-
-	if (x >= FONT_W){
-		x -= FONT_W;
-		
-		for (int i = x; i < x+ FONT_W; i++){
-			for (int j = y; j < y+FONT_H; i++){
-				putPixel(0x00000000, i, j);
-			}
-			
-		}
-		
-	}else if (y > FONT_H){
-		y -= FONT_H;
-		x = W - 1;
-	}
-
-}
-
-void vdBackspace(void) {
+void vdBackSpace(void) {
     const uint32_t W = VBE_mode_info->width;
     const uint32_t H = VBE_mode_info->height;
 
-    // 1) Mover cursor hacia atrás
+    // mover cursor una celda atrás
     if (x >= FONT_W) {
         x -= FONT_W;
-		
-		
-		for (uint32_t py = y; py < y + FONT_H; py++) {
-        if (py >= H) break;
-        for (uint32_t px = x; px < x + FONT_W; px++) {
-            if (px >= W) break;
-            putPixel(0x000000, px, py);
-        }
-    }
     } else if (y >= FONT_H) {
-        // Subir una línea y saltar al final alineado a celdas de 8 px
         y -= FONT_H;
         x = (W / FONT_W) * FONT_W;
     } else {
-        // Estamos en (0,0): nada para borrar
-        return;
+        return; // ya en (0,0)
     }
 
-
+    // borrar el bloque 8x16 en (x,y)
+    for (uint32_t py = y; py < y + FONT_H && py < H; py++) {
+        for (uint32_t px = x; px < x + FONT_W && px < W; px++) {
+            putPixel(0x000000, px, py);
+        }
+    }
 }
 
-void vdclearScreen(void){
+
+void vdclearScreen(void) {
     const uint32_t H = VBE_mode_info->height;
 
 	for (int i = 0; i < y; i++){
-		for (int j = 0; j < VBE_mode_info->width; i++)
-		{
+		for (int j = 0; j < VBE_mode_info->width; i++){
 			putPixel(0x000000, i, j);
 		}
 		
@@ -270,7 +167,7 @@ void vdclearScreen(void){
 	
 }
 
-void vdNewline(){
+void vdNewline() {
 	x=0;
 	y+=FONT_H;
 }
@@ -278,8 +175,7 @@ void vdNewline(){
 
 
 // Convierte un entero a string en base arbitraria (2, 10, 16, etc.)
-static uint32_t uintToBase(uint64_t value, char * buffer, uint32_t base)
-{
+static uint32_t uintToBase(uint64_t value, char * buffer, uint32_t base) {
 	char *p = buffer;
 	char *p1, *p2;
 	uint32_t digits = 0;
@@ -312,22 +208,22 @@ static uint32_t uintToBase(uint64_t value, char * buffer, uint32_t base)
 }
 
 // Imprime un número decimal
-void vdPrintDec(uint64_t value){
+void vdPrintDec(uint64_t value) {
 	vdPrintBase(value, 10);
 }
 
 // Imprime un número en hexadecimal
-void vdPrintHex(uint64_t value){
+void vdPrintHex(uint64_t value) {
 	vdPrintBase(value, 16);
 }
 
 // Imprime un número en binario
-void vdPrintBin(uint64_t value){
+void vdPrintBin(uint64_t value) {
 	vdPrintBase(value, 2);
 }
 
 // Función genérica: convierte un valor a string en base dada y lo imprime
-void vdPrintBase(uint64_t value, uint32_t base){
+void vdPrintBase(uint64_t value, uint32_t base) {
     uintToBase(value, buffer, base); // convierte el número en string
     vdPrint(buffer);                 // lo imprime con ncPrint
 }

@@ -4,8 +4,6 @@
 #include "io.h"
 #include <string.h>
 
-
-
 static char scancode_to_ascii[128] = {
     0,  27, '1','2','3','4','5','6','7','8','9','0','-','=', '\b', // 0x00-0x0E
     '\t','q','w','e','r','t','y','u','i','o','p','[',']','\n', 0,   // 0x0F-0x1D
@@ -21,70 +19,74 @@ static char scancode_to_ascii_mayus[128] = {
     'C','V','B','N','M', 0, 0, 0, 0, 0, 0, ' ',
 };
 
-
-
 #define BUFFER_MAXLENGTH 32
-static KeyBufferStruct keyBuffer[BUFFER_MAXLENGTH];
-static bool hasnext = true;
-static int bufferLength = 0;
-static int nextKey = 0;
+static KeyBufferStruct buf[BUFFER_MAXLENGTH];
+static int lastkey = 0;   
+static int nextkey = 0;   
+static int count = 0;  //dim
+
 static bool capsLock = false;
 
-
-bool bufferFull(){
-    return bufferLength >= BUFFER_MAXLENGTH;
+static inline bool bufferFull(void) {
+    return count == BUFFER_MAXLENGTH;
+}
+static inline bool bufferEmpty(void) { 
+    return count == 0;
 }
 
-void addKeyToBuffer(uint8_t scancode){
-    if (scancode == 0x3A){// es  el capsLock
+static void pushEvent(KeyBufferStruct ev) {
+    if (bufferFull()) {
+        nextkey = (nextkey + 1) % BUFFER_MAXLENGTH;
+        count--;
+    }
+    buf[lastkey] = ev;
+    lastkey = (lastkey + 1) % BUFFER_MAXLENGTH;
+    count++;
+}
+
+void addKeyToBuffer(uint8_t scancode) {
+    if (scancode == 0x3A) { 
         capsLock = !capsLock;
+        return; 
+    }
+
+    if (scancode & 0x80) {
         return;
     }
-    
-    keyBuffer[bufferLength].scancode = scancode;
 
-    bool pressed = (scancode & 0x80) == 0;
+    KeyBufferStruct ev = {0};
+    ev.scancode   = scancode;
+    ev.is_pressed = true;
 
-    if (capsLock){
-        keyBuffer[bufferLength].key = scancode_to_ascii_mayus[scancode];
-    }else keyBuffer[bufferLength].key = scancode_to_ascii[scancode];
-    
-    keyBuffer[bufferLength].is_pressed = pressed;
-    
-    bufferLength++;
+    // depende si son mayus o normales
+    char ch = capsLock ? scancode_to_ascii_mayus[scancode]:scancode_to_ascii[scancode];
+
+    // si no esta en la tabla retorno, TALVEZ PODEMOS HACER UNA EXCEPCION
+    if (ch == 0) return;
+
+    ev.key = ch;
+    pushEvent(ev);
 }
 
-void keyboardPressed(){
-    if (bufferFull()){
-        if (nextKey == bufferLength){
-            nextKey++;
-        }
-        bufferLength = 0;
-        addKeyToBuffer(inb(0x60));
-    }
-    addKeyToBuffer(inb(0x60));
+void keyboardPressed(void) {
+    uint8_t sc = inb(0x60);
+    addKeyToBuffer(sc);
 }
 
 bool hasNext(void) {
-    // Hay siguiente si todavía no leíste todos los elementos cargados
-    return nextKey < bufferLength;
+    return !bufferEmpty();
 }
 
 KeyBufferStruct getNext(void) {
-    KeyBufferStruct empty = (KeyBufferStruct){0, 0, false};
-    if (!hasNext()) return empty;
+    KeyBufferStruct empty = (KeyBufferStruct){0,0,false};
+    if (bufferEmpty()) return empty;
 
-    KeyBufferStruct aux = keyBuffer[nextKey++];
-    // Si acabás de consumir el último, reseteá para reutilizar el buffer
-    if (nextKey >= bufferLength) {
-        nextKey = 0;
-        bufferLength = 0;
-    }
-    return aux;
+    KeyBufferStruct ev = buf[nextkey];
+    nextkey = (nextkey + 1) % BUFFER_MAXLENGTH;
+    count--;
+    return ev;
 }
-
 void clearBuffer(void) {
-    nextKey = 0;
-    bufferLength = 0;
+    lastkey = nextkey = count = 0;
 }
 

@@ -23,13 +23,11 @@ static void * const shellAddress = (void*)0x600000;
 
 typedef int (*EntryPoint)();
 
-void clearBSS(void * bssAddress, uint64_t bssSize)
-{
+void clearBSS(void * bssAddress, uint64_t bssSize) {
 	memset(bssAddress, 0, bssSize);
 }
 
-void * getStackBase()
-{
+void * getStackBase() {
 	return (void*)(
 		(uint64_t)&endOfKernel
 		+ PageSize * 8				//The size of the stack itself, 32KiB
@@ -37,87 +35,75 @@ void * getStackBase()
 	);
 }
 
-void * initializeKernelBinary()
-{
+void * initializeKernelBinary() {
 	char buffer[10];
+    clearBSS(&bss, &endOfKernel - &bss);
 
-	ncPrint("[x64BareBones]"); //POR EJEMPLO ACA 
-	ncNewline();
+	vdPrint("[x64BareBones]"); //POR EJEMPLO ACA 
+	vdNewline();
+	vdPrint("CPU Vendor:");
+	vdPrint(cpuVendor(buffer));
+	vdNewline();
 
-	ncPrint("CPU Vendor:");
-	ncPrint(cpuVendor(buffer));
-	ncNewline();
-
-	ncPrint("[Loading modules]");
-	ncNewline();
+	vdPrint("[Loading modules]");
+	vdNewline();
 	void * moduleAddresses[] = {
 		sampleCodeModuleAddress,
 		sampleDataModuleAddress
 	};
 
 	loadModules(&endOfKernelBinary, moduleAddresses);
-	ncPrint("[Done]");
-	ncNewline();
-	ncNewline();
+	vdPrint("[Done]");
+	vdNewline();
+	vdNewline();
 
-	ncPrint("[Initializing kernel's binary]");
-	ncNewline();
+	vdPrint("[Initializing kernel's binary]");
+	vdNewline();
 
-	clearBSS(&bss, &endOfKernel - &bss);
 
-	ncPrint("  text: 0x");
-	ncPrintHex((uint64_t)&text);
-	ncNewline();
-	ncPrint("  rodata: 0x");
-	ncPrintHex((uint64_t)&rodata);
-	ncNewline();
-	ncPrint("  data: 0x");
-	ncPrintHex((uint64_t)&data);
-	ncNewline();
-	ncPrint("  bss: 0x");
-	ncPrintHex((uint64_t)&bss);
-	ncNewline();
+	vdPrint("  text: 0x");
+	vdPrintHex((uint64_t)&text);
+	vdNewline();
+	vdPrint("  rodata: 0x");
+	vdPrintHex((uint64_t)&rodata);
+	vdNewline();
+	vdPrint("  data: 0x");
+	vdPrintHex((uint64_t)&data);
+	vdNewline();
+	vdPrint("  bss: 0x");
+	vdPrintHex((uint64_t)&bss);
+	vdNewline();
 
-	ncPrint("[Done]");
-	ncNewline();
-	ncNewline();
+	vdPrint("[Done]");
+	vdNewline();
+	vdNewline();
 	return getStackBase();
+
 }
 
-int main()
-{
-
+int main() {
 	init_interrupts();
-	vdPrint("NIGGER holasdddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddholaabcdefghijkaaa");
-	vdPrint("NIGGER holasdddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddholaabcdefghijkaaa");
-	vdPrint("NIGGER holasdddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddholaabcdefghijkaaa");vdPrint("NIGGER holasdddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddholaabcdefghijkaaa");
-	vdPrint("NIGGER holasdddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddholaabcdefghijkaaa");
-	vdPrint("NIGGER holasdddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddholaabcdefghijkaaa");
-	
+	vdPrint("[Kernel Main]");
+	vdNewline();
+	vdPrint("  Sample code module at 0x");
+	vdPrintHex((uint64_t)sampleCodeModuleAddress);
+	vdNewline();
+	vdPrint("  Calling the sample code module returned: ");
+	vdPrintHex(((EntryPoint)sampleCodeModuleAddress)());
+	vdNewline();
+	vdNewline();
 
-
-	/*
-	ncPrint("[Kernel Main]");
-	ncNewline();
-	ncPrint("  Sample code module at 0x");
-	ncPrintHex((uint64_t)sampleCodeModuleAddress);
-	ncNewline();
-	ncPrint("  Calling the sample code module returned: ");
-	ncPrintHex(((EntryPoint)sampleCodeModuleAddress)());
-	ncNewline();
-	ncNewline();
-
-	ncPrint("  Sample data module at 0x");
-	ncPrintHex((uint64_t)sampleDataModuleAddress);
-	ncNewline();
-	ncPrint("  Sample data module contents: ");
-	ncPrint((char*)sampleDataModuleAddress);
-	ncNewline();
+	vdPrint("  Sample data module at 0x");
+	vdPrintHex((uint64_t)sampleDataModuleAddress);
+	vdNewline();
+	vdPrint("  Sample data module contents: ");
+	vdPrint((char*)sampleDataModuleAddress);
+	vdNewline();
 
 	char buf1[16];
 	getTimeString(buf1);
-	ncPrint(buf1);
-*/
+	vdPrint(buf1);
+
 	while (1){
 		if (hasNext()){
 		vdPrintChar(getNext().key);
