@@ -16,6 +16,7 @@ void vdBackspace(void);
 void vdPrint(const char *str);
 void vdPrintStyled(const char *str, uint32_t fColor, uint32_t bgColor);
 void vdPrintCharStyled(char c, uint32_t fColor, uint32_t bgColor);
+void vdNewline();
 
 // =====================
 // Utilidades numéricas

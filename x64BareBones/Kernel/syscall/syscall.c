@@ -1,34 +1,35 @@
-    #include "../include/syscall.h"
+   //#include "../include/syscall.h"
     #include <stdint.h>
     #include "../include/video.h"
 
+    typedef struct {
+        uint64_t rax;
+        uint64_t rbx;
+        uint64_t rcx;
+        uint64_t rdx;
+    } syscall_Registers;
+
+    static int syscall_write(syscall_Registers *regs);
+    static int syscall_read(syscall_Registers *regs);
 
 
-    int syscall_write(syscall_Registers *regs);
-    void syscall_read(syscall_Registers *regs);
-
-
-    void syscall_handler(syscall_Registers * regs){
-        switch ((int)regs->rax)
-        {
+    int syscall_handler(syscall_Registers * regs){
+        switch ((int)regs->rax){
         case 0:
-        syscall_read(regs); 
-        break;
-
+            return syscall_read(regs); 
         case 1:
-            syscall_write(regs);
-            break;
+            return syscall_write(regs);
         default:
-            break;
+            return 0;
         }
     }
 
-    int syscall_write(syscall_Registers *regs){
-        char * str = (char*)regs->rbx;  // me guardo el puntero al inicio del string 
-        vdPrint(str);                   // printeo el string
+    static int syscall_write(syscall_Registers *regs){
+        vdPrintChar('0' + regs->rcx);         
+        vdPrint((char * )regs->rcx);              // printeo el string
         return 1;
     }
 
-    void syscall_read(syscall_Registers *regs){
-
+    static int syscall_read(syscall_Registers *regs){  
+        return 0;
     }

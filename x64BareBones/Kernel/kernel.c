@@ -16,9 +16,7 @@ extern uint8_t endOfKernel;
 
 static const uint64_t PageSize = 0x1000;
 
-static void * const sampleCodeModuleAddress = (void*)0x400000;
-static void * const sampleDataModuleAddress = (void*)0x500000;
-static void * const shellAddress = (void*)0x600000;
+static void * const shellAddress = (void*)0x400000;
 
 
 typedef int (*EntryPoint)();
@@ -48,8 +46,7 @@ void * initializeKernelBinary() {
 	vdPrint("[Loading modules]");
 	vdNewline();
 	void * moduleAddresses[] = {
-		sampleCodeModuleAddress,
-		sampleDataModuleAddress
+		shellAddress
 	};
 
 	loadModules(&endOfKernelBinary, moduleAddresses);
@@ -83,27 +80,12 @@ void * initializeKernelBinary() {
 
 int main() {
 	init_interrupts();
-	vdPrint("[Kernel Main]");
-	vdNewline();
-	vdPrint("  Sample code module at 0x");
-	vdPrintHex((uint64_t)sampleCodeModuleAddress);
-	vdNewline();
-	vdPrint("  Calling the sample code module returned: ");
-	vdPrintHex(((EntryPoint)sampleCodeModuleAddress)());
-	vdNewline();
-	vdNewline();
 
-	vdPrint("  Sample data module at 0x");
-	vdPrintHex((uint64_t)sampleDataModuleAddress);
-	vdNewline();
-	vdPrint("  Sample data module contents: ");
-	vdPrint((char*)sampleDataModuleAddress);
-	vdNewline();
+	
+	((EntryPoint)shellAddress)();
 
-	char buf1[16];
-	getTimeString(buf1);
-	vdPrint(buf1);
 
+	vdPrint("HOLAAA");
 	while (1){
 		if (hasNext()){
 		vdPrintChar(getNext().key);

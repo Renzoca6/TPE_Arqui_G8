@@ -22,7 +22,6 @@ sys_read:
 sys_write:
     push rbp
     mov  rbp, rsp
-
     push rax
     push rbx
     push rcx

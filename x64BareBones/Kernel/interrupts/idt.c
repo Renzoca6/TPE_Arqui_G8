@@ -50,7 +50,9 @@ void idt_init(void) {
     idt_set_entry(0x20, (uint64_t)&_irq00Handler);
     idt_set_entry(0x21, (uint64_t)&_irq01Handler);
     // idt_set_entry(0x00, (uint64_t)&_exception0Handler); //
-    
+    idt_set_entry(0x80,  (uint64_t)&_irq06Handler);
+
+
     // llamo a funcion de asm que manda la direccion de memoria donde esta el idt_desc que es el foramto que me piden para la tabla IDT  a LIDT que carga la tabla
     load_idt(&idt_desc);    
 }

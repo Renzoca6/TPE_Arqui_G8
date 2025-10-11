@@ -128,7 +128,6 @@ _irq05Handler:
 
 ; syscall 
 _irq06Handler:
-	
 	push rbp
 	push rdi
 	push rsi
@@ -152,8 +151,8 @@ _irq06Handler:
 	call syscall_handler
 
 	; signal pic EOI (End of Interrupt)
-	mov al, 20h
-	out 20h, al
+	; mov al, 20h
+	; out 20h, al
 
 
 	pop r15
@@ -168,9 +167,9 @@ _irq06Handler:
 	pop rdi
 	pop rbp
 
-	iretq 
+	iretq
 	
-
+	 
 haltcpu:
 	cli
 	hlt

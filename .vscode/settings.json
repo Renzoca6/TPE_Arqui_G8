@@ -3,6 +3,7 @@
         "stdint.h": "c",
         "io.h": "c",
         "realtimeclock.h": "c",
-        "inout.h": "c"
+        "inout.h": "c",
+        "syscall_call.h": "c"
     }
 }

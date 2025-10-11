@@ -2,7 +2,7 @@
 #define SYSCALL_CALL_H
 #include <stddef.h>
 
-long write(const void *buf, size_t count); // fd fijo = 1
-long read (void *buf, size_t count);       // fd fijo = 0
+int write(const char* buf);       // fd fijo = 1
+int read (char *buf);       // fd fijo = 0
 
 #endif

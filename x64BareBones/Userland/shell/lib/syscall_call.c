@@ -1,20 +1,20 @@
 #include "syscall_call.h"
 
-extern long sys_write(int fb, const char *buf);
-extern long sys_read (char *buf);
+extern int sys_write(int fb, const char* buf);
+extern int sys_read (char *buf);
 
 #define STDIN   0
 #define STDOUT  1
 
-int print(const char *buf){
+int write(const char* buf){
     return sys_write(STDOUT, buf);
 }
 
-int println(const char *buf){
-    return (sys_write(STDOUT, buf) && print("\n"));
+int println(const char* buf){
+    return (sys_write(STDOUT, buf) && write("\n"));
 }
 
-size_t read(char *buf){
+int read (char *buf){
     return sys_read(buf);
 }
 
