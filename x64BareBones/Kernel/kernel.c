@@ -83,9 +83,7 @@ int main() {
 
 	
 	((EntryPoint)shellAddress)();
-
-
-	vdPrint("HOLAAA");
+	
 	while (1){
 		if (hasNext()){
 		vdPrintChar(getNext().key);

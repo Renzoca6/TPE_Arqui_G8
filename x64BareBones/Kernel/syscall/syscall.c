@@ -25,8 +25,9 @@
     }
 
     static int syscall_write(syscall_Registers *regs){
-        vdPrintChar('0' + regs->rcx);         
-        vdPrint((char * )regs->rcx);              // printeo el string
+        vdPrint("entre");
+        vdPrint( (const char*) regs->rcx );
+
         return 1;
     }
 

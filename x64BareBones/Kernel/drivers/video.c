@@ -227,3 +227,30 @@ void vdPrintBase(uint64_t value, uint32_t base) {
     uintToBase(value, buffer, base); // convierte el número en string
     vdPrint(buffer);                 // lo imprime con ncPrint
 }
+
+
+//Es para probar porque no funcian las syscall
+void vdPrintHex8(uint8_t value) {
+    static const char *hex = "0123456789ABCDEF";
+    char buf[3];
+    buf[0] = hex[(value >> 4) & 0xF];  // nibble alto
+    buf[1] = hex[value & 0xF];         // nibble bajo
+    buf[2] = '\0';
+    vdPrint(buf);
+}
+
+void vdPrintHex64(uint64_t value) {
+    static const char *hex = "0123456789ABCDEF";
+    char buf[19]; // "0x" + 16 dígitos + '\0'
+
+    buf[0] = '0';
+    buf[1] = 'x';
+
+    for (int i = 0; i < 16; i++) {
+        // extrae nibble alto a bajo
+        buf[2 + i] = hex[(value >> (60 - i * 4)) & 0xF];
+    }
+    buf[18] = '\0';
+
+    vdPrint(buf);
+}

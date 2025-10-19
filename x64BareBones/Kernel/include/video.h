@@ -26,5 +26,6 @@ void vdPrintHex(uint64_t value);
 void vdPrintBin(uint64_t value);
 void vdPrintBase(uint64_t value, uint32_t base);
 
-
+void vdPrintHex8(uint8_t value);
+void vdPrintHex64(uint64_t value);
 #endif // VIDEO_H

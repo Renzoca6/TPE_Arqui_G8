@@ -4,6 +4,8 @@
         "io.h": "c",
         "realtimeclock.h": "c",
         "inout.h": "c",
-        "syscall_call.h": "c"
+        "syscall_call.h": "c",
+        "video.h": "c",
+        "new": "c"
     }
 }
