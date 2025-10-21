@@ -40,5 +40,9 @@
     }
 
     static int syscall_read(syscall_Registers *regs){  
+        vdNewline();
+        vdPrint("ENTRE A SYSCALL READ");
+        vdNewline();
+        //hay que codearla pero no nos anda la write
         return 0;
     }

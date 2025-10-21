@@ -6,5 +6,7 @@ int main() {
     write(hola);
     write("TEST2 CHAR*");
 
+    read("VER SI ENTRA READ");
+
 	return 0;
 }
