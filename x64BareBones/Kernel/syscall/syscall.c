@@ -25,9 +25,17 @@
     }
 
     static int syscall_write(syscall_Registers *regs){
-        vdPrint("entre");
+        vdNewline();
+        vdPrint("ENTRE A SYSCALL WRITE");
+        vdNewline();
+        vdPrint("PRINT DE RCX:");
         vdPrint( (const char*) regs->rcx );
-
+        vdNewline();
+        char buf[20];
+        intToStrSimple(regs->rcx,buf);
+        vdPrint("PRINT DE INT TO STRING:");
+        vdPrint(buf);
+        vdNewline();
         return 1;
     }
 

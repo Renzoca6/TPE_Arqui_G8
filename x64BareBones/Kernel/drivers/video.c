@@ -80,6 +80,28 @@ void vdPrintChar(char c) {
 	vdPrintCharStyled(c, 0x00ffffff, 0x00000000);
 }
 
+void vdBackSpace(void) {
+    const uint32_t W = VBE_mode_info->width;
+    const uint32_t H = VBE_mode_info->height;
+
+    // mover cursor una celda atrás
+    if (x >= FONT_W) {
+        x -= FONT_W;
+    } else if (y >= FONT_H) {
+        y -= FONT_H;
+        x = (W / FONT_W) * FONT_W;
+    } else {
+        return; // ya en (0,0)
+    }
+
+    // borrar el bloque 8x16 en (x,y)
+    for (uint32_t py = y; py < y + FONT_H && py < H; py++) {
+        for (uint32_t px = x; px < x + FONT_W && px < W; px++) {
+            putPixel(0x000000, px, py);
+        }
+    }
+}
+
 void vdPrintCharStyled(char c, uint32_t fColor, uint32_t bgColor) {
     // Si te pasás del borde, opcionalmente “clipeá”
     const uint32_t W = VBE_mode_info->width;
@@ -130,32 +152,10 @@ void vdPrintCharStyled(char c, uint32_t fColor, uint32_t bgColor) {
     x += FONT_W; 
 }
 
-void vdBackSpace(void) {
-    const uint32_t W = VBE_mode_info->width;
-    const uint32_t H = VBE_mode_info->height;
 
-    // mover cursor una celda atrás
-    if (x >= FONT_W) {
-        x -= FONT_W;
-    } else if (y >= FONT_H) {
-        y -= FONT_H;
-        x = (W / FONT_W) * FONT_W;
-    } else {
-        return; // ya en (0,0)
-    }
-
-    // borrar el bloque 8x16 en (x,y)
-    for (uint32_t py = y; py < y + FONT_H && py < H; py++) {
-        for (uint32_t px = x; px < x + FONT_W && px < W; px++) {
-            putPixel(0x000000, px, py);
-        }
-    }
-}
 
 
 void vdclearScreen(void) {
-    const uint32_t H = VBE_mode_info->height;
-
 	for (int i = 0; i < y; i++){
 		for (int j = 0; j < VBE_mode_info->width; i++){
 			putPixel(0x000000, i, j);
@@ -228,29 +228,30 @@ void vdPrintBase(uint64_t value, uint32_t base) {
     vdPrint(buffer);                 // lo imprime con ncPrint
 }
 
-
-//Es para probar porque no funcian las syscall
-void vdPrintHex8(uint8_t value) {
-    static const char *hex = "0123456789ABCDEF";
-    char buf[3];
-    buf[0] = hex[(value >> 4) & 0xF];  // nibble alto
-    buf[1] = hex[value & 0xF];         // nibble bajo
-    buf[2] = '\0';
-    vdPrint(buf);
-}
-
-void vdPrintHex64(uint64_t value) {
-    static const char *hex = "0123456789ABCDEF";
-    char buf[19]; // "0x" + 16 dígitos + '\0'
-
-    buf[0] = '0';
-    buf[1] = 'x';
-
-    for (int i = 0; i < 16; i++) {
-        // extrae nibble alto a bajo
-        buf[2 + i] = hex[(value >> (60 - i * 4)) & 0xF];
+int intToStrSimple(int num, char* str) {
+    int i = 0;
+    
+    if (num == 0) {
+        str[i++] = '0';
+    } else {
+        while (num > 0) {
+            str[i++] = (num % 10) + '0';
+            num /= 10;
+        }
     }
-    buf[18] = '\0';
 
-    vdPrint(buf);
+    str[i] = '\0';
+    
+    // Invertir la cadena
+    int inicio = 0;
+    int fin = i - 1;
+    while (inicio < fin) {
+        char temp = str[inicio];
+        str[inicio] = str[fin];
+        str[fin] = temp;
+        inicio++;
+        fin--;
+    }
+    
+    return i;
 }

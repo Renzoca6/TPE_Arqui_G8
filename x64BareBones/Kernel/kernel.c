@@ -80,8 +80,6 @@ void * initializeKernelBinary() {
 
 int main() {
 	init_interrupts();
-
-	
 	((EntryPoint)shellAddress)();
 	
 	while (1){

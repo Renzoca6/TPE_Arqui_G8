@@ -8,24 +8,26 @@ VMDK=$(OSIMAGENAME).vmdk
 QCOW2=$(OSIMAGENAME).qcow2
 IMG=$(OSIMAGENAME).img
 KERNEL=../Kernel/kernel.bin
-USERLAND= ../Userland/0000-shell.bin
+
+USERLAND_SHELL=../Userland/0000-shell.bin
 
 PACKEDKERNEL=packedKernel.bin
 IMGSIZE=6291456
 
 all: $(IMG) $(VMDK) $(QCOW2)
+image: all
 
 $(KERNEL):
-	cd ../Kernel; make
+	@cd ../Kernel; make
 
-$(PACKEDKERNEL): $(KERNEL) $(USERLAND)
-	$(MP) $(KERNEL) $(USERLAND) -o $(PACKEDKERNEL)
+$(PACKEDKERNEL): $(KERNEL) $(USERLAND_SAMPLECODE) $(USERLAND_SAMPLEDATA) $(USERLAND_SHELL)
+	$(MP) $(KERNEL) $(USERLAND_SAMPLECODE) $(USERLAND_SAMPLEDATA) $(USERLAND_SHELL) -o $(PACKEDKERNEL)
 
 $(IMG): $(BMFS) $(MBR) $(PURE64) $(PACKEDKERNEL)
-	$(BMFS) $(IMG) initialize $(IMGSIZE) $(MBR) $(PURE64) $(PACKEDKERNEL) 
+	$(BMFS) $(IMG) initialize $(IMGSIZE) $(MBR) $(PURE64) $(PACKEDKERNEL)
 
 $(VMDK): $(IMG)
-	qemu-img convert -f raw -O vmdk $(IMG) $(VMDK) 
+	qemu-img convert -f raw -O vmdk $(IMG) $(VMDK)
 
 $(QCOW2): $(IMG)
 	qemu-img convert -f raw -O qcow2 $(IMG) $(QCOW2)
@@ -33,4 +35,4 @@ $(QCOW2): $(IMG)
 clean:
 	rm -rf $(IMG) $(VMDK) $(QCOW2) *.bin
 
-.PHONY: all clean
+.PHONY: all clean image
