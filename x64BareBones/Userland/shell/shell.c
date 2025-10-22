@@ -1,12 +1,9 @@
 #include "./lib/syscall_call.h"
 
 int main() {
-    char hola[] = "TEST1 ARREGLO";
+    println("TEST2 CHAR*");
+    println("asdasd");  
 
-    write(hola);
-    write("TEST2 CHAR*");
-
-    read("VER SI ENTRA READ");
-
-	return 0;
+    
+    return 1;
 }

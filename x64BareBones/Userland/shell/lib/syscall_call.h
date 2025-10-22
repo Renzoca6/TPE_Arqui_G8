@@ -3,6 +3,7 @@
 #include <stddef.h>
 
 int write(const char* buf);       // fd fijo = 1
+int println(const char* buf);
 int read (char *buf);       // fd fijo = 0
 
 #endif

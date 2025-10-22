@@ -34,46 +34,11 @@ void * getStackBase() {
 }
 
 void * initializeKernelBinary() {
-	char buffer[10];
-    clearBSS(&bss, &endOfKernel - &bss);
-
-	vdPrint("[x64BareBones]"); //POR EJEMPLO ACA 
-	vdNewline();
-	vdPrint("CPU Vendor:");
-	vdPrint(cpuVendor(buffer));
-	vdNewline();
-
-	vdPrint("[Loading modules]");
-	vdNewline();
 	void * moduleAddresses[] = {
 		shellAddress
 	};
-
 	loadModules(&endOfKernelBinary, moduleAddresses);
-	vdPrint("[Done]");
-	vdNewline();
-	vdNewline();
-
-	vdPrint("[Initializing kernel's binary]");
-	vdNewline();
-
-
-	vdPrint("  text: 0x");
-	vdPrintHex((uint64_t)&text);
-	vdNewline();
-	vdPrint("  rodata: 0x");
-	vdPrintHex((uint64_t)&rodata);
-	vdNewline();
-	vdPrint("  data: 0x");
-	vdPrintHex((uint64_t)&data);
-	vdNewline();
-	vdPrint("  bss: 0x");
-	vdPrintHex((uint64_t)&bss);
-	vdNewline();
-
-	vdPrint("[Done]");
-	vdNewline();
-	vdNewline();
+	clearBSS(&bss, &endOfKernel - &bss);
 	return getStackBase();
 
 }
@@ -81,12 +46,5 @@ void * initializeKernelBinary() {
 int main() {
 	init_interrupts();
 	((EntryPoint)shellAddress)();
-	
-	while (1){
-		if (hasNext()){
-		vdPrintChar(getNext().key);
-		}
-	}
-
 	return 0;
 }

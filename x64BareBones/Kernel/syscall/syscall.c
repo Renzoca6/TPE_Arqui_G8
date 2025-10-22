@@ -25,24 +25,11 @@
     }
 
     static int syscall_write(syscall_Registers *regs){
-        vdNewline();
-        vdPrint("ENTRE A SYSCALL WRITE");
-        vdNewline();
-        vdPrint("PRINT DE RCX:");
         vdPrint( (const char*) regs->rcx );
-        vdNewline();
-        char buf[20];
-        intToStrSimple(regs->rcx,buf);
-        vdPrint("PRINT DE INT TO STRING:");
-        vdPrint(buf);
-        vdNewline();
         return 1;
     }
 
     static int syscall_read(syscall_Registers *regs){  
-        vdNewline();
-        vdPrint("ENTRE A SYSCALL READ");
-        vdNewline();
-        //hay que codearla pero no nos anda la write
+ 
         return 0;
     }
