@@ -10,7 +10,7 @@ sys_read:
 
     mov  rax, 0          ; id read
     mov  rbx, rdi        ; dst -> RBX
-    int  80h             ; kernel deja el retorno en RAX
+    int  80h             ; RAX
     
     pop  rbx
     
@@ -24,7 +24,7 @@ sys_write:
     push rbx
     push rcx
     
-    mov  rax, 1          ; id write
+    mov  rax, 1          ; id write(1)
     mov  rbx, rdi        ; fd (STDOUT)
     mov  rcx, rsi        ; puntero al buffer
     int  80h

@@ -28,7 +28,14 @@
     }
 
     static int syscall_write(syscall_Registers *regs){
-        vdPrint( (const char*) regs->rcx );
+        if (regs->rbx == 1){
+            vdPrint( (const char*) regs->rcx );
+        }else {
+            vdPrintCharStyled( (const char*) regs->rcx, 0x00ffffff, 0x00FF0000);
+        } 
+        
+        
+        
         return 1;
     }
 
@@ -58,9 +65,15 @@ static int syscall_read(syscall_Registers *regs) {
                     if (size + 1 < 256) {      // deja espacio para \0
                         buf[size++] = k.key;
                         vdPrintChar(k.key);    //print
-                    } 
+                    }else{
+                        vdPrintChar('\n');         // enter
+                        buf[size] = '\0';          // pongo null
+                        return (int)size;  
+                    }
                 }
             }
         } 
     }
+
+    //falta funcion para apagar las interrupts
 }

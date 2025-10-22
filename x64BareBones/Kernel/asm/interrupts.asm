@@ -141,7 +141,7 @@ _irq06Handler:
 	push r15
 
 
-	mov [registers], rax
+	mov [registers], rax		
 	mov [registers+8], rbx
 	mov [registers+16], rcx
 	mov [registers+24], rdx

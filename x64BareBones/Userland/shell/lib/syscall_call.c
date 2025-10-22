@@ -22,3 +22,5 @@ int read (char *buf){
 //apagado
 //registros del procesador
 //hora
+//fps
+//ETC

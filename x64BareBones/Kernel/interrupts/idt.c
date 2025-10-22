@@ -48,6 +48,7 @@ void idt_init(void) {
 
     //cargo a la tabla mi timer
     idt_set_entry(0x20, (uint64_t)&_irq00Handler);
+    //keyboar handler
     idt_set_entry(0x21, (uint64_t)&_irq01Handler);
     // idt_set_entry(0x00, (uint64_t)&_exception0Handler); //
     idt_set_entry(0x80,  (uint64_t)&_irq06Handler);
