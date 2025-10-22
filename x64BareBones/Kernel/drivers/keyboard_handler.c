@@ -73,11 +73,11 @@ void keyboardPressed(void) {
     addKeyToBuffer(sc);
 }
 
-bool hasNext(void) {
+bool hasNextKey(void) {
     return !bufferEmpty();
 }
 
-KeyBufferStruct getNext(void) {
+KeyBufferStruct getNextKey(void) {
     KeyBufferStruct empty = (KeyBufferStruct){0,0,false};
     if (bufferEmpty()) return empty;
 
@@ -86,7 +86,7 @@ KeyBufferStruct getNext(void) {
     count--;
     return ev;
 }
-void clearBuffer(void) {
+void clearKeyBoardBuffer(void) {
     lastkey = nextkey = count = 0;
 }
 

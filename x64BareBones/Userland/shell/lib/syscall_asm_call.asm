@@ -8,34 +8,30 @@ sys_read:
 
     push rbx
 
-    mov  rax, 0          ; número de syscall: read
-    mov  rbx, rdi        ;
-    int  80h             ; int 0x80
-
+    mov  rax, 0          ; id read
+    mov  rbx, rdi        ; dst -> RBX
+    int  80h             ; kernel deja el retorno en RAX
+    
     pop  rbx
-
-    mov  rsp, rbp
-    pop  rbp
+    
+    leave
     ret
-
 
 sys_write:
     push rbp
     mov  rbp, rsp
-    push rax
+    
     push rbx
     push rcx
-
-    mov  rax, 1          ; número de syscall: write
-    mov  rbx, rdi        ; fd
-    mov  rcx, rsi        ; buffer
-    int  80h             ; int 0x80
-
+    
+    mov  rax, 1          ; id write
+    mov  rbx, rdi        ; fd (STDOUT)
+    mov  rcx, rsi        ; puntero al buffer
+    int  80h
+    
     pop  rcx
     pop  rbx
-    pop  rax
-
-    mov  rsp, rbp
-    pop  rbp
-    ret
+    
+    leave
+    ret    
 

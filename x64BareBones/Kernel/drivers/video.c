@@ -152,19 +152,11 @@ void vdPrintCharStyled(char c, uint32_t fColor, uint32_t bgColor) {
     x += FONT_W; 
 }
 
-
-
-
 void vdclearScreen(void) {
-	for (int i = 0; i < y; i++){
-		for (int j = 0; j < VBE_mode_info->width; i++){
-			putPixel(0x000000, i, j);
-		}
-		
-	}
-	x = 0;
-	y = 0;
-	
+    for (uint32_t py = 0; py < VBE_mode_info->height; py++)
+        for (uint32_t px = 0; px < VBE_mode_info->width; px++)
+            putPixel(0x000000, px, py);
+    x = y = 0;
 }
 
 void vdNewline() {

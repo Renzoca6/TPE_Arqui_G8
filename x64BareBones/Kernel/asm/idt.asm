@@ -1,4 +1,5 @@
 global load_idt
+GLOBAL enable_interrupts
 section .text
 
 load_idt:
@@ -6,4 +7,9 @@ load_idt:
     ; de tu tabla de interrupciones (IDT). Sin IDT cargada, el CPU no sabe a qué handler saltar cuando ocurre una excepción/IRQ.
 
     lidt [rdi]    ; carga IDT desde dirección pasada en RDI
+    ret
+
+
+enable_interrupts:
+    sti
     ret

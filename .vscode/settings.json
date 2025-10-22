@@ -6,6 +6,9 @@
         "inout.h": "c",
         "syscall_call.h": "c",
         "video.h": "c",
-        "new": "c"
+        "new": "c",
+        "string.h": "c",
+        "stdbool.h": "c",
+        "keyboard_handler.h": "c"
     }
 }

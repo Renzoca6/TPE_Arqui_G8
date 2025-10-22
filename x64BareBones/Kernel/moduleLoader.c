@@ -17,20 +17,8 @@ void loadModules(void * payloadStart, void ** targetModuleAddress) {
 
 static void loadModule(uint8_t ** module, void * targetModuleAddress) {
 	uint32_t moduleSize = readUint32(module);
-
-	vdPrint("  Will copy module at 0x");
-	vdPrintHex((uint64_t)*module);
-	vdPrint(" to 0x");
-	vdPrintHex((uint64_t)targetModuleAddress);
-	vdPrint(" (");
-	vdPrintDec(moduleSize);
-	vdPrint(" bytes)");
-
 	memcpy(targetModuleAddress, *module, moduleSize);
 	*module += moduleSize;
-
-	vdPrint(" [Done]");
-	vdNewline();
 }
 
 static uint32_t readUint32(uint8_t ** address) {

@@ -9,10 +9,10 @@ typedef struct {
     bool is_pressed;
 } KeyBufferStruct;
 
-void clearBuffer();
+void clearKeyBoardBuffer();
 void keyboardPressed();
-bool hasNext();
-KeyBufferStruct getNext();
+bool hasNextKey();
+KeyBufferStruct getNextKey();
 
 
 #endif
