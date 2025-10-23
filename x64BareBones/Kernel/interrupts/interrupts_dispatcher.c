@@ -51,6 +51,7 @@ void init_interrupts(void) {
     //pit_set_frequency(100);     // programar PIT a 1 Hz lo cual son 1 vez por segundo 
     pic_unmask_irq(0);      // habilitar IRQ0 (timer) es decir que puede detectar al timer si lo seteo en 1 ya no responderia ante el timer 
     pic_unmask_irq(1);
+	pic_mask_irq(0);
 
     __asm__ __volatile__("sti");     // habilitar interrupciones globales
 }

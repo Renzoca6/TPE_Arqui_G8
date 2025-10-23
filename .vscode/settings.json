@@ -11,6 +11,7 @@
         "stdbool.h": "c",
         "keyboard_handler.h": "c",
         "font8x16.h": "c",
-        "stddef.h": "c"
+        "stddef.h": "c",
+        "pic.h": "c"
     }
 }

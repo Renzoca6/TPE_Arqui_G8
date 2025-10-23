@@ -268,11 +268,11 @@ int intToStrSimple(int num, char* str) {
 
 
 // --- BACK buffer ---
-static inline uint32_t fb_size_bytes(void) {
+inline uint32_t fb_size_bytes(void) {
 	return (uint32_t)VBE_mode_info->pitch * VBE_mode_info->height;//tambaio del frame buffer
 }
 
-static void present_fullframe(void) {
+void present_fullframe(void) {
     uint8_t *vram  = (uint8_t*) (uintptr_t) VBE_mode_info->framebuffer;
     uint32_t pitch = VBE_mode_info->pitch;
     uint32_t h     = VBE_mode_info->height;

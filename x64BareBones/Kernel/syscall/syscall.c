@@ -23,7 +23,7 @@
         case 1:
             return syscall_write(regs);
         case 2:
-            return syscall_clearwindow(regs);
+            syscall_clearwindow(regs);
         default:
             return 0;
         }
@@ -38,8 +38,8 @@
         return 1;
     }
 
-    syscall_clearwindow(syscall_Registers *regs){
-        vdclearScreenDB(regs->rbx);
+    void syscall_clearwindow(syscall_Registers *regs){
+        return vdclearScreenDB(regs->rbx);
     }
 
     static int syscall_read(syscall_Registers *regs) {

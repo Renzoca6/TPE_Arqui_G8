@@ -30,12 +30,12 @@ void vdPrintHex(uint64_t value);
 void vdPrintBin(uint64_t value);
 void vdPrintBase(uint64_t value, uint32_t base);
 
-int intToStrSimple(int num, char* str);
-
-video_init_buffers(void);
+// =====================
+// Utilidades BACK BUFFER
+// =====================
 void vdclearScreenDB(uint32_t color);
-static void present_fullframe(void);
-static inline int bytes_per_pixel(void);
-static inline uint32_t fb_size_bytes(void);
+void present_fullframe(void);
+int bytes_per_pixel(void);
+uint32_t fb_size_bytes(void);
 
 #endif // VIDEO_H
