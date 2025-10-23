@@ -1,6 +1,7 @@
 SECTION .text
 GLOBAL sys_write
 GLOBAL sys_read
+GLOBAL sys_clearwindow
 
 sys_read:
     push rbp
@@ -9,8 +10,8 @@ sys_read:
     push rbx
 
     mov  rax, 0          ; id read
-    mov  rbx, rdi        ; dst -> RBX
-    int  80h             ; RAX
+    mov  rbx, rdi        ; BUF -> RBX
+    int  80h             
     
     pop  rbx
     
@@ -26,7 +27,7 @@ sys_write:
     
     mov  rax, 1          ; id write(1)
     mov  rbx, rdi        ; fd (STDOUT)
-    mov  rcx, rsi        ; puntero al buffer
+    mov  rcx, rsi        ; buffer
     int  80h
     
     pop  rcx
@@ -35,3 +36,17 @@ sys_write:
     leave
     ret    
 
+sys_clearwindow:
+    push rbp
+    mov  rbp, rsp
+
+    push rbx
+
+    mov  rax, 2          ; id read
+    mov  rbx, rdi        ; color -> RBX
+    int  80h             
+    
+    pop  rbx
+    
+    leave
+    ret

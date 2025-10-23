@@ -9,6 +9,8 @@
         "new": "c",
         "string.h": "c",
         "stdbool.h": "c",
-        "keyboard_handler.h": "c"
+        "keyboard_handler.h": "c",
+        "font8x16.h": "c",
+        "stddef.h": "c"
     }
 }

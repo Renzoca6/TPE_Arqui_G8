@@ -51,17 +51,35 @@ unsigned int x = 0, y = 0;
 static const int FONT_W = 8;
 static const int FONT_H = 16;
 
+//Puntero al back buffer
+static uint8_t g_back_static[1024 * 768 * 3];
+static uint8_t *g_back = g_back_static;
 VBEInfoPtr VBE_mode_info = (VBEInfoPtr) 0x0000000000005C00;
 
-void putPixel(uint32_t hexColor, uint64_t x, uint64_t y) {
-    uint8_t * framebuffer = (uint8_t *) VBE_mode_info->framebuffer;
-    uint64_t offset = (x * ((VBE_mode_info->bpp)/8)) + (y * VBE_mode_info->pitch);
-    framebuffer[offset]     =  (hexColor) & 0xFF;
-    framebuffer[offset+1]   =  (hexColor >> 8) & 0xFF; 
-    framebuffer[offset+2]   =  (hexColor >> 16) & 0xFF;
+void putPixel(uint32_t color, uint32_t x, uint32_t y, PixelTarget target) {
+    const uint32_t w = VBE_mode_info->width;
+    const uint32_t h = VBE_mode_info->height;
+    if (x >= w || y >= h) return;  // protección de límites
+
+    const uint32_t pitch = VBE_mode_info->pitch;   // bytes por fila
+    const uint8_t bpp = 3;                         // bytes por píxel (24 bpp)
+    uint8_t *base;
+
+    if (target == PIXEL_BACK && g_back) {
+        base = g_back;                              // dibuja en back buffer
+    } else {
+        base = (uint8_t*)(uintptr_t)VBE_mode_info->framebuffer; // dibuja directo en VRAM
+    }
+
+    uint8_t *px = base + y * pitch + x * bpp;
+
+    // El modo VBE usa formato BGR (Blue, Green, Red)
+    px[0] =  color        & 0xFF;   // Blue
+    px[1] = (color >> 8 ) & 0xFF;   // Green
+    px[2] = (color >>16 ) & 0xFF;   // Red
 }
 
-
+// VRAM
 void vdPrint(const char * str) {
 	int i;
 	for (i = 0; str[i] != 0; i++){
@@ -97,7 +115,7 @@ void vdBackSpace(void) {
     // borrar el bloque 8x16 en (x,y)
     for (uint32_t py = y; py < y + FONT_H && py < H; py++) {
         for (uint32_t px = x; px < x + FONT_W && px < W; px++) {
-            putPixel(0x000000, px, py);
+            putPixel(0x000000, px, py, PIXEL_VRAM);
         }
     }
 }
@@ -145,7 +163,7 @@ void vdPrintCharStyled(char c, uint32_t fColor, uint32_t bgColor) {
             // máscara: 0x80 >> col
             uint8_t mask = (uint8_t)(0x80 >> col);
             uint32_t color = (line & mask) ? fColor : bgColor;
-            putPixel(color, px, py);
+            putPixel(color, px, py, PIXEL_VRAM);
         }
     }
     //avanzo en X 
@@ -155,7 +173,7 @@ void vdPrintCharStyled(char c, uint32_t fColor, uint32_t bgColor) {
 void vdclearScreen(void) {
     for (uint32_t py = 0; py < VBE_mode_info->height; py++)
         for (uint32_t px = 0; px < VBE_mode_info->width; px++)
-            putPixel(0x000000, px, py);
+            putPixel(0x000000, px, py, PIXEL_VRAM);
     x = y = 0;
 }
 
@@ -246,4 +264,68 @@ int intToStrSimple(int num, char* str) {
     }
     
     return i;
+}
+
+
+// --- BACK buffer ---
+static inline uint32_t fb_size_bytes(void) {
+	return (uint32_t)VBE_mode_info->pitch * VBE_mode_info->height;//tambaio del frame buffer
+}
+
+static void present_fullframe(void) {
+    uint8_t *vram  = (uint8_t*) (uintptr_t) VBE_mode_info->framebuffer;
+    uint32_t pitch = VBE_mode_info->pitch;
+    uint32_t h     = VBE_mode_info->height;
+
+    // voy copiando fila por fila 
+    for (uint32_t y = 0; y < h; y++) {
+        uint8_t *dst = vram  + y * pitch;// vream
+        uint8_t *src = g_back + y * pitch;  // back buffer
+        // para que sea mas eficiente tendria que hacerlo es asm 
+        for (uint32_t i = 0; i < pitch; i++) dst[i] = src[i];
+    }
+}
+
+// Prueba: llená el BACK con azul puro y logueá los 3 primeros bytes
+void test_fill_back_blue(void){
+    const uint32_t w = VBE_mode_info->width;
+    const uint32_t h = VBE_mode_info->height;
+    const uint32_t pitch = VBE_mode_info->pitch;
+    if (!g_back){ vdPrint("ERR back null\n"); return; }
+    if (VBE_mode_info->bpp != 24){ vdPrint("ERR bpp!=24\n"); return; }
+
+    // Azul (BGR): B=FF, G=00, R=00
+    for (uint32_t y=0; y<h; y++){
+        uint8_t* row = g_back + y*pitch;
+        for (uint32_t x=0; x<w; x++){
+            uint8_t* px = row + x*3;
+            px[0]=0xFF; px[1]=0x00; px[2]=0x00;
+        }
+        // opcional: limpiar padding
+        for (uint32_t i=w*3; i<pitch; i++) row[i]=0x00;
+    }
+    vdPrint("back[0..2]= "); vdPrintHex(g_back[0]); vdPrint(" ");
+    vdPrintHex(g_back[1]); vdPrint(" "); vdPrintHex(g_back[2]); vdPrint("\n");
+}
+
+void vdclearScreenDB(uint32_t color) {
+	const uint32_t w     = VBE_mode_info->width;
+	const uint32_t h     = VBE_mode_info->height;
+	const uint32_t pitch = VBE_mode_info->pitch;
+
+	for (uint32_t y = 0; y < h; y++) {
+		uint8_t *row = g_back + y * pitch;
+
+		uint8_t B =  color        & 0xFF;
+		uint8_t G = (color >> 8)  & 0xFF;
+		uint8_t R = (color >> 16) & 0xFF;
+		for (uint32_t x = 0; x < w; x++) {
+			uint8_t *px = row + x * 3;
+			px[0] = B; px[1] = G; px[2] = R;
+		}
+		
+	}
+
+	present_fullframe();
+	x = 0; y = 0;
 }

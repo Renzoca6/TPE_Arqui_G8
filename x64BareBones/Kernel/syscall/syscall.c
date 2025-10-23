@@ -22,6 +22,8 @@
             return syscall_read(regs); 
         case 1:
             return syscall_write(regs);
+        case 2:
+            return syscall_clearwindow(regs);
         default:
             return 0;
         }
@@ -31,49 +33,50 @@
         if (regs->rbx == 1){
             vdPrint( (const char*) regs->rcx );
         }else {
-            vdPrintCharStyled( (const char*) regs->rcx, 0x00ffffff, 0x00FF0000);
+            vdPrintStyled( (const char*) regs->rcx, 0x00ffffff, 0x00FF0000);
         } 
-        
-        
-        
         return 1;
     }
 
-static int syscall_read(syscall_Registers *regs) {
-    char   *buf = (char *)regs->rbx;
-    int  size = 0;
-
-    clearKeyBoardBuffer();                 //limpio el buffer del teclado
-
-    enable_interrupts();        //habilito (Interrupt Flag)
-
-    while (1){
-        if (hasNextKey()) {
-            KeyBufferStruct k = getNextKey();
-            if (k.is_pressed){
-                if (k.key == '\n') {
-                    vdPrintChar('\n');         // enter
-                    buf[size] = '\0';          // pongo null
-                    return (int)size;          
-                } else if (k.key == '\b') {
-                    if (size > 0) {
-                        size--;
-                        buf[size] = '\0';
-                        vdBackSpace();           // borro
-                    }
-                } else if (k.key) {
-                    if (size + 1 < 256) {      // deja espacio para \0
-                        buf[size++] = k.key;
-                        vdPrintChar(k.key);    //print
-                    }else{
-                        vdPrintChar('\n');         // enter
-                        buf[size] = '\0';          // pongo null
-                        return (int)size;  
-                    }
-                }
-            }
-        } 
+    syscall_clearwindow(syscall_Registers *regs){
+        vdclearScreenDB(regs->rbx);
     }
 
-    //falta funcion para apagar las interrupts
-}
+    static int syscall_read(syscall_Registers *regs) {
+        char   *buf = (char *)regs->rbx;
+        int  size = 0;
+
+        clearKeyBoardBuffer();                 //limpio el buffer del teclado
+
+        enable_interrupts();        //habilito (Interrupt Flag)
+
+        while (1){
+            if (hasNextKey()) {
+                KeyBufferStruct k = getNextKey();
+                if (k.is_pressed){
+                    if (k.key == '\n') {
+                        vdPrintChar('\n');         // enter
+                        buf[size] = '\0';          // pongo null
+                        return (int)size;          
+                    } else if (k.key == '\b') {
+                        if (size > 0) {
+                            size--;
+                            buf[size] = '\0';
+                            vdBackSpace();           // borro
+                        }
+                    } else if (k.key) {
+                        if (size + 1 < 256) {      // deja espacio para \0
+                            buf[size++] = k.key;
+                            vdPrintChar(k.key);    //print
+                        }else{
+                            vdPrintChar('\n');         // enter
+                            buf[size] = '\0';          // pongo null
+                            return (int)size;  
+                        }
+                    }
+                }
+            } 
+        }
+
+        //falta funcion para apagar las interrupts
+    }

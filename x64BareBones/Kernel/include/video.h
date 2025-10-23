@@ -2,11 +2,15 @@
 #define VIDEO_H
 #include <stdint.h>
 
+typedef enum {
+    PIXEL_VRAM,
+    PIXEL_BACK
+} PixelTarget;
+
 // ===================
 // Primitivas de video
 // ===================
-void putPixel(uint32_t hexColor, uint64_t x, uint64_t y);
-void vdClearScreen(void);
+void putPixel24(uint32_t hexColor, uint32_t x, uint32_t y, PixelTarget target);
 
 // ==============
 // Texto en video
@@ -27,5 +31,11 @@ void vdPrintBin(uint64_t value);
 void vdPrintBase(uint64_t value, uint32_t base);
 
 int intToStrSimple(int num, char* str);
+
+video_init_buffers(void);
+void vdclearScreenDB(uint32_t color);
+static void present_fullframe(void);
+static inline int bytes_per_pixel(void);
+static inline uint32_t fb_size_bytes(void);
 
 #endif // VIDEO_H
