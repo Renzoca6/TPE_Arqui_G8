@@ -16,6 +16,7 @@
     static int syscall_read(syscall_Registers *regs);
 
 
+
     int syscall_handler(syscall_Registers * regs){
         switch ((int)regs->rax){
         case 0:
@@ -39,41 +40,42 @@
         return 1;
     }
 
-static int syscall_read(syscall_Registers *regs) {
-    char   *buf = (char *)regs->rbx;
-    int  size = 0;
 
-    clearKeyBoardBuffer();                 //limpio el buffer del teclado
+    static int syscall_read(syscall_Registers *regs) {
+        char   *buf = (char *)regs->rbx;
+        int  size = 0;
 
-    enable_interrupts();        //habilito (Interrupt Flag)
+        clearKeyBoardBuffer();                 //limpio el buffer del teclado
 
-    while (1){
-        if (hasNextKey()) {
-            KeyBufferStruct k = getNextKey();
-            if (k.is_pressed){
-                if (k.key == '\n') {
-                    vdPrintChar('\n');         // enter
-                    buf[size] = '\0';          // pongo null
-                    return (int)size;          
-                } else if (k.key == '\b') {
-                    if (size > 0) {
-                        size--;
-                        buf[size] = '\0';
-                        vdBackSpace();           // borro
-                    }
-                } else if (k.key) {
-                    if (size + 1 < 256) {      // deja espacio para \0
-                        buf[size++] = k.key;
-                        vdPrintChar(k.key);    //print
-                    }else{
+        enable_interrupts();        //habilito (Interrupt Flag)
+
+        while (1){
+            if (hasNextKey()) {
+                KeyBufferStruct k = getNextKey();
+                if (k.is_pressed){
+                    if (k.key == '\n') {
                         vdPrintChar('\n');         // enter
                         buf[size] = '\0';          // pongo null
-                        return (int)size;  
+                        return (int)size;          
+                    } else if (k.key == '\b') {
+                        if (size > 0) {
+                            size--;
+                            buf[size] = '\0';
+                            vdBackSpace();           // borro
+                        }
+                    } else if (k.key) {
+                        if (size + 1 < 256) {      // deja espacio para \0
+                            buf[size++] = k.key;
+                            vdPrintChar(k.key);    //print
+                        }else{
+                            vdPrintChar('\n');         // enter
+                            buf[size] = '\0';          // pongo null
+                            return (int)size;  
+                        }
                     }
                 }
-            }
-        } 
-    }
+            } 
+        }
 
-    //falta funcion para apagar las interrupts
-}
+        //falta funcion para apagar las interrupts
+    }

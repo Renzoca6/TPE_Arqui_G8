@@ -18,6 +18,8 @@ int read (char *buf){
     return sys_read(buf);
 }
 
+
+
 //Clear
 //apagado
 //registros del procesador

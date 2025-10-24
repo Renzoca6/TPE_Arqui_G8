@@ -4,7 +4,7 @@ int main() {
     char buf[256];
     while (1){
         read(buf);
-        // funcion que revisa el buffer en buequeda de un comando
+        cr_dispatch_exact(buf);
         println(buf);
     }
     
