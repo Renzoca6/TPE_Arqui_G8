@@ -16,6 +16,7 @@
     static int syscall_read(syscall_Registers *regs);
 
 
+
     int syscall_handler(syscall_Registers * regs){
         switch ((int)regs->rax){
         case 0:
