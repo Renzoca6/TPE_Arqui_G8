@@ -2,6 +2,7 @@
     #include <stdint.h>
     #include "video.h"
     #include "keyboard_handler.h"
+    #include "realTimeClock.h"
 
     extern void enable_interrupts(void);
 
@@ -14,6 +15,7 @@
 
     static int syscall_write(syscall_Registers *regs);
     static int syscall_read(syscall_Registers *regs);
+    static void syscall_getDate(syscall_Registers *regs);
 
 
 
@@ -25,9 +27,23 @@
             return syscall_write(regs);
         case 2:
             syscall_clearwindow(regs);
+            break;
+        case 3:
+            syscall_getDate(regs);
+            break;
         default:
             return 0;
         }
+    }
+
+
+    static void syscall_getDate(syscall_Registers *regs){
+        if (regs->rbx == 1){
+           vdPrint(getDateString());
+           return;
+        }
+        vdPrint(getTimeString());
+        
     }
 
     static int syscall_write(syscall_Registers *regs){

@@ -10,8 +10,8 @@ int getDay();
 int getMonth();
 int getYear_YY();
 int getYear_YYYY();
-void getDateString(char *buffer);
-void getTimeString(char *buffer);
+char * getDateString();
+char * getTimeString();
 
 
 #endif

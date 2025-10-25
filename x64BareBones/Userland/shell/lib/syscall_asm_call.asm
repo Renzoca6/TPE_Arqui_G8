@@ -2,6 +2,7 @@ SECTION .text
 GLOBAL sys_write
 GLOBAL sys_read
 GLOBAL sys_clearwindow
+GLOBAL sys_date_time
 
 sys_read:
     push rbp
@@ -44,6 +45,21 @@ sys_clearwindow:
 
     mov  rax, 2          ; id read
     mov  rbx, rdi        ; color -> RBX
+    int  80h             
+    
+    pop  rbx
+    
+    leave
+    ret
+
+sys_date_time:
+    push rbp
+    mov  rbp, rsp
+
+    push rbx
+
+    mov  rax, 3          ; id read
+    mov  rbx, rdi        ; time 0 date 1 -> RBX
     int  80h             
     
     pop  rbx

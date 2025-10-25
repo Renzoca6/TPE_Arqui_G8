@@ -2,7 +2,9 @@
 
 extern int sys_write(int fb, const char* buf);
 extern int sys_read (char *buf);
-extern int sys_clearwindow(uint32_t* color);
+extern void sys_clearwindow(uint32_t* color);
+extern int sys_date_time (int aux);
+
 
 #define STDIN   0
 #define STDOUT  1
@@ -23,9 +25,18 @@ int read (char *buf){
     return sys_read(buf);
 }
 
-int clearwindow(uint32_t* color){
+void clearwindow(uint32_t* color){
     sys_clearwindow(color);
 }
+
+void get_time(){
+    sys_date_time (0);
+}
+
+void get_date(){
+    sys_date_time (1);
+}
+
 
 
 //Clear

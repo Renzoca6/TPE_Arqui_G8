@@ -7,7 +7,10 @@ int write(const char* buf);         // fd fijo = 1
 int println(const char* buf);
 int read (char *buf);               // fd fijo = 0
 int printError(const char* buf);
-int clearwindow(uint32_t* color);
+void clearwindow(uint32_t* color);
+void get_time();
+void get_date();
+
 
 
 #endif

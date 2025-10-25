@@ -57,7 +57,8 @@ int getMonth(){
 
 
 // hh/mm/ss\0
-void getTimeString(char *buffer) {
+char *  getTimeString() {
+    static char buffer[9];
     int h = getHours();
     int m = getMinutes();
     int s = getSeconds();
@@ -71,9 +72,11 @@ void getTimeString(char *buffer) {
     buffer[6] = '0' + (s / 10);
     buffer[7] = '0' + (s % 10);
     buffer[8] = '\0';
+    return buffer;
 }
 // dd/mm/yyyy\0
-void getDateString(char *buffer) {
+char * getDateString() {
+    static char buffer[11];
     int d = getDay();
     int m = getMonth();
     int y = getYear_YYYY();   
@@ -89,4 +92,5 @@ void getDateString(char *buffer) {
     buffer[8] = '0' + (y / 10) % 10;
     buffer[9] = '0' + (y % 10); 
     buffer[10] = '\0';
+    return buffer;
 }

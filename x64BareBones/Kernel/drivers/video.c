@@ -286,28 +286,6 @@ void present_fullframe(void) {
     }
 }
 
-// Prueba: llená el BACK con azul puro y logueá los 3 primeros bytes
-void test_fill_back_blue(void){
-    const uint32_t w = VBE_mode_info->width;
-    const uint32_t h = VBE_mode_info->height;
-    const uint32_t pitch = VBE_mode_info->pitch;
-    if (!g_back){ vdPrint("ERR back null\n"); return; }
-    if (VBE_mode_info->bpp != 24){ vdPrint("ERR bpp!=24\n"); return; }
-
-    // Azul (BGR): B=FF, G=00, R=00
-    for (uint32_t y=0; y<h; y++){
-        uint8_t* row = g_back + y*pitch;
-        for (uint32_t x=0; x<w; x++){
-            uint8_t* px = row + x*3;
-            px[0]=0xFF; px[1]=0x00; px[2]=0x00;
-        }
-        // opcional: limpiar padding
-        for (uint32_t i=w*3; i<pitch; i++) row[i]=0x00;
-    }
-    vdPrint("back[0..2]= "); vdPrintHex(g_back[0]); vdPrint(" ");
-    vdPrintHex(g_back[1]); vdPrint(" "); vdPrintHex(g_back[2]); vdPrint("\n");
-}
-
 void vdclearScreenDB(uint32_t color) {
 	const uint32_t w     = VBE_mode_info->width;
 	const uint32_t h     = VBE_mode_info->height;
