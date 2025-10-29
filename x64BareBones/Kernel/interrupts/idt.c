@@ -50,7 +50,9 @@ void idt_init(void) {
     idt_set_entry(0x20, (uint64_t)&_irq00Handler);
     //keyboar handler
     idt_set_entry(0x21, (uint64_t)&_irq01Handler);
-    // idt_set_entry(0x00, (uint64_t)&_exception0Handler); //
+    /* Excepciones CPU: Divide Error (0) y Invalid Opcode (6) */
+    idt_set_entry(0x00, (uint64_t)&_exception0Handler);
+    idt_set_entry(0x06, (uint64_t)&_exception6Handler);
     idt_set_entry(0x80,  (uint64_t)&_irq06Handler);
 
 

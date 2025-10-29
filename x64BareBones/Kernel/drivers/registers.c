@@ -1,12 +1,11 @@
 #include "registers.h"
 #include <stddef.h>
 
-/* Exportamos los nombres desde un solo lugar */
+/* Exportamos los nombres desde un solo lugar. Deben coincidir con pushState */
 const char * const REG_NAMES[REG_COUNT] = {
     "RAX", "RBX", "RCX", "RDX",
-    "RSI", "RDI", "RBP",
-    "R8", "R9", "R10", "R11", "R12", "R13", "R14", "R15",
-    "RSP", "RIP", "RFLAGS"
+    "RBP", "RDI", "RSI",
+    "R8",  "R9",  "R10", "R11", "R12", "R13", "R14", "R15"
 };
 
 static uint64_t snapshot[REG_COUNT] = {0};

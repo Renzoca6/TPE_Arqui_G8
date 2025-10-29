@@ -10,6 +10,8 @@ int echo(int argc, char *argv[]);                       // <-- firma con args
 int help(const command_t *comandos, int n, int argc, char *argv[]);             // <-- pasa también la cantidad
 void date();
 void time();
+void testInvalidOpcode();
+void testZeroDivision();
 
 //IMPORTANTE DEBE SER EN ORDEN ALFABETICO
 const command_t COMMANDS[] = {
@@ -17,8 +19,14 @@ const command_t COMMANDS[] = {
     { "date",  1 },
     { "echo",  2 },
     { "help",  3 },
+<<<<<<< HEAD
     { "resize",4 },   // ★ nuevo
     { "time",  5 },
+=======
+    { "testop", 4},
+    { "testzero", 5},
+    { "time",  6 }
+>>>>>>> exceptions
 };
 
 const int N_COMMANDS = sizeof(COMMANDS) / sizeof(COMMANDS[0]);
@@ -31,6 +39,9 @@ void commands_Handler(int func, int argc, char *argv[]) {
         case 3: help(COMMANDS, N_COMMANDS, argc, argv);    break;
         case 4: resize(argc,argv);    break;
         case 5: time();                        break;   
+        case 4: testInvalidOpcode();            break;
+        case 5: testZeroDivision();            break;
+        case 6: time();                        break;   
         default:                               break;
     }
 }
@@ -69,4 +80,14 @@ int echo(int argc, char *argv[]) {
         write(" ");
     }
     write("\n");
+}
+
+void testZeroDivision()
+{
+    throw_zero_division();
+}
+
+void testInvalidOpcode()
+{
+    throw_invalid_opcode();
 }

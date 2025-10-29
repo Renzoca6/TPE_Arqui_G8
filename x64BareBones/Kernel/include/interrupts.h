@@ -20,6 +20,9 @@ void _irq06Handler(void);
 void _exception0Handler(void);
 
 */
+/* Prototipos para handlers de excepciones definidos en ASM */
+void _exception0Handler(void);
+void _exception6Handler(void);
 
 void _cli(void);
 

@@ -13,6 +13,7 @@ void clearKeyBoardBuffer();
 void keyboardPressed();
 bool hasNextKey();
 KeyBufferStruct getNextKey();
+void waitForEnter();
 
 
 #endif
