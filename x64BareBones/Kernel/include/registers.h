@@ -7,10 +7,22 @@
 /* Orden del frame que esperamos recibir desde el stub de la ISR.
    Asegurate de que esto MATCHEE el push order del stub ASM. */
 typedef enum {
-    REG_RAX = 0, REG_RBX, REG_RCX, REG_RDX,
-    REG_RSI, REG_RDI, REG_RBP,
-    REG_R8,  REG_R9,  REG_R10, REG_R11, REG_R12, REG_R13, REG_R14, REG_R15,
-    REG_RSP, REG_RIP, REG_RFLAGS,
+    /* Debe coincidir con el macro pushState en asm/interrupts.asm */
+    REG_RAX = 0,
+    REG_RBX,
+    REG_RCX,
+    REG_RDX,
+    REG_RBP,
+    REG_RDI,
+    REG_RSI,
+    REG_R8,
+    REG_R9,
+    REG_R10,
+    REG_R11,
+    REG_R12,
+    REG_R13,
+    REG_R14,
+    REG_R15,
     REG_COUNT
 } reg_index_t;
 
