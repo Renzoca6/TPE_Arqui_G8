@@ -79,6 +79,16 @@ void putPixel(uint32_t color, uint32_t x, uint32_t y, PixelTarget target) {
     px[2] = (color >>16 ) & 0xFF;   // Red
 }
 
+void putFrame(){
+    for (uint32_t y = 0; y < VBE_mode_info->height; y++) {
+        for (uint32_t x = 0; x < VBE_mode_info->width; x++) {
+                putPixel(x, y, 0x000000, PIXEL_BACK); // fondo negro
+        }
+    }
+}
+
+
+
 // VRAM
 void vdPrint(const char * str) {
 	int i;
@@ -119,6 +129,7 @@ void vdBackSpace(void) {
         }
     }
 }
+
 
 void vdPrintCharStyled(char c, uint32_t fColor, uint32_t bgColor) {
     // Si te pasás del borde, opcionalmente “clipeá”

@@ -17,6 +17,7 @@
         "commandread.h": "c",
         "benchmark.h": "c",
         "time.h": "c",
-        "timer.h": "c"
+        "timer.h": "c",
+        "type_traits": "c"
     }
 }
