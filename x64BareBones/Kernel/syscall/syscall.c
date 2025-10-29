@@ -16,7 +16,7 @@
     static int syscall_write(syscall_Registers *regs);
     static int syscall_read(syscall_Registers *regs);
     static void syscall_getDate(syscall_Registers *regs);
-    // ★ NUEVO:
+    static double syscall_benchmark(syscall_Registers *regs);
     static void syscall_resize(syscall_Registers *regs);
 
     extern int  vdSetFontScale(int s);
@@ -38,9 +38,27 @@
         case 4:
             syscall_resize(regs);
             break;
+        case 5:
+            return syscall_benchmark(regs);
         default:
             return 0;
         }
+    }
+
+    double syscall_benchmark(syscall_Registers *regs){
+        uint64_t which = regs->rbx;             // 0=fps, 1=floating, 2=vram
+        double res = 0.0;
+
+        switch (which) {
+            case 0: res = benchmark_fps();               break;
+            case 1: res = benchmark_floating_point();    break;
+            case 2: res = benchmark_hardware_access();   break;
+            default: res = -1.0;                         break; // inválido
+        }
+
+        // Devolver el double como bits en RAX 
+        regs->rax = dbl_to_u64_bits(res);
+
     }
 
 

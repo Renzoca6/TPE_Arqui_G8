@@ -4,6 +4,7 @@ GLOBAL sys_write
 GLOBAL sys_read
 GLOBAL sys_clearwindow
 GLOBAL sys_date_time
+GLOBAL sys_benchmark
 
 sys_read:
     push rbp
@@ -82,3 +83,21 @@ sys_resize:
     
     leave
     ret
+
+sys_benchmark:
+    push rbp
+    mov  rbp, rsp
+    push rbx
+
+    mov  rax, 5        ; syscall ID = 5
+    mov  rbx, rdi      ; which: 0=fps, 1=floating, 2=vram
+    int  80h
+
+    ; Al volver, RAX = bits IEEE754 del double
+    ; Mover bits a XMM0 para retornar double según SysV ABI
+    movq xmm0, rax
+
+    pop  rbx
+    leave
+    ret
+
