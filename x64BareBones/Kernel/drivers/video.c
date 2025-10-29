@@ -56,6 +56,13 @@ static uint8_t g_back_static[1024 * 768 * 3];
 static uint8_t *g_back = g_back_static;
 VBEInfoPtr VBE_mode_info = (VBEInfoPtr) 0x0000000000005C00;
 
+uint32_t vdGetWidth(void)  { 
+    return VBE_mode_info->width;  
+}
+uint32_t vdGetHeight(void) { 
+    return VBE_mode_info->height; 
+}
+
 void putPixel(uint32_t color, uint32_t x, uint32_t y, PixelTarget target) {
     const uint32_t w = VBE_mode_info->width;
     const uint32_t h = VBE_mode_info->height;

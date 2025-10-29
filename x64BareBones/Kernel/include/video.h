@@ -13,6 +13,13 @@ typedef enum {
 void putPixel(uint32_t hexColor, uint32_t x, uint32_t y, PixelTarget target);
 void putFrame();
 
+//===================
+// Getters 
+// ===================
+uint32_t vdGetWidth(void);
+uint32_t vdGetHeight(void);
+
+
 // ==============
 // Texto en video
 // ==============
