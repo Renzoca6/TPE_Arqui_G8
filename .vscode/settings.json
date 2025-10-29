@@ -18,6 +18,7 @@
         "benchmark.h": "c",
         "time.h": "c",
         "timer.h": "c",
-        "type_traits": "c"
+        "type_traits": "c",
+        "help.h": "c"
     }
 }

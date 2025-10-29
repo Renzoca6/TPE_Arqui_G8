@@ -3,44 +3,48 @@
 #include "timer.h"
 
 static const int PIXELS = 100;
-
-double benchmark_fps(){
+uint64_t benchmark_fps() {
     //guardo el tiempo inicial
-    uint64_t start = timer_ms_since_boot();
     uint64_t frames = 0;
+    uint64_t start = timer_ms_since_boot();
     // dibujo por 1 segundo
-    while (timer_ms_since_boot - start < 1000){
+    while (timer_ms_since_boot() - start < 1000) {
         //escribo en toda la pantalla 
         putFrame();
         frames++;
     }
+
     //retortno la cantidad de frames que se imprimieron en ese tiempo 
-    return (double)frames;
+    return frames;
 }
 
-double benchmark_floating_point() {
+uint64_t benchmark_floating_point() {
     //cantidad de operaciones 
     const uint64_t ITERATIONS = 1000000;
     uint64_t start = timer_ms_since_boot();
 
-    double result = 0;
+    uint64_t result = 0;
     //ejucuta un millon de operaciones 
     for (uint64_t i = 1; i < ITERATIONS; i++) {
-        result += (i * 3.14159265358979) / (i + 1.0);
-        result *= 0.999999;
+        // simulamos operaciones de punto flotante con enteros para evitar FPU/SSE
+        result += (i * 31415926u) / (i + 1u);   // aproximación de π * 10^7
+        result *= 999999u;
+        result /= 1000000u;
     }
+
     // tiempo cuando termino 
     uint64_t end = timer_ms_since_boot();
     uint64_t elapsed = end - start;
 
     if (elapsed == 0) elapsed = 1; // evitar división por 0
 
-    double ops_per_ms = (double)ITERATIONS / (double)elapsed;
+    // operaciones por milisegundo → *1000 para operaciones por segundo
+    uint64_t ops_per_sec = (ITERATIONS * 1000ull) / elapsed;
 
-    return ops_per_ms * 1000.0; // operaciones por segundo
+    return ops_per_sec; // operaciones por segundo
 }
 
-double benchmark_hardware_access(void) {
+uint64_t benchmark_hardware_access(void) {
     // Obtengo el tamanio de la pantalla 
     const uint32_t W = vdGetWidth();
     const uint32_t H = vdGetHeight();
@@ -55,6 +59,9 @@ double benchmark_hardware_access(void) {
     //calculo cuanto tardo en imprimirlos 
     uint64_t dt = timer_ms_since_boot() - t0;
     if (dt == 0) dt = 1;
-    return (double)PIXELS * 1000.0 / (double)dt; // píxeles/seg
-}
 
+    // píxeles por milisegundo → *1000 para píxeles por segundo
+    uint64_t pixels_per_sec = (PIXELS * 1000ull) / dt;
+
+    return pixels_per_sec; // píxeles/seg
+}

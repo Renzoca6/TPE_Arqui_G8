@@ -46,4 +46,11 @@ void present_fullframe(void);
 int bytes_per_pixel(void);
 uint32_t fb_size_bytes(void);
 
+
+
+
+void vdPrintHex64(uint64_t value);
+
+void vdPrintDouble(double value, int precision);
+
 #endif // VIDEO_H

@@ -16,7 +16,7 @@
     static int syscall_write(syscall_Registers *regs);
     static int syscall_read(syscall_Registers *regs);
     static void syscall_getDate(syscall_Registers *regs);
-    static double syscall_benchmark(syscall_Registers *regs);
+    uint64_t syscall_benchmark(syscall_Registers *regs);
     static void syscall_resize(syscall_Registers *regs);
 
     extern int  vdSetFontScale(int s);
@@ -45,20 +45,32 @@
         }
     }
 
-    double syscall_benchmark(syscall_Registers *regs){
+    static inline uint64_t dbl_to_u64_bits(double d) {
+        union { double d; uint64_t u; } x;
+        x.d = d;
+         return x.u;
+    }
+
+    uint64_t syscall_benchmark(syscall_Registers *regs){
         uint64_t which = regs->rbx;             // 0=fps, 1=floating, 2=vram
-        double res = 0.0;
+        uint64_t res = 0;
 
         switch (which) {
             case 0: res = benchmark_fps();               break;
             case 1: res = benchmark_floating_point();    break;
             case 2: res = benchmark_hardware_access();   break;
-            default: res = -1.0;                         break; // inválido
+            default: res = (uint64_t)-1;                 break; // inválido
         }
 
-        // Devolver el double como bits en RAX 
-        regs->rax = dbl_to_u64_bits(res);
+        //BORRAR
+        // DEBUG: imprimí el número (entero) para confirmar que no es 0
+        vdPrint("\nFPS(entero/trunc): ");
+        vdPrintDec((int)res);
+        vdPrint("\n");
 
+        // devolver el entero directamente por RAX
+        regs->rax = res;
+        return res;  // opcional, pero prolijo si tu caller lo usa
     }
 
 

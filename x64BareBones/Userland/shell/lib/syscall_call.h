@@ -12,9 +12,9 @@ int printError(const char* buf);
 void clearwindow(uint32_t* color);
 void get_time();
 void get_date();
-double do_benchmark_fps();
-double do_benchmark_floating_point();
-double do_benchmark_hardware_access();
+uint64_t  do_benchmark_fps();
+uint64_t  do_benchmark_floating_point();
+uint64_t  do_benchmark_hardware_access();
 
 
 #endif

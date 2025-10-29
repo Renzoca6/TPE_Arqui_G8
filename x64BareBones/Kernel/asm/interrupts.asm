@@ -140,6 +140,7 @@ _irq06Handler:
 	push r14
 	push r15
 
+	sti
 
 	mov [registers], rax		;ID
 	mov [registers+8], rbx

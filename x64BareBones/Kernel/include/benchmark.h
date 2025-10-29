@@ -5,8 +5,8 @@
 #include <stdint.h>
 
 
-double benchmark_fps(void);
-double benchmark_floating_point(void);
-double benchmark_hardware_access(void);
+uint64_t benchmark_fps(void);
+uint64_t benchmark_floating_point(void);
+uint64_t benchmark_hardware_access(void);
 
 #endif 

@@ -404,3 +404,52 @@ void vdclearScreenDB(uint32_t color) {
 	present_fullframe();
 	x = 0; y = 0;
 }
+
+
+void vdPrintHex64(uint64_t value) {
+    const char *hex = "0123456789ABCDEF";
+    vdPrint("0x");  // prefijo estándar
+    for (int i = 60; i >= 0; i -= 4) {
+        uint8_t nibble = (value >> i) & 0xF;
+        vdPrintChar(hex[nibble]);
+    }
+}
+
+void vdPrintDouble(double value, int precision) {
+    if (value < 0) {
+        vdPrintChar('-');
+        value = -value;
+    }
+
+    // Parte entera
+    uint64_t intPart = (uint64_t)value;
+    double frac = value - (double)intPart;
+
+    // Convertir parte entera a decimal normal
+    char temp[32];
+    int i = 0;
+    if (intPart == 0)
+        temp[i++] = '0';
+    else {
+        while (intPart > 0 && i < 31) {
+            temp[i++] = '0' + (intPart % 10);
+            intPart /= 10;
+        }
+    }
+    while (i > 0)
+        vdPrintChar(temp[--i]);
+
+    // Si no se quieren decimales, terminamos
+    if (precision <= 0)
+        return;
+
+    vdPrintChar('.');
+
+    // Mostrar parte fraccionaria
+    for (int j = 0; j < precision; j++) {
+        frac *= 10.0;
+        int digit = (int)frac;
+        vdPrintChar('0' + digit);
+        frac -= digit;
+    }
+}
