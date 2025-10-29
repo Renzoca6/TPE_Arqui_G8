@@ -48,8 +48,34 @@ struct vbe_mode_info_structure {
 typedef struct vbe_mode_info_structure * VBEInfoPtr;
 unsigned int x = 0, y = 0;
 
-static const int FONT_W = 8;
-static const int FONT_H = 16;
+static const int BASE_FONT_W = 8;
+static const int BASE_FONT_H = 16;
+
+static int g_scale = 1;             // factor de escala (1..4)
+#define CELL_W (BASE_FONT_W * g_scale)  // ancho de celda actual
+#define CELL_H (BASE_FONT_H * g_scale)  // alto de celda actual
+
+int vdSetFontScale(int s);   // retorna escala efectiva aplicada
+int vdGetFontScale(void);
+
+// ★ Implementación:
+int vdSetFontScale(int s){
+    g_scale = s;
+    return g_scale;
+}
+int vdGetFontScale(void){
+    return g_scale;
+}
+
+
+
+/*------------------------------ Prototipos internos -----------------------*/
+static inline void fb_copy(uint8_t *dst, const uint8_t *src, uint32_t n);
+static inline void fb_fill_row(uint8_t *row, uint32_t width, uint8_t B, uint8_t G, uint8_t R);
+static void vdScrollUp_pixels(uint32_t rows);
+
+
+
 
 //Puntero al back buffer
 static uint8_t g_back_static[1024 * 768 * 3];
@@ -112,19 +138,18 @@ void vdBackSpace(void) {
     const uint32_t W = VBE_mode_info->width;
     const uint32_t H = VBE_mode_info->height;
 
-    // mover cursor una celda atrás
-    if (x >= FONT_W) {
-        x -= FONT_W;
-    } else if (y >= FONT_H) {
-        y -= FONT_H;
-        x = (W / FONT_W) * FONT_W;
+    if (x >= CELL_W) {
+        x -= CELL_W;                       
+    } else if (y >= CELL_H) {
+        y -= CELL_H;                       
+        x = (W / CELL_W) * CELL_W;         
     } else {
-        return; // ya en (0,0)
+        return;
     }
 
-    // borrar el bloque 8x16 en (x,y)
-    for (uint32_t py = y; py < y + FONT_H && py < H; py++) {
-        for (uint32_t px = x; px < x + FONT_W && px < W; px++) {
+    // borrar bloque de la celda actual
+    for (uint32_t py = y; py < y + CELL_H && py < H; py++) {
+        for (uint32_t px = x; px < x + CELL_W && px < W; px++) {
             putPixel(0x000000, px, py, PIXEL_VRAM);
         }
     }
@@ -132,66 +157,112 @@ void vdBackSpace(void) {
 
 
 void vdPrintCharStyled(char c, uint32_t fColor, uint32_t bgColor) {
-    // Si te pasás del borde, opcionalmente “clipeá”
     const uint32_t W = VBE_mode_info->width;
     const uint32_t H = VBE_mode_info->height;
 
-    // salto de linea
-    if (c == '\n') {
-		vdNewline();
-        return;
-    }
+    if (c == '\n') { vdNewline(); return; }
+    if (c == '\t') { vdPrintStyled("    ", fColor, bgColor); return; }
+    if (c == '\b') { vdBackSpace(); return; }
 
-	if (c == '\t') {
-		vdPrintStyled("    ", fColor, bgColor);
-        return;
-    }
-
-	if (c == '\b'){
-		vdBackSpace();
-		return;
-	}
-	
-    // recorro las 16 filas
-    for (int row = 0; row < FONT_H; row++) {
-        // Cada fila es un byte: bit7 = columna 0, bit0 = columna 7
-        unsigned char line = font8x16[(uint8_t)c][row];
-
-        for (int col = 0; col < FONT_W; col++) {
-            uint32_t px = x + (uint32_t)col;
-            uint32_t py = y + (uint32_t)row;
-
-            // para que haga un salto de linea si llegue al final
-            if (px >= W){
-				x=0;
-				y += FONT_H;
-			};
-
-			if (py >= H){
-				//Hay que hacer un scrool 
-			}
-			
-            // máscara: 0x80 >> col
+    // Recorremos el glyph base 8x16
+    for (int row = 0; row < BASE_FONT_H; row++) {
+        unsigned char line = font8x16[(uint8_t)c][row];  
+        for (int col = 0; col < BASE_FONT_W; col++) {
             uint8_t mask = (uint8_t)(0x80 >> col);
             uint32_t color = (line & mask) ? fColor : bgColor;
-            putPixel(color, px, py, PIXEL_VRAM);
+
+            // ★ bloque escalado g_scale × g_scale
+            int posX = x + col * g_scale;   // ★ origen X del bloque
+            int posY = y + row * g_scale;   // ★ origen Y del bloque
+            for (int dy = 0; dy < g_scale; dy++) {
+                uint32_t py = posY + dy;
+                if (py >= H) continue;
+                for (int dx = 0; dx < g_scale; dx++) {
+                    uint32_t px = posX + dx;
+                    if (px >= W) continue;
+                    putPixel(color, px, py, PIXEL_VRAM); 
+                }
+            }
         }
     }
-    //avanzo en X 
-    x += FONT_W; 
+
+    // avance de cursor a la derecha según celda
+    x += CELL_W;                                
+
+    // wrap horizontal simple
+    if (x + CELL_W > W) {                       // ★ si no entra el próximo
+        x = 0;
+        y += CELL_H;
+		if (y + CELL_H > H) {
+        vdScrollUp_pixels(CELL_H);
+    }
+    }
+
+    // TODO: scroll vertical si y+CELL_H > H
 }
 
-void vdclearScreen(void) {
-    for (uint32_t py = 0; py < VBE_mode_info->height; py++)
-        for (uint32_t px = 0; px < VBE_mode_info->width; px++)
-            putPixel(0x000000, px, py, PIXEL_VRAM);
-    x = y = 0;
+// Copia 'n' bytes sin libc
+static inline void fb_copy(uint8_t *dst, const uint8_t *src, uint32_t n) {
+    for (uint32_t i = 0; i < n; i++) dst[i] = src[i];
 }
 
-void vdNewline() {
-	x=0;
-	y+=FONT_H;
+// Llena 'n' bytes con el patrón B,G,R (24bpp) por fila
+static inline void fb_fill_row(uint8_t *row, uint32_t width, uint8_t B, uint8_t G, uint8_t R) {
+    for (uint32_t x = 0; x < width; x++) {
+        uint8_t *px = row + x * 3;
+        px[0] = B; px[1] = G; px[2] = R;
+    }
 }
+
+
+static void vdScrollUp_pixels(uint32_t rows) {
+    const uint32_t pitch = VBE_mode_info->pitch;
+    const uint32_t w     = VBE_mode_info->width;
+    const uint32_t h     = VBE_mode_info->height;
+
+    if (rows == 0 || rows >= h) {
+        // si te pasan algo raro, limpiá todo
+        uint8_t *vram = (uint8_t*)(uintptr_t)VBE_mode_info->framebuffer;
+        for (uint32_t y = 0; y < h; y++) {
+            fb_fill_row(vram + y * pitch, w, 0x00, 0x00, 0x00);
+        }
+        x = 0; y = 0;
+        return;
+    }
+
+    uint8_t *vram = (uint8_t*)(uintptr_t)VBE_mode_info->framebuffer;
+
+    // 1) desplazar hacia arriba: fila src=y -> dst=y-rows
+    for (uint32_t ysrc = rows; ysrc < h; ysrc++) {
+        uint8_t *src = vram + ysrc       * pitch;
+        uint8_t *dst = vram + (ysrc-rows)* pitch;
+        fb_copy(dst, src, pitch);
+    }
+
+    // 2) limpiar la franja inferior (últimas 'rows' filas)
+    for (uint32_t yclr = h - rows; yclr < h; yclr++) {
+        uint8_t *row = vram + yclr * pitch;
+        fb_fill_row(row, w, 0x00, 0x00, 0x00);  // negro
+    }
+
+    // 3) reubicar cursor en la última línea visible
+    if (y >= rows) y -= rows; else y = 0;
+    if (y + CELL_H > h) y = (h >= CELL_H) ? (h - CELL_H) : 0;
+    if (x + CELL_W > w) x = 0;
+}
+
+
+void vdNewline(void) {
+    const uint32_t H = VBE_mode_info->height;
+    x = 0;
+    y += CELL_H;
+    if (y + CELL_H > H) {
+        vdScrollUp_pixels(CELL_H);
+        // y quedó ajustada adentro de vdScrollUp_pixels()
+    }
+}
+
+
 
 
 
@@ -275,6 +346,20 @@ int intToStrSimple(int num, char* str) {
     }
     
     return i;
+}
+
+
+
+unsigned int str_to_uint_ignore_sign(const char *s) {
+    while (*s==' '||*s=='\t'||*s=='\r'||*s=='\n'||*s=='\v'||*s=='\f') s++;
+    if (*s == '+' || *s == '-') s++;  // ignora signo
+
+    unsigned int x = 0;
+    while (*s >= '0' && *s <= '9') {
+        x = x * 10u + (unsigned)(*s - '0');
+        s++;
+    }
+    return x;  // sin chequeos de overflow/errores
 }
 
 

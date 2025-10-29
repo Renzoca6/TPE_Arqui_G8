@@ -17,7 +17,7 @@ void putFrame();
 // Texto en video
 // ==============
 void vdPrintChar(char c);
-void vdBackspace(void);
+void vdBackSpace(void);
 void vdPrint(const char *str);
 void vdPrintStyled(const char *str, uint32_t fColor, uint32_t bgColor);
 void vdPrintCharStyled(char c, uint32_t fColor, uint32_t bgColor);

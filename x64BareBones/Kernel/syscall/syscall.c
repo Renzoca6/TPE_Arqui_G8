@@ -16,7 +16,11 @@
     static int syscall_write(syscall_Registers *regs);
     static int syscall_read(syscall_Registers *regs);
     static void syscall_getDate(syscall_Registers *regs);
+    // ★ NUEVO:
+    static void syscall_resize(syscall_Registers *regs);
 
+    extern int  vdSetFontScale(int s);
+    extern void vdclearScreen(void);
 
 
     int syscall_handler(syscall_Registers * regs){
@@ -31,9 +35,25 @@
         case 3:
             syscall_getDate(regs);
             break;
+        case 4:
+            syscall_resize(regs);
+            break;
         default:
             return 0;
         }
+    }
+
+
+    void syscall_resize(syscall_Registers *regs) {
+        int s = str_to_uint_ignore_sign(regs->rbx);     // <-- paso el valor del char * que se pasa desde el assembler a un entero
+
+        // 2) Validar / clamp simple (defensivo en kernel)
+        if (s < 1) s = 1;
+        if (s > 4) s = 4;         // si esta fuera del rango que printee que esta fuera de rango (FALTA HACER ESTO)
+
+        // 3) Se setea el GD_Scale en el valor que tiene S
+        vdSetFontScale(s);
+
     }
 
 
