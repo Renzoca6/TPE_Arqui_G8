@@ -292,14 +292,8 @@ void vdclearScreenDB(uint32_t color) {
 	const uint32_t pitch = VBE_mode_info->pitch;
 
 	for (uint32_t y = 0; y < h; y++) {
-		uint8_t *row = g_back + y * pitch;
-
-		uint8_t B =  color        & 0xFF;
-		uint8_t G = (color >> 8)  & 0xFF;
-		uint8_t R = (color >> 16) & 0xFF;
 		for (uint32_t x = 0; x < w; x++) {
-			uint8_t *px = row + x * 3;
-			px[0] = B; px[1] = G; px[2] = R;
+			putPixel(color, x,y, PIXEL_BACK);
 		}
 		
 	}

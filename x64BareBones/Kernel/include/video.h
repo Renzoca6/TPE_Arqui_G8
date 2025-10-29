@@ -10,7 +10,7 @@ typedef enum {
 // ===================
 // Primitivas de video
 // ===================
-void putPixel24(uint32_t hexColor, uint32_t x, uint32_t y, PixelTarget target);
+void putPixel(uint32_t hexColor, uint32_t x, uint32_t y, PixelTarget target);
 
 // ==============
 // Texto en video

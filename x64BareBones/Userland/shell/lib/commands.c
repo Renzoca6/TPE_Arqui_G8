@@ -17,7 +17,6 @@ const command_t COMMANDS[] = {
     { "date",  3 },
     { "help",  2 },
     { "time",  4 },
-
 };
 
 const int N_COMMANDS = sizeof(COMMANDS) / sizeof(COMMANDS[0]);
@@ -44,7 +43,7 @@ void time(){
 }
 
 void clear(void) {
-    clearwindow(0x00F000);
+    clearwindow(0x000000);
 }
 
 int help(const command_t *comandos, int n) {

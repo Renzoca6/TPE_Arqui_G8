@@ -49,3 +49,11 @@ void pic_mask_irq(uint8_t irq) {
     value = inb(port) | (uint8_t)(1u << irq);  
     outb(port, value);
 }
+
+// aviso de End Of Interrupt
+void pic_send_eoi(uint8_t irq) {
+    if (irq >= 8) {
+        outb(0xA0, 0x20); // PIC esclavo
+    }
+    outb(0x20, 0x20);     // PIC maestro
+}
