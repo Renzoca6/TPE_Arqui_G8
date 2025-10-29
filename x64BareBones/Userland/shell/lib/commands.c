@@ -18,7 +18,6 @@ const command_t COMMANDS[] = {
     { "echo",  2 },
     { "help",  3 },
     { "time",  4 },
-
 };
 
 const int N_COMMANDS = sizeof(COMMANDS) / sizeof(COMMANDS[0]);

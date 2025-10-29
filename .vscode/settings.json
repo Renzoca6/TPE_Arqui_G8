@@ -14,6 +14,9 @@
         "stddef.h": "c",
         "pic.h": "c",
         "commands.h": "c",
-        "commandread.h": "c"
+        "commandread.h": "c",
+        "benchmark.h": "c",
+        "time.h": "c",
+        "timer.h": "c"
     }
 }
