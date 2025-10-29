@@ -13,7 +13,9 @@ char* cr_last_argv[CR_MAXARGS];
 
 // asumo que ya tenés cr_first_token(...) y cr_match_prefix_range(...)
 
-// --- helpers sin libc ---
+
+// -----------------------------------------------------------------------------
+// Helpers sin libc (compatibles bare-metal)
 static int my_tolower(int c) {
     return (c >= 'A' && c <= 'Z') ? (c + ('a' - 'A')) : c;
 }
@@ -29,103 +31,133 @@ static int my_strncmp(const char* a, const char* b, size_t n) {
     return 0;
 }
 
-
+// -----------------------------------------------------------------------------
+// Tokenización simple (destructiva): separa por espacio/tab/CR/LF
 static int simple_tokenize(char* line, char* argv[], int maxargv) {
     int argc = 0;
     char* p = line;
-    // saltar espacios
+
     while (*p==' '||*p=='\t'||*p=='\r'||*p=='\n') p++;
+
     while (*p && argc < maxargv-1) {
         argv[argc++] = p;
         while (*p && *p!=' ' && *p!='\t' && *p!='\r' && *p!='\n') p++;
         if (*p) { *p = '\0'; p++; }
         while (*p==' '||*p=='\t'||*p=='\r'||*p=='\n') p++;
     }
+
     argv[argc] = NULL;
     return argc;
 }
-// --- first token (no modifica el buffer) ---
-static int is_space(char c) {
-    return c==' ' || c=='\t' || c=='\r' || c=='\n';
-}
 
-int cr_first_token(const char* buf, cr_token_t* out) {
+// -----------------------------------------------------------------------------
+// Primer token (no modifica el buffer)
+static int is_space_(char c) {
+    return (c==' ' || c=='\t' || c=='\r' || c=='\n');
+}
+static int cr_first_token(const char* buf, cr_token_t* out) {
     if (!buf || !out) return 0;
     const char* p = buf;
-    while (*p && is_space(*p)) p++;
+    while (*p && is_space_(*p)) p++;
     if (!*p) return 0;
     const char* start = p;
-    while (*p && !is_space(*p)) p++;
+    while (*p && !is_space_(*p)) p++;
     out->token = start;
     out->len   = (int)(p - start);
     return 1;
 }
 
-// --- prefix matching sobre arreglo ORDENADO COMMANDS[] ---
-static int char_at_ci(const char* s, int pos) {
-    unsigned char c = (unsigned char)s[pos];
-    return c ? my_tolower(c) : -1;
+// -----------------------------------------------------------------------------
+// Búsqueda binaria por prefijo (CI) + verificación de nombre completo (CI).
+// Requiere COMMANDS[] ordenado lexicográficamente "case-insensitive".
+
+// compare NAME vs TOKEN en los primeros 'len' chars (case-insensitive):
+//   <0 si NAME es "menor" o se queda corto,
+//    0 si NAME comienza con TOKEN,
+//   >0 si NAME es "mayor" en el primer char que difiere.
+static int ci_cmp_prefix(const char* name, const char* tok, int len){
+    for (int i = 0; i < len; i++) {
+        unsigned char a = (unsigned char)name[i];
+        unsigned char b = (unsigned char)tok[i];
+        if (a == 0) return -1; // name terminó → menor
+        int da = my_tolower(a), db = my_tolower(b);
+        if (da != db) return (da < db) ? -1 : 1;
+    }
+    return 0; // prefijo coincide
 }
 
-static int lb_pref_char(int lo, int hi, int pos, int ch) {
+// lower_bound: primer índice con cmp >= 0
+static int lb_prefix(int lo, int hi, const char* tok, int len){
     while (lo < hi) {
         int mid = lo + (hi - lo)/2;
-        int cm = char_at_ci(COMMANDS[mid].name, pos);
-        if (cm < ch) lo = mid + 1; else hi = mid;
+        int c = ci_cmp_prefix(COMMANDS[mid].name, tok, len);
+        if (c < 0) lo = mid + 1; else hi = mid;
     }
     return lo;
 }
 
-static int ub_pref_char(int lo, int hi, int pos, int ch) {
+// upper_bound: primer índice con cmp > 0
+static int ub_prefix(int lo, int hi, const char* tok, int len){
     while (lo < hi) {
         int mid = lo + (hi - lo)/2;
-        int cm = char_at_ci(COMMANDS[mid].name, pos);
-        if (cm <= ch) lo = mid + 1; else hi = mid;
+        int c = ci_cmp_prefix(COMMANDS[mid].name, tok, len);
+        if (c <= 0) lo = mid + 1; else hi = mid;
     }
     return lo;
 }
 
-int cr_match_prefix_range(const char* token, int len, cr_match_t* out) {
-    if (!token || !out || len <= 0) return 0;
-    int lo = 0, hi = N_COMMANDS, pos = 0;
-    while (pos < len && lo < hi) {
-        int ch = my_tolower((unsigned char)token[pos]);
-        int lo2 = lb_pref_char(lo, hi, pos, ch);
-        int hi2 = ub_pref_char(lo, hi, pos, ch);
-        lo = lo2; hi = hi2; pos++;
-        if (lo >= hi) break;
+// comparación CI exacta de longitud fija
+static int ci_strncmp(const char* a, const char* b, int n){
+    for (int i = 0; i < n; i++) {
+        unsigned char ca = (unsigned char)a[i], cb = (unsigned char)b[i];
+        int da = my_tolower(ca), db = my_tolower(cb);
+        if (da != db) return (da < db) ? -1 : 1;
+        if (ca == 0 || cb == 0) return 0;
     }
-    out->lo = lo; out->hi = hi; out->pos = pos;
-    return (hi > lo);
+    return 0;
 }
 
+// Devuelve índice si hay EXACTAMENTE 1 candidato por prefijo (CI)
+// y además el token coincide COMPLETO (misma longitud) en CI.
+// En otro caso, devuelve -1.
+static int cr_find_cmd_idx_ci_exact(const char* token, int len){
+    if (!token || len <= 0) return -1;
 
+    int lo = lb_prefix(0, N_COMMANDS, token, len);
+    int hi = ub_prefix(0, N_COMMANDS, token, len);
+    if (hi - lo != 1) return -1; // 0 o >1 → inválido/ambiguo
+
+    const char* name = COMMANDS[lo].name;
+    // exigir nombre completo (no abreviaturas)
+    int namelen = (int)my_strlen(name);
+    if (namelen != len) return -1;
+
+    // exigir igualdad CI completa
+    if (ci_strncmp(name, token, len) != 0) return -1;
+
+    return lo; // índice del comando
+}
+
+// -----------------------------------------------------------------------------
+// Punto de entrada: lee primer token, busca, tokeniza y despacha
 void cr_dispatch_exact(char* buf) {
-    // valores seguros por defecto
+    // estado seguro por defecto
     cr_last_cmd_id = -1;
     cr_last_argc   = 0;
     cr_last_argv[0]= NULL;
 
+    // 1) primer token (sin alterar el buffer)
     cr_token_t t;
     if (!cr_first_token(buf, &t)) { println("comando invalido"); return; }
 
-    cr_match_t m;
-    if (!cr_match_prefix_range(t.token, t.len, &m)) { println("comando invalido"); return; }
+    // 2) buscar índice (CI, binario, único + nombre completo)
+    int idx = cr_find_cmd_idx_ci_exact(t.token, t.len);
+    if (idx < 0) { println("comando invalido"); return; }
 
-    if (m.hi - m.lo != 1) { println("comando invalido"); return; }
-
-    const char* name = COMMANDS[m.lo].name;
-    if ((int)my_strlen(name) != t.len || my_strncmp(name, t.token, t.len) != 0) {
-        println("comando invalido"); return -1;
-    }
-
-    // tokenizar recién ahora (modifica buf)
+    // 3) tokenizar (alterando el buffer, poniendo /0 en los espacios) y despachar
     int argc = simple_tokenize(buf, cr_last_argv, CR_MAXARGS);
+    cr_last_cmd_id = COMMANDS[idx].id;
+    cr_last_argc   = argc;
 
-    // dejar “en bandeja”
-    cr_last_cmd_id = COMMANDS[m.lo].id;  // tu ID numérico
-    cr_last_argc   = argc;  
-
-    commands_Handler(cr_last_cmd_id,cr_last_argc,cr_last_argv);
+    commands_Handler(cr_last_cmd_id, cr_last_argc, cr_last_argv);
 }
-

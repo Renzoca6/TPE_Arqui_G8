@@ -28,11 +28,11 @@ extern char* cr_last_argv[CR_MAXARGS];   // argv sobre el mismo buffer
 // API
 // Extrae el primer token del buffer NUL-terminado `buf`.
 // Devuelve 1 si encontró token, 0 si estaba vacío/solo espacios.
-int cr_first_token(const char* buf, cr_token_t* out);
+//int cr_first_token(const char* buf, cr_token_t* out);
 
 // Calcula el rango [lo,hi) de comandos cuyo nombre tiene como prefijo token[0..len).
 // Devuelve 1 si hay al menos un candidato, 0 si no hay coincidencias.
-int cr_match_prefix_range(const char* token, int len, cr_match_t* out);
+//int cr_match_prefix_range(const char* token, int len, cr_match_t* out);
 
 // Matchea exacto y, si coincide, tokeniza y llama a tu handler desde commands.c.
 // En caso de error imprime "comando invalido". Devuelve el código que retorne tu handler.

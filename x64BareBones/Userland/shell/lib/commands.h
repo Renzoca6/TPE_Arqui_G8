@@ -13,3 +13,5 @@ typedef struct {
 // Tabla de comandos (definida en commands.c)
 extern const command_t COMMANDS[];
 extern const int       N_COMMANDS;
+
+void commands_Handler(int func, int argc, char *argv[]);
