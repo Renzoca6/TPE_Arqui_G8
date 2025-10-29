@@ -6,8 +6,7 @@ int main() {
     char buf[256];
     while (1){
         read(buf);
-        cr_dispatch_exact(buf);
-    }
+        cr_dispatch_exact(buf);}
     
     return 1;
 }

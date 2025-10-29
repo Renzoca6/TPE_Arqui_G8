@@ -3,6 +3,8 @@
 #include <stddef.h>
 #include <stdint.h>
 
+
+void do_resize(char * N_Times);
 int write(const char* buf);         // fd fijo = 1
 int println(const char* buf);
 int read (char *buf);               // fd fijo = 0

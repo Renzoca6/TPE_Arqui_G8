@@ -1,4 +1,5 @@
 SECTION .text
+GLOBAL sys_resize
 GLOBAL sys_write
 GLOBAL sys_read
 GLOBAL sys_clearwindow
@@ -58,8 +59,23 @@ sys_date_time:
 
     push rbx
 
-    mov  rax, 3          ; id read
+    mov  rax, 3          ; id time
     mov  rbx, rdi        ; time 0 date 1 -> RBX
+    int  80h             
+    
+    pop  rbx
+    
+    leave
+    ret
+
+sys_resize:
+    push rbp
+    mov  rbp, rsp
+
+    push rbx
+
+    mov  rax, 4          ; id resize
+    mov  rbx, rdi        ; N_Times -> RBX
     int  80h             
     
     pop  rbx

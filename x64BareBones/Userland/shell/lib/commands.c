@@ -17,8 +17,8 @@ const command_t COMMANDS[] = {
     { "date",  1 },
     { "echo",  2 },
     { "help",  3 },
-    { "time",  4 },
-
+    { "resize",4 },   // ★ nuevo
+    { "time",  5 },
 };
 
 const int N_COMMANDS = sizeof(COMMANDS) / sizeof(COMMANDS[0]);
@@ -29,8 +29,19 @@ void commands_Handler(int func, int argc, char *argv[]) {
         case 1: date();                        break; 
         case 2: echo(argc,argv);                        break;
         case 3: help(COMMANDS, N_COMMANDS, argc, argv);    break;
-        case 4: time();                        break;   
+        case 4: resize(argc,argv);    break;
+        case 5: time();                        break;   
         default:                               break;
+    }
+}
+
+
+void resize(int argc, char *argv[]){
+    if (argc != 2){
+        println("comando invalido");
+    }
+    else{
+        return do_resize(argv[1]);
     }
 }
 

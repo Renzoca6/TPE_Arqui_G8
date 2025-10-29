@@ -1,5 +1,6 @@
 #include "syscall_call.h"
 
+extern void sys_resize(char * N_times);
 extern int sys_write(int fb, const char* buf);
 extern int sys_read (char *buf);
 extern void sys_clearwindow(uint32_t* color);
@@ -27,6 +28,10 @@ int read (char *buf){
 
 void clearwindow(uint32_t* color){
     sys_clearwindow(color);
+}
+
+void do_resize(char * N_Times){
+    return sys_resize(N_Times);
 }
 
 void get_time(){
