@@ -55,10 +55,7 @@ static int g_scale = 1;             // factor de escala (1..4)
 #define CELL_W (BASE_FONT_W * g_scale)  // ancho de celda actual
 #define CELL_H (BASE_FONT_H * g_scale)  // alto de celda actual
 
-int vdSetFontScale(int s);   // retorna escala efectiva aplicada
-int vdGetFontScale(void);
 
-// ★ Implementación:
 int vdSetFontScale(int s){
     g_scale = s;
     return g_scale;
@@ -115,7 +112,7 @@ void putPixel(uint32_t color, uint32_t x, uint32_t y, PixelTarget target) {
 void putFrame(){
     for (uint32_t y = 0; y < VBE_mode_info->height; y++) {
         for (uint32_t x = 0; x < VBE_mode_info->width; x++) {
-                putPixel(x, y, 0x000000, PIXEL_BACK); // fondo negro
+                putPixel(0x000000, x, y, PIXEL_BACK); // fondo negro
         }
     }
 }
@@ -123,25 +120,31 @@ void putFrame(){
 
 
 // VRAM
-void vdPrint(const char * str) {
+void vdPrint(const char * str, PixelTarget target) {
 	int i;
 	for (i = 0; str[i] != 0; i++){
-		vdPrintChar(str[i]);
+		vdPrintChar(str[i], target);
 	}
 }
 
-void vdPrintStyled(const char * str, uint32_t fColor, uint32_t bgColor) {
+void vdPrintStyled(const char * str, uint32_t fColor, uint32_t bgColor, PixelTarget target) {
 	int i;
 	for (i = 0; str[i] != 0; i++){
-		vdPrintCharStyled(str[i], fColor, bgColor);
+		vdPrintCharStyled(str[i], fColor, bgColor, target);
 	}
 }
 
-void vdPrintChar(char c) {
-	vdPrintCharStyled(c, 0x00ffffff, 0x00000000);
+
+void vdPrintStyled_AT(const char * str, uint32_t fColor, uint32_t bgColor, PixelTarget target) {
+
 }
 
-void vdBackSpace(void) {
+
+void vdPrintChar(char c, PixelTarget target) {
+	vdPrintCharStyled(c, 0x00ffffff, 0x00000000, target);
+}
+
+void vdBackSpace(PixelTarget target) {
     const uint32_t W = VBE_mode_info->width;
     const uint32_t H = VBE_mode_info->height;
 
@@ -157,19 +160,19 @@ void vdBackSpace(void) {
     // borrar bloque de la celda actual
     for (uint32_t py = y; py < y + CELL_H && py < H; py++) {
         for (uint32_t px = x; px < x + CELL_W && px < W; px++) {
-            putPixel(0x000000, px, py, PIXEL_VRAM);
+            putPixel(0x000000, px, py, target);
         }
     }
 }
 
 
-void vdPrintCharStyled(char c, uint32_t fColor, uint32_t bgColor) {
+void vdPrintCharStyled(char c, uint32_t fColor, uint32_t bgColor, PixelTarget target) {
     const uint32_t W = VBE_mode_info->width;
     const uint32_t H = VBE_mode_info->height;
 
     if (c == '\n') { vdNewline(); return; }
-    if (c == '\t') { vdPrintStyled("    ", fColor, bgColor); return; }
-    if (c == '\b') { vdBackSpace(); return; }
+    if (c == '\t') { vdPrintStyled("    ", fColor, bgColor, target); return; }
+    if (c == '\b') { vdBackSpace(target); return; }
 
     // Recorremos el glyph base 8x16
     for (int row = 0; row < BASE_FONT_H; row++) {
@@ -178,16 +181,16 @@ void vdPrintCharStyled(char c, uint32_t fColor, uint32_t bgColor) {
             uint8_t mask = (uint8_t)(0x80 >> col);
             uint32_t color = (line & mask) ? fColor : bgColor;
 
-            // ★ bloque escalado g_scale × g_scale
-            int posX = x + col * g_scale;   // ★ origen X del bloque
-            int posY = y + row * g_scale;   // ★ origen Y del bloque
+            
+            int posX = x + col * g_scale;   
+            int posY = y + row * g_scale;   
             for (int dy = 0; dy < g_scale; dy++) {
                 uint32_t py = posY + dy;
                 if (py >= H) continue;
                 for (int dx = 0; dx < g_scale; dx++) {
                     uint32_t px = posX + dx;
                     if (px >= W) continue;
-                    putPixel(color, px, py, PIXEL_VRAM); 
+                    putPixel(color, px, py, target); 
                 }
             }
         }
@@ -197,7 +200,7 @@ void vdPrintCharStyled(char c, uint32_t fColor, uint32_t bgColor) {
     x += CELL_W;                                
 
     // wrap horizontal simple
-    if (x + CELL_W > W) {                       // ★ si no entra el próximo
+    if (x + CELL_W > W) {                       
         x = 0;
         y += CELL_H;
 		if (y + CELL_H > H) {
@@ -269,94 +272,6 @@ void vdNewline(void) {
     }
 }
 
-
-
-
-
-// Convierte un entero a string en base arbitraria (2, 10, 16, etc.)
-static uint32_t uintToBase(uint64_t value, char * buffer, uint32_t base) {
-	char *p = buffer;
-	char *p1, *p2;
-	uint32_t digits = 0;
-
-	// Calcula los dígitos sucesivos en la base elegida
-	do
-	{
-		uint32_t remainder = value % base;   // resto en la base
-		*p++ = (remainder < 10) ? remainder + '0' : remainder + 'A' - 10;
-		digits++;
-	}
-	while (value /= base);
-
-	// Termina el string con '\0'
-	*p = 0;
-
-	// Invierte el string (porque se construyó al revés)
-	p1 = buffer;
-	p2 = p - 1;
-	while (p1 < p2)
-	{
-		char tmp = *p1;
-		*p1 = *p2;
-		*p2 = tmp;
-		p1++;
-		p2--;
-	}
-
-	return digits;  // devuelve cuántos dígitos tiene el número
-}
-
-// Imprime un número decimal
-void vdPrintDec(uint64_t value) {
-	vdPrintBase(value, 10);
-}
-
-// Imprime un número en hexadecimal
-void vdPrintHex(uint64_t value) {
-	vdPrintBase(value, 16);
-}
-
-// Imprime un número en binario
-void vdPrintBin(uint64_t value) {
-	vdPrintBase(value, 2);
-}
-
-// Función genérica: convierte un valor a string en base dada y lo imprime
-void vdPrintBase(uint64_t value, uint32_t base) {
-    uintToBase(value, buffer, base); // convierte el número en string
-    vdPrint(buffer);                 // lo imprime con ncPrint
-}
-
-int intToStrSimple(int num, char* str) {
-    int i = 0;
-    
-    if (num == 0) {
-        str[i++] = '0';
-    } else {
-        while (num > 0) {
-            str[i++] = (num % 10) + '0';
-            num /= 10;
-        }
-    }
-
-    str[i] = '\0';
-    
-    // Invertir la cadena
-    int inicio = 0;
-    int fin = i - 1;
-    while (inicio < fin) {
-        char temp = str[inicio];
-        str[inicio] = str[fin];
-        str[fin] = temp;
-        inicio++;
-        fin--;
-    }
-    
-    return i;
-}
-
-
-
 unsigned int str_to_uint_ignore_sign(const char *s) {
     while (*s==' '||*s=='\t'||*s=='\r'||*s=='\n'||*s=='\v'||*s=='\f') s++;
     if (*s == '+' || *s == '-') s++;  // ignora signo
@@ -377,7 +292,7 @@ inline uint32_t fb_size_bytes(void) {
 
 void present_fullframe(void) {
     uint8_t *vram  = (uint8_t*) (uintptr_t) VBE_mode_info->framebuffer;
-    uint32_t pitch = VBE_mode_info->pitch;
+    uint32_t pitch = VBE_mode_info->pitch; //cantidad de byts que ocupa una fila 
     uint32_t h     = VBE_mode_info->height;
 
     // voy copiando fila por fila 
@@ -389,66 +304,24 @@ void present_fullframe(void) {
     }
 }
 
+
 void vdclearScreenDB(uint32_t color) {
-	const uint32_t w     = VBE_mode_info->width;
-	const uint32_t h     = VBE_mode_info->height;
+    const uint32_t w     = VBE_mode_info->width;
+    const uint32_t h     = VBE_mode_info->height;
+    const uint32_t pitch = VBE_mode_info->pitch;
 
-	for (uint32_t y = 0; y < h; y++) {
-		for (uint32_t x = 0; x < w; x++) {
-			putPixel(color, x,y, PIXEL_BACK);
-		}
-		
-	}
+    uint8_t B =  color        & 0xFF;
+    uint8_t G = (color >> 8 ) & 0xFF;
+    uint8_t R = (color >> 16) & 0xFF;
 
-	present_fullframe();
-	x = 0; y = 0;
+    for (uint32_t y = 0; y < h; y++) {
+        uint8_t row = g_back + y * pitch;
+        fb_fill_row(row, w, B, G, R);
+    }
+    present_fullframe();
+    x = 0; y = 0;
 }
 
 
-void vdPrintHex64(uint64_t value) {
-    const char *hex = "0123456789ABCDEF";
-    vdPrint("0x");  // prefijo estándar
-    for (int i = 60; i >= 0; i -= 4) {
-        uint8_t nibble = (value >> i) & 0xF;
-        vdPrintChar(hex[nibble]);
-    }
-}
 
-void vdPrintDouble(double value, int precision) {
-    if (value < 0) {
-        vdPrintChar('-');
-        value = -value;
-    }
 
-    // Parte entera
-    uint64_t intPart = (uint64_t)value;
-    double frac = value - (double)intPart;
-
-    // Convertir parte entera a decimal normal
-    char temp[32];
-    int i = 0;
-    if (intPart == 0)
-        temp[i++] = '0';
-    else {
-        while (intPart > 0 && i < 31) {
-            temp[i++] = '0' + (intPart % 10);
-            intPart /= 10;
-        }
-    }
-    while (i > 0)
-        vdPrintChar(temp[--i]);
-
-    // Si no se quieren decimales, terminamos
-    if (precision <= 0)
-        return;
-
-    vdPrintChar('.');
-
-    // Mostrar parte fraccionaria
-    for (int j = 0; j < precision; j++) {
-        frac *= 10.0;
-        int digit = (int)frac;
-        vdPrintChar('0' + digit);
-        frac -= digit;
-    }
-}

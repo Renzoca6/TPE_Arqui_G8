@@ -43,8 +43,8 @@ static void handle_exception(const char *title)
        _sti();   // <- Sólo si tu teclado depende de IF, y sabiendo el riesgo.
     */
 
-    vdPrint("Exception: ");
-    vdPrint(title);
+    vdPrint("Exception: ", PIXEL_VRAM);
+    vdPrint(title, PIXEL_VRAM);
     vdNewline();
 
     print_registers_safe();
@@ -60,18 +60,18 @@ static void print_registers_safe(void)
     const uint64_t *regs = regs_get();
 
     if (regs == NULL) {
-        vdPrint("Register snapshot not available.");
+        vdPrint("Register snapshot not available.", PIXEL_VRAM);
         vdNewline();
         return;
     }
 
-    vdPrint("Register Status:");
+    vdPrint("Register Status:", PIXEL_VRAM);
     vdNewline();
 
     for (int i = 0; i < REG_COUNT; i++) {
-        vdPrint((char*)REG_NAMES[i]);
-        vdPrint(": ");
-        vdPrintHex(regs[i]);
+        vdPrint((char*)REG_NAMES[i], PIXEL_VRAM);
+        vdPrint(": ", PIXEL_VRAM);
+        //vdPrintHex(regs[i]);
         vdNewline();
     }
 }

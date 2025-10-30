@@ -16,7 +16,9 @@ int write(const char* buf){
 }
 
 int println(const char* buf){
-    return (sys_write(STDOUT, buf) && write("\n"));
+    sys_write(STDOUT, buf);
+    write("\n");
+    return 1;
 }
 
 int printError(const char* buf){
