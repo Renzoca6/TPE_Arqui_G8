@@ -32,8 +32,8 @@ void exceptionDispatcher(int exception_id)
 
 static void handle_exception(const char *title)
 {
-    vdPrint("Exception: ");
-    vdPrint(title);
+    vdPrint("Exception: ", PIXEL_VRAM);
+    vdPrint(title, PIXEL_VRAM);
     vdNewline();
 
     print_registers();     

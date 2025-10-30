@@ -177,7 +177,6 @@ _exception6Handler:
 ; syscall 
 _irq06Handler:
 	push rbp
-	push rdi
 	push rsi
 	push r8
 	push r9
@@ -194,6 +193,8 @@ _irq06Handler:
 	mov [registers+8], rbx
 	mov [registers+16], rcx
 	mov [registers+24], rdx
+	mov [registers+28], rdi
+
 
 
 	mov rdi, registers
@@ -213,7 +214,6 @@ _irq06Handler:
 	pop r9
 	pop r8
 	pop rsi
-	pop rdi
 	pop rbp
 
 	iretq
@@ -235,6 +235,8 @@ SECTION .data
 	dq 0
 	dq 0
 	dq 0
+	dq 0
 ; buffer temporal para snapshot de excepciones (15 regs x 8 bytes)
 exc_regs:
 	dq 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
+	
