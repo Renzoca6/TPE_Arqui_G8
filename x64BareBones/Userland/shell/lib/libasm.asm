@@ -1,4 +1,3 @@
-GLOBAL syscall
 GLOBAL throw_invalid_opcode
 GLOBAL throw_zero_division
 

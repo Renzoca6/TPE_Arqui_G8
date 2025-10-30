@@ -3,13 +3,9 @@
 #include "keyboard_handler.h"
 #include "video.h"   /* vdPrint, vdNewline, vdPrintHex, vdClear, etc. */
 #include "interrupts.h"
-#include <stddef.h>        /* NULL */
 #include <stdbool.h>
 
-#define ENTER_CHAR '\n'    /* Unificamos comparación por carácter */
-
 static void handle_exception(const char *title);
-static void print_registers_safe(void);
 
 /* Tabla de nombres por ID que te interesan (podés extenderla si luego agregás más) */
 static const struct {
@@ -22,8 +18,7 @@ static const struct {
 
 void exceptionDispatcher(int exception_id)
 {
-    /* Si querés, podés mantener IF=0 durante todo el manejo para evitar anidación.
-       Si necesitás teclado, documentá por qué habilitás IF. */
+    /*selecciona la excepcion correspondiente */
     for (unsigned i = 0; i < sizeof(EXC_TABLE)/sizeof(EXC_TABLE[0]); i++) {
         if (exception_id == EXC_TABLE[i].id) {
             handle_exception(EXC_TABLE[i].msg);
@@ -35,45 +30,15 @@ void exceptionDispatcher(int exception_id)
     handle_exception("Unknown Exception");
 }
 
-/* -------- helpers -------- */
-
 static void handle_exception(const char *title)
 {
-    /* Si decidís habilitar interrupciones para leer teclado, hacelo consciente:
-       _sti();   // <- Sólo si tu teclado depende de IF, y sabiendo el riesgo.
-    */
-
     vdPrint("Exception: ");
     vdPrint(title);
     vdNewline();
 
-    print_registers_safe();
-
-
-
-     
+    print_registers();     
 }
 
-/* Evita crash si no hay snapshot todavía */
-static void print_registers_safe(void)
-{
-    const uint64_t *regs = regs_get();
 
-    if (regs == NULL) {
-        vdPrint("Register snapshot not available.");
-        vdNewline();
-        return;
-    }
-
-    vdPrint("Register Status:");
-    vdNewline();
-
-    for (int i = 0; i < REG_COUNT; i++) {
-        vdPrint((char*)REG_NAMES[i]);
-        vdPrint(": ");
-        vdPrintHex(regs[i]);
-        vdNewline();
-    }
-}
 
 

@@ -1,4 +1,6 @@
 #include "registers.h"
+#include "keyboard_handler.h"
+#include "video.h"   /* vdPrint, vdNewline, vdPrintHex, vdClear, etc. */
 #include <stddef.h>
 
 /* Exportamos los nombres desde un solo lugar. Deben coincidir con pushState */
@@ -12,7 +14,6 @@ static uint64_t snapshot[REG_COUNT] = {0};
 static volatile bool snapshot_ready = false;
 
 void regs_save(const uint64_t *frame) {
-    /* frame no debe ser NULL; si querés, podés hardenear con un if */
     for (int i = 0; i < REG_COUNT; i++) {
         snapshot[i] = frame[i];
     }
@@ -27,7 +28,26 @@ const uint64_t *regs_get(void) {
     return snapshot_ready ? snapshot : NULL;
 }
 
-void regs_clear(void) {
-    snapshot_ready = false;
-    /* Si querés limpiar datos viejos: for (int i=0;i<REG_COUNT;i++) snapshot[i]=0; */
+
+/* Evita crash si no hay snapshot todavía */
+void print_registers(void)
+{
+    const uint64_t *regs = regs_get();
+
+    if (regs == NULL) {
+        vdPrint("Register snapshot not available.");
+        vdNewline();
+        return;
+    }
+
+    vdPrint("Register Status:");
+    vdNewline();
+
+    for (int i = 0; i < REG_COUNT; i++) {
+        vdPrint((char*)REG_NAMES[i]);
+        vdPrint(": ");
+        vdPrintHex(regs[i]);
+        vdNewline();
+    }
+    vdNewline();
 }

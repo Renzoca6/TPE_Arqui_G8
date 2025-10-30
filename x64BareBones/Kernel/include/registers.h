@@ -33,7 +33,7 @@ extern const char * const REG_NAMES[REG_COUNT];
 void     regs_save(const uint64_t *frame);   /* copia ‘frame’ a un snapshot interno */
 bool     regs_ready(void);                   /* hay snapshot disponible */
 const uint64_t *regs_get(void);              /* puntero const al snapshot (puede ser NULL si no hay) */
-void     regs_clear(void);                   /* limpia el snapshot (opcional) */
+void print_registers(void);             /*printea los registros*/
 
 /* --- Compatibilidad con tu código actual --- */
 static inline void makeBackup(uint64_t *regs) { regs_save(regs); }

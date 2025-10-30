@@ -14,12 +14,16 @@ GLOBAL _irq03Handler
 GLOBAL _irq04Handler
 GLOBAL _irq05Handler
 GLOBAL _irq06Handler
+GLOBAL _exception0Handler
+GLOBAL _exception6Handler
 
 ;GLOBAL _exception0Handler
 
 EXTERN syscall_handler
 EXTERN irqDispatcher
 ;EXTERN exceptionDispatcher
+extern regs_save
+extern exceptionDispatcher
 
 
 SECTION .text
@@ -77,7 +81,47 @@ SECTION .text
 %endmacro
 
 
-; falta el exception handler
+%macro SaveRegisters 0
+mov [rel exc_regs], rax
+mov [rel exc_regs + 8], rbx
+mov [rel exc_regs + 2*8], rcx
+mov [rel exc_regs + 3*8], rdx
+mov [rel exc_regs + 4*8], rbp
+mov [rel exc_regs + 5*8], rdi
+mov [rel exc_regs + 6*8], rsi
+mov [rel exc_regs + 7*8], r8
+mov [rel exc_regs + 8*8], r9
+mov [rel exc_regs + 9*8], r10
+mov [rel exc_regs + 10*8], r11
+mov [rel exc_regs + 11*8], r12
+mov [rel exc_regs + 12*8], r13
+mov [rel exc_regs + 13*8], r14
+mov [rel exc_regs + 14*8], r15
+
+lea rdi, [rel exc_regs]
+call regs_save
+%endmacro
+
+; exceptionHandler macro
+; args:
+;   1 = id exception
+;   2 = skip bytes (number of bytes to advance saved RIP so faulting
+;       instruction is not re-executed). Optional, default 0.
+
+%macro exceptionHandler 2
+	pushState
+
+	; advance saved RIP by %2 bytes; saved RIP is at [rsp + 15*8]
+	add qword [rsp + 15*8], %2
+
+	SaveRegisters
+
+	mov rdi, %1
+	call exceptionDispatcher
+
+	popState
+	iretq
+%endmacro
 
 
 _hlt:
@@ -120,10 +164,14 @@ _irq05Handler:
 
 
 ;Zero Division Exception
+_exception0Handler:
+	; Divide Error (DIV by zero) — skip 3 bytes (48 F7 F0) and dispatch
+	exceptionHandler 0, 3
 
-
-;_exception0Handler:
-;	exceptionHandler 0
+;OP Exception
+_exception6Handler:
+	; Invalid Opcode (UD2) — skip 2 bytes and dispatch
+	exceptionHandler 6, 2
 
 
 ; syscall 
@@ -187,3 +235,6 @@ SECTION .data
 	dq 0
 	dq 0
 	dq 0
+; buffer temporal para snapshot de excepciones (15 regs x 8 bytes)
+exc_regs:
+	dq 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
