@@ -6,13 +6,16 @@
 // —— declaraciones mínimas para que compile ——
 extern void syscall_clear(void);                         // <-- prototipo
 void clear(void);                                         // <-- firma sin args
-int echo(int argc, char *argv[]);                       // <-- firma con args
+void echo(int argc, char *argv[]);                       // <-- firma con args
 int help(const command_t *comandos, int n, int argc, char *argv[]);             // <-- pasa también la cantidad
 void date();
 void time();
 void benchmark();  
 void testInvalidOpcode();
 void testZeroDivision();
+extern void throw_zero_division();
+void resize(int argc, char *argv[]);
+extern void throw_invalid_opcode ();
 
 //IMPORTANTE DEBE SER EN ORDEN ALFABETICO
 const command_t COMMANDS[] = {
@@ -55,14 +58,13 @@ void resize(int argc, char *argv[]){
 }
 
 void benchmark(){
-    while (1)
-    {
+    while (1){
         do_benchmark_fps();
+        do_benchmark_hardware_access();
+        do_benchmark_floating_point();
+        
     }
     
-    do_benchmark_fps();
-    //do_benchmark_hardware_access();
-    //do_benchmark_floating_point();
 }
 
 void date(){
@@ -83,7 +85,7 @@ int help(const command_t *comandos, int n, int argc, char *argv[]) {
     return help_impl(comandos, n, argc, argv);
 }
 
-int echo(int argc, char *argv[]) {
+void echo(int argc, char *argv[]) {
     for (int i = 1 ; i < argc; i++){
         write(argv[i]);
         write(" ");

@@ -392,7 +392,6 @@ void present_fullframe(void) {
 void vdclearScreenDB(uint32_t color) {
 	const uint32_t w     = VBE_mode_info->width;
 	const uint32_t h     = VBE_mode_info->height;
-	const uint32_t pitch = VBE_mode_info->pitch;
 
 	for (uint32_t y = 0; y < h; y++) {
 		for (uint32_t x = 0; x < w; x++) {

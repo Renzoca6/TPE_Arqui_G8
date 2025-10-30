@@ -3,6 +3,7 @@
     #include "video.h"
     #include "keyboard_handler.h"
     #include "realTimeClock.h"
+    #include "benchmark.h"
 
     extern void enable_interrupts(void);
 
@@ -18,6 +19,7 @@
     static void syscall_getDate(syscall_Registers *regs);
     uint64_t syscall_benchmark(syscall_Registers *regs);
     static void syscall_resize(syscall_Registers *regs);
+    static void syscall_clearwindow(syscall_Registers *regs);
 
     extern int  vdSetFontScale(int s);
     extern void vdclearScreen(void);
@@ -43,6 +45,7 @@
         default:
             return 0;
         }
+        return 0;
     }
 
     static inline uint64_t dbl_to_u64_bits(double d) {
@@ -62,7 +65,7 @@
             default: res = (uint64_t)-1;                 break; // inválido
         }
 
-        //BORRAR
+        //BORR
         // DEBUG: imprimí el número (entero) para confirmar que no es 0
         vdPrint("\nFPS(entero/trunc): ");
         vdPrintDec((int)res);
@@ -75,7 +78,7 @@
 
 
     void syscall_resize(syscall_Registers *regs) {
-        int s = str_to_uint_ignore_sign(regs->rbx);     // <-- paso el valor del char * que se pasa desde el assembler a un entero
+        int s = str_to_uint_ignore_sign((char *)regs->rbx);     // <-- paso el valor del char * que se pasa desde el assembler a un entero
 
         // 2) Validar / clamp simple (defensivo en kernel)
         if (s < 1) s = 1;

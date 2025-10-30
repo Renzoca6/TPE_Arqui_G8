@@ -50,7 +50,7 @@ uint32_t fb_size_bytes(void);
 
 
 void vdPrintHex64(uint64_t value);
-
+unsigned int str_to_uint_ignore_sign(const char *s);
 void vdPrintDouble(double value, int precision);
 
 #endif // VIDEO_H

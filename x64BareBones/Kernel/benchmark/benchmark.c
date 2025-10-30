@@ -2,7 +2,7 @@
 #include "video.h"
 #include "timer.h"
 
-static const int PIXELS = 100;
+static const int PIXELS = 5000;
 uint64_t benchmark_fps() {
     //guardo el tiempo inicial
     uint64_t frames = 0;
@@ -44,24 +44,29 @@ uint64_t benchmark_floating_point() {
     return ops_per_sec; // operaciones por segundo
 }
 
-uint64_t benchmark_hardware_access(void) {
-    // Obtengo el tamanio de la pantalla 
+uint64_t benchmark_hardware_access() {
+    //tamanio de la patalla
     const uint32_t W = vdGetWidth();
     const uint32_t H = vdGetHeight();
 
-    uint64_t t0 = timer_ms_since_boot();
-    //printeo una cantidad de pixeles fija 
-    for (int i = 0; i < PIXELS; i++) {
-        uint32_t x = (uint32_t)i % W;
-        uint32_t y = (uint32_t)(i / W) % H;
-        putPixel(x, y, 0xFFFFFF, PIXEL_BACK);
+    //tiempo de inicio y contador
+    uint64_t written = 0;
+    uint64_t start = timer_ms_since_boot();
+    
+    //dutante 10ms dibujo pixeles 
+    while (timer_ms_since_boot() - start < 50) { 
+        for (int i = 0; i < PIXELS; i++) {
+            uint32_t x = (uint32_t)i % W;
+            uint32_t y = (uint32_t)(i / W) % H;
+            putPixel(x, y, 0xFFFFFF, PIXEL_BACK);
+            written++;
+        }
     }
-    //calculo cuanto tardo en imprimirlos 
-    uint64_t dt = timer_ms_since_boot() - t0;
-    if (dt == 0) dt = 1;
+    
+    uint64_t dt = timer_ms_since_boot() - start;  
+    if (dt == 0) {
+        dt = 1;
+    }
 
-    // píxeles por milisegundo → *1000 para píxeles por segundo
-    uint64_t pixels_per_sec = (PIXELS * 1000ull) / dt;
-
-    return pixels_per_sec; // píxeles/seg
+    return (written * 1000ull) / dt; 
 }
