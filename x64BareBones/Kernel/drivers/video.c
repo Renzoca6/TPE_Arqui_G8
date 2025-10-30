@@ -322,6 +322,48 @@ void vdclearScreenDB(uint32_t color) {
     x = 0; y = 0;
 }
 
+void vdPrintHex(uint64_t value, PixelTarget target) {
+    vdPrintBase(value, 16, target);
+}
+
+void vdPrintBase(uint64_t value, uint32_t base, PixelTarget target) {
+    uintToBase(value, buffer, base); // convierte el número en string
+    vdPrint(buffer, target);                 // lo imprime con ncPrint
+}
+
+
+static uint32_t uintToBase(uint64_t value, char * buffer, uint32_t base) {
+    char *p = buffer;
+    char *p1, *p2;
+    uint32_t digits = 0;
+
+    // Calcula los dígitos sucesivos en la base elegida
+    do
+    {
+        uint32_t remainder = value % base;   // resto en la base
+        *p++ = (remainder < 10) ? remainder + '0' : remainder + 'A' - 10;
+        digits++;
+    }
+    while (value /= base);
+
+    // Termina el string con '\0'
+    *p = 0;
+
+    // Invierte el string (porque se construyó al revés)
+    p1 = buffer;
+    p2 = p - 1;
+    while (p1 < p2)
+    {
+        char tmp = *p1;
+        *p1 = *p2;
+        *p2 = tmp;
+        p1++;
+        p2--;
+    }
+
+    return digits;  // devuelve cuántos dígitos tiene el número
+}
+
 
 
 
