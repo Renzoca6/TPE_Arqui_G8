@@ -37,6 +37,14 @@ static void handle_exception(const char *title)
     vdNewline();
 
     print_registers();     
+
+    vdNewline();
+    vdPrint("Press ENTER to continue...", PIXEL_VRAM);
+
+ 
+    waitForEnter();
+    vdNewline();
+
 }
 
 

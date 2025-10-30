@@ -92,6 +92,8 @@ void clearKeyBoardBuffer(void) {
 }
 
 void waitForEnter(void) {
+    clearKeyBoardBuffer();      //limpio cualquier tecla previa
+    _sti();     //_sti() es un wrapper (asm) que ejecuta la instrucción STI: pone a 1 el Interrupt Flag (IF). Eso permite que las interrupciones externas (IRQ) sean entregadas por la CPU.
     while (1) {
         if (!hasNextKey()) continue;
 
@@ -101,4 +103,5 @@ void waitForEnter(void) {
             break; // Se presionó Enter → salir
         }
     }
+    _cli();     //_cli() es el wrapper para CLI: limpia IF (IF = 0) y bloquea la entrega de interrupciones externas.
 }
