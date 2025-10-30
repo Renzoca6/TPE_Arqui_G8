@@ -25,6 +25,7 @@ uint32_t vdGetHeight(void);
 /* ===================== */
 void vdPrint(const char *str, PixelTarget target);
 void vdPrintStyled(const char *str, uint32_t fColor, uint32_t bgColor, PixelTarget target);
+void vdPrintStyled_AT(const char *str, int col, int fil, uint32_t fColor, uint32_t bgColor, PixelTarget target);
 void vdPrintChar(char c, PixelTarget target);
 void vdBackSpace(PixelTarget target);
 void vdPrintCharStyled(char c, uint32_t fColor, uint32_t bgColor, PixelTarget target);

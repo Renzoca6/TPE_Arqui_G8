@@ -12,8 +12,8 @@ typedef struct {
     uint64_t rbx;
     uint64_t rcx;
     uint64_t rdx;
+    uint64_t rsi;
     uint64_t rdi;
-
 } syscall_Registers;
 
 static void syscall_write(syscall_Registers *regs);
@@ -25,6 +25,8 @@ static void syscall_clearwindow(syscall_Registers *regs);
 static void syscall_write_at_VRAM(syscall_Registers * regs);
 static void syscall_write_at_BACK(syscall_Registers * regs);     
 static void  syscall_present_fullframe();      
+static void syscall_write_at(syscall_Registers * regs, PixelTarget target);
+static void syscall_getScreen_Info(syscall_Registers * regs); 
 
 
 int syscall_handler(syscall_Registers *regs) {
@@ -57,6 +59,9 @@ int syscall_handler(syscall_Registers *regs) {
         case 8:
             syscall_present_fullframe();    
             break; 
+        case 9:
+            syscall_getScreen_Info(regs); 
+            break;
         default:
             return 0;
     }
@@ -65,16 +70,27 @@ int syscall_handler(syscall_Registers *regs) {
 
 
 static void syscall_write_at_VRAM(syscall_Registers * regs){
-    return;
+    syscall_write_at(regs, PIXEL_VRAM);
 }
-static void syscall_write_at(syscall_Registers * regs){
-    return;
-}
+
 static void syscall_write_at_BACK(syscall_Registers * regs){
-    return;
+    syscall_write_at(regs, PIXEL_BACK);
 }
 
+static void syscall_write_at(syscall_Registers * regs, PixelTarget target){
+    const char *str   = (const char *)regs->rbx;   // texto
+    int col           = (int)regs->rcx;            // x en celdas
+    int fil           = (int)regs->rdx;            // y en celdas
+    uint32_t fColor   = (uint32_t)regs->rsi;       // color fuente
+    uint32_t bgColor  = (uint32_t)regs->rdi;       // color fondo
 
+    vdPrintStyled_AT(str, col, fil, fColor, bgColor, target);
+}
+
+static void syscall_getScreen_Info(syscall_Registers * regs){
+    regs->rbx = vdGetHeight;
+    regs->rcx = vdGetWidth;
+}
 
 static void  syscall_present_fullframe(){
     present_fullframe();

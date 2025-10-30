@@ -177,7 +177,6 @@ _exception6Handler:
 ; syscall 
 _irq06Handler:
 	push rbp
-	push rsi
 	push r8
 	push r9
 	push r10
@@ -193,9 +192,8 @@ _irq06Handler:
 	mov [registers+8], rbx
 	mov [registers+16], rcx
 	mov [registers+24], rdx
-	mov [registers+28], rdi
-
-
+	mov [registers+32], rsi
+	mov [registers+40], rdi
 
 	mov rdi, registers
 	call syscall_handler
@@ -213,7 +211,6 @@ _irq06Handler:
 	pop r10
 	pop r9
 	pop r8
-	pop rsi
 	pop rbp
 
 	iretq
@@ -231,6 +228,7 @@ SECTION .bss
 
 SECTION .data
 	registers:
+	dq 0
 	dq 0
 	dq 0
 	dq 0
