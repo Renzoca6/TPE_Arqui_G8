@@ -7,6 +7,7 @@ C_SRCS       := $(wildcard *.c) \
                 $(wildcard drivers/*.c) \
                 $(wildcard syscall/*.c) \
                 $(wildcard benchmark/*.c) \
+                $(wildcard utils/*.c) \
                 $(wildcard interrupts/*.c)
 
 ASM_SRCS     := $(wildcard asm/*.asm)
