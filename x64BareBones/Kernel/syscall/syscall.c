@@ -4,7 +4,7 @@
 #include "keyboard_handler.h"
 #include "realTimeClock.h"
 #include "benchmark.h"
-
+#include "registers.h"
 extern void enable_interrupts(void);
 
 typedef struct {
@@ -27,6 +27,7 @@ static void syscall_write_at_BACK(syscall_Registers * regs);
 static void  syscall_present_fullframe();      
 static void syscall_write_at(syscall_Registers * regs, PixelTarget target);
 static void syscall_getScreen_Info(syscall_Registers * regs); 
+static void syscall_print_registers(syscall_Registers * regs);
 
 
 int syscall_handler(syscall_Registers *regs) {
@@ -61,6 +62,9 @@ int syscall_handler(syscall_Registers *regs) {
             break; 
         case 9:
             syscall_getScreen_Info(regs); 
+            break;
+        case 10:
+            syscall_print_registers(regs);
             break;
         default:
             return 0;
@@ -190,4 +194,9 @@ static void syscall_read(syscall_Registers *regs) {
     }
 
     //falta funcion para apagar las interrupts
+}
+
+static void syscall_print_registers(syscall_Registers * regs){
+    regs_save(regs);
+    print_registers();
 }

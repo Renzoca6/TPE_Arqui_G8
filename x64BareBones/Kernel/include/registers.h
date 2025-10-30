@@ -23,6 +23,15 @@ typedef enum {
     REG_R13,
     REG_R14,
     REG_R15,
+    REG_RSP,
+    REG_RIP,
+    REG_CS,
+    REG_RFLAGS,
+    REG_DS,
+    REG_ES,
+    REG_FS,
+    REG_GS,
+    REG_SS,
     REG_COUNT
 } reg_index_t;
 

@@ -1,5 +1,6 @@
 {
     "files.associations": {
+        "*.asm": "wat",
         "stdint.h": "c",
         "io.h": "c",
         "realtimeclock.h": "c",
@@ -19,6 +20,7 @@
         "time.h": "c",
         "timer.h": "c",
         "type_traits": "c",
-        "help.h": "c"
+        "help.h": "c",
+        "registers.h": "c"
     }
 }

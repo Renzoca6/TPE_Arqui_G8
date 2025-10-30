@@ -67,6 +67,10 @@ void get_date(){
     sys_date_time (1);
 }
 
+void printRegisters(){
+    sys_print_registers();
+}
+
 
 
 uint64_t  do_benchmark_fps(){

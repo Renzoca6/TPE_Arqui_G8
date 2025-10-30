@@ -24,6 +24,7 @@ const command_t COMMANDS[] = {
     { "date",  1 },
     { "echo",  2 },
     { "help",  3 },
+    { "registers", 9},
     { "resize",4 },   
     { "testop", 5},
     { "testzero", 6},
@@ -43,6 +44,7 @@ void commands_Handler(int func, int argc, char *argv[]) {
         case 6: testZeroDivision();            break;
         case 7: time();                        break;   
         case 8: benchmark();                    break; 
+        case 9: registers();               break;
         default:                               break;
     }
 }
@@ -99,4 +101,8 @@ void testZeroDivision() {
 
 void testInvalidOpcode() {
     throw_invalid_opcode();
+}
+
+void registers(){
+    printRegisters();
 }

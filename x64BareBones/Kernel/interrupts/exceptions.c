@@ -32,6 +32,7 @@ void exceptionDispatcher(int exception_id)
 
 static void handle_exception(const char *title)
 {
+    vdNewline();
     vdPrint("Exception: ", PIXEL_VRAM);
     vdPrint(title, PIXEL_VRAM);
     vdNewline();
@@ -41,10 +42,9 @@ static void handle_exception(const char *title)
     vdNewline();
     vdPrint("Press ENTER to continue...", PIXEL_VRAM);
 
- 
     waitForEnter();
     vdNewline();
-
+    vdNewline();
 }
 
 

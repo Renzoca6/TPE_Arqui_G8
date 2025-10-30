@@ -9,6 +9,7 @@ GLOBAL sys_write_at_vram
 GLOBAL sys_write_at_back
 GLOBAL sys_get_screen_info
 GLOBAL sys_present_fullframe
+GLOBAL sys_print_registers
 
 sys_read:
     push rbp
@@ -166,6 +167,16 @@ sys_present_fullframe:
     mov  rbp, rsp
 
     mov  rax, 9      ; ID = 9 -> present_fullframe
+    int  80h
+
+    leave
+    ret
+
+sys_print_registers:
+    push rbp
+    mov  rbp, rsp
+
+    mov  rax, 10      ; ID = 10 -> registers
     int  80h
 
     leave

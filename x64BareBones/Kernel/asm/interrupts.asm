@@ -98,6 +98,40 @@ mov [rel exc_regs + 12*8], r13
 mov [rel exc_regs + 13*8], r14
 mov [rel exc_regs + 14*8], r15
 
+mov rax, rsp
+mov [rel exc_regs + 15*8], rax    ; REG_RSP
+
+	
+mov rax, [rsp + 15*8]
+mov [rel exc_regs + 16*8], rax    ; REG_RIP
+
+mov rax, [rsp + 16*8]
+mov [rel exc_regs + 17*8], rax    ; REG_CS
+
+mov rax, [rsp + 17*8]
+mov [rel exc_regs + 18*8], rax    ; REG_RFLAGS
+
+; Save segment selectors (DS, ES, FS, GS, SS) into low 16 bits.
+xor rax, rax
+mov ax, ds
+mov [rel exc_regs + 19*8], rax    ; REG_DS
+
+xor rax, rax
+mov ax, es
+mov [rel exc_regs + 20*8], rax    ; REG_ES
+
+xor rax, rax
+mov ax, fs
+mov [rel exc_regs + 21*8], rax    ; REG_FS
+
+xor rax, rax
+mov ax, gs
+mov [rel exc_regs + 22*8], rax    ; REG_GS
+
+xor rax, rax
+mov ax, ss
+mov [rel exc_regs + 23*8], rax    ; REG_SS
+
 lea rdi, [rel exc_regs]
 call regs_save
 %endmacro
@@ -235,6 +269,9 @@ SECTION .data
 	dq 0
 	dq 0
 ; buffer temporal para snapshot de excepciones (15 regs x 8 bytes)
+
+; buffer temporal para snapshot de excepciones (REG_COUNT regs x 8 bytes)
+; Ajustado a 24 entradas: RAX..R15, RSP, RIP, CS, RFLAGS, DS, ES, FS, GS, SS
 exc_regs:
-	dq 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
+	dq 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
 	
