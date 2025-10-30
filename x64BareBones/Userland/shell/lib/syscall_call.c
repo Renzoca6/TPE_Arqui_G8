@@ -6,6 +6,8 @@ extern int sys_read (char *buf);
 extern void sys_clearwindow(uint32_t* color);
 extern int sys_date_time (int tpye);
 extern uint64_t  sys_benchmark (int type);
+extern uint64_t sys_write_at_vram(const char *str, int col, int fil, uint32_t fColor, uint32_t bgColor);
+extern uint64_t sys_write_at_back(const char *str, int col, int fil, uint32_t fColor, uint32_t bgColor);
 
 
 #define STDIN   0
@@ -19,6 +21,26 @@ int println(const char* buf){
     sys_write(STDOUT, buf);
     write("\n");
     return 1;
+}
+
+//   uint64_t width, height;
+//get_screen_info(&height, &width);
+
+void get_screen_info(uint64_t *height, uint64_t *width) {
+    sys_get_screen_info(height, width);
+}
+
+void present_fullframe(void) {
+    sys_present_fullframe();
+}
+
+
+void write_at_back(const char *str, int col, int fil, uint32_t fColor, uint32_t bgColor){
+    sys_write_at_back(str,col,fil,fColor,bgColor);
+}
+
+void write_at_vram(const char *str, int col, int fil, uint32_t fColor, uint32_t bgColor){
+    sys_write_at_vram(str,col,fil,fColor,bgColor);
 }
 
 int printError(const char* buf){
@@ -44,6 +66,7 @@ void get_time(){
 void get_date(){
     sys_date_time (1);
 }
+
 
 
 uint64_t  do_benchmark_fps(){

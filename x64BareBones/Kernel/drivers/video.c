@@ -135,8 +135,25 @@ void vdPrintStyled(const char * str, uint32_t fColor, uint32_t bgColor, PixelTar
 }
 
 
-void vdPrintStyled_AT(const char * str, uint32_t fColor, uint32_t bgColor, PixelTarget target) {
+void vdPrintStyled_AT(const char *str, int col, int fil, uint32_t fColor, uint32_t bgColor, PixelTarget target){
+    if (!str) return;
 
+    // guardar
+    unsigned int old_x = x;
+    unsigned int old_y = y;
+
+    // setear
+    if (col < 0) col = 0;
+    if (fil < 0) fil = 0;
+    x = (unsigned int)(col * CELL_W);
+    y = (unsigned int)(fil * CELL_H);
+
+    // imprimir
+    vdPrintStyled(str, fColor, bgColor, target);
+
+    // restaurar
+    x = old_x;
+    y = old_y;
 }
 
 
