@@ -15,200 +15,57 @@ global sys_putPixel
 global sys_get_ms_since_boot
 global sys_sleep_ms
 
-sys_read:
-    push rbp
-    mov  rbp, rsp
 
-    push rbx
-
-    mov  rax, 0          ; id read
-    mov  rbx, rdi        ; BUF -> RBX
-    int  80h             
-    
-    pop  rbx
-    
-    leave
-    ret
-
-sys_write:
-    push rbp
-    mov  rbp, rsp
-    
-    push rbx
-    push rcx
-    
-    mov  rax, 1          ; id write(1)
-    mov  rbx, rdi        ; fd (STDOUT)
-    mov  rcx, rsi        ; buffer
-    int  80h
-    
-    pop  rcx
-    pop  rbx
-    
-    leave
-    ret    
-
-sys_clearwindow:
-    push rbp
-    mov  rbp, rsp
-
-    push rbx
-
-    mov  rax, 2          ; id read
-    mov  rbx, rdi        ; color -> RBX
-    int  80h             
-    
-    pop  rbx
-    
-    leave
-    ret
-
-sys_date_time:
-    push rbp
-    mov  rbp, rsp
-
-    push rbx
-
-    mov  rax, 3          ; id time
-    mov  rbx, rdi        ; time 0 date 1 -> RBX
-    int  80h             
-    
-    pop  rbx
-    
-    leave
-    ret
-
-sys_resize:
-    push rbp
-    mov  rbp, rsp
-
-    push rbx
-
-    mov  rax, 4          ; id resize
-    mov  rbx, rdi        ; N_Times -> RBX
-    int  80h             
-    
-    pop  rbx
-    
-    leave
-    ret
-
-sys_benchmark:
-    push rbp
-    mov  rbp, rsp
-    push rbx
-
-    mov  rax, 5        ; syscall ID = 5
-    mov  rbx, rdi      ; which: 0=fps, 1=floating, 2=vram
-    int  80h
-
-    ; Al volver del int 80h:
-    ; RAX ya trae el resultado uint64_t del kernel.
-    ; No hay que tocar xmm0 ni nada.
-
-    pop  rbx
-    leave
-    ret
-    
-sys_write_at_vram:
-    push rbp
-    mov  rbp, rsp
-
-    push rbx
-    push r9           ; vamos a usar r9 como temporal
-
-    mov  rax, 6       ; syscall id
-    mov  r9, rcx          ; r9 = fColor
-    mov  rbx, rdi         ; regs->rbx = str
-    mov  rcx, rsi         ; regs->rcx = col
-    mov  rsi, r9          ; regs->rsi = fColor
-    mov  rdi, r8          ; regs->rdi = bgColor
-
-    int  80h
-
-    pop  r9
-    pop  rbx
-    leave
-    ret
-sys_write_at_back:
-    push rbp
-    mov  rbp, rsp
-
-    push rbx
-    push r9           ; vamos a usar r9 como temporal
-
-    mov  rax, 7       ; syscall id
-    mov  r9, rcx          ; r9 = fColor
-    mov  rbx, rdi         ; regs->rbx = str
-    mov  rcx, rsi         ; regs->rcx = col
-    mov  rsi, r9          ; regs->rsi = fColor
-    mov  rdi, r8          ; regs->rdi = bgColor
-
-    int  80h
-
-    pop  r9
-    pop  rbx
-    leave
-    ret
-    ret
-sys_get_screen_info:
-    push rbp
-    mov  rbp, rsp
-    push rbx
-
-    mov  rax, 9       ; syscall id
-    mov  rbx, rdi     ; which: 0=height, 1=width
-    int  80h
-
-    ; al volver, RAX YA TIENE el valor
-    pop  rbx
-    leave
-    ret
-
-sys_present_fullframe:
-    push rbp
-    mov  rbp, rsp
-
-    mov  rax, 8     ; ID = 8 -> present_fullframe
-    int  80h
-
-    leave
-    ret
-
-sys_print_registers:
-    push rbp
-    mov  rbp, rsp
-
-    mov  rax, 10      ; ID = 10 -> registers
-    int  80h
-
-    leave
-    ret
-
-sys_getchar:
+; Generic syscall stub
+; Userland ABI (SysV):
+;   arg0=rdi, arg1=rsi, arg2=rdx, arg3=rcx, arg4=r8, arg5=r9
+; Kernel expects args snapshot in registers as:
+;   arg0=rbx, arg1=rcx, arg2=rdx, arg3=rsi, arg4=rdi
+; We must reshuffle registers before triggering int 0x80 and
+; preserve callee-saved rbx for the C caller.
+%macro SYSCALL 1
     push rbp
     mov rbp, rsp
 
-    mov rax, 11          ; ID de la syscall getchar
-    int 80h             ; entra al kernel
-    ; el kernel deja el char en RAX
-    leave
+    ; Preserve callee-saved used below
+    push rbx
+
+    ; Save arg3 (in RCX) temporarily
+    mov r10, rcx
+
+    ; Re-map arguments to what the kernel expects
+    mov rbx, rdi     ; arg0 -> RBX
+    mov rcx, rsi     ; arg1 -> RCX
+    ; RDX already holds arg2
+    mov rsi, r10     ; arg3 -> RSI
+    mov rdi, r8      ; arg4 -> RDI
+
+    ; Syscall number
+    mov rax, %1
+    int 0x80
+
+    ; Restore callee-saved register
+    pop rbx
+
+    mov rsp, rbp
+    pop rbp
     ret
+%endmacro
 
-sys_putPixel:
-    push rbp
-    mov  rbp, rsp
+sys_read:               SYSCALL 0
+sys_write:              SYSCALL 1
+sys_clearwindow:        SYSCALL 2
+sys_date_time:          SYSCALL 3
+sys_resize:             SYSCALL 4
+sys_benchmark:          SYSCALL 5
+sys_write_at_vram:      SYSCALL 6
+sys_write_at_back:      SYSCALL 7
+sys_present_fullframe:  SYSCALL 8
+sys_get_screen_info:    SYSCALL 9
+sys_print_registers:    SYSCALL 10 
+sys_getchar:            SYSCALL 11
+sys_putPixel:           SYSCALL 12
 
-    mov  rax, 12          ; ID syscall
-    mov  r8,  rcx         ; r8 = target (4to parámetro original)
-    mov  rbx, rdi         ; color
-    mov  rcx, rsi         ; x
-    mov  rsi, r8          ; rsi = target (lo que vino como 4to arg)
-
-    int  80h
-
-    leave
-    ret
 
 sys_get_ms_since_boot:
     push rbp

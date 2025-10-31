@@ -3,9 +3,36 @@
 #include <stdbool.h>
 #include "io.h"
 #include <string.h>
+#include "registers.h"  // For REG_COUNT
 
 extern void _sti();
 extern void _cli();
+
+// === Guardado de registros (snapshot con Shift+Tab) ===
+static char regsSaved = 0;
+static uint64_t savedRegisters[REG_COUNT]; 
+static uint64_t * lastRegsState = NULL;
+
+void updateRegs(uint64_t * registers){
+    for(int i = 0; i < REG_COUNT; i++){
+        savedRegisters[i] = registers[i];
+    }
+    lastRegsState = savedRegisters; 
+}
+
+char areRegsSaved(){
+    return regsSaved;
+}
+
+uint64_t* getSavedRegs(){
+    return lastRegsState;
+}
+
+void clearRegsSaved(){
+    regsSaved = 0;
+    // No resetear lastRegsState - mantener el snapshot disponible
+}
+// === Fin guardado de registros ===
 
 
 static char scancode_to_ascii[128] = {
@@ -30,6 +57,7 @@ static int nextkey = 0;
 static int count = 0;  //dim
 
 static bool capsLock = false;
+static bool shiftPressed = false;  // Track shift state
 
 static inline bool bufferFull(void) {
     return count == BUFFER_MAXLENGTH;
@@ -48,12 +76,34 @@ static void pushEvent(KeyBufferStruct ev) {
     count++;
 }
 
-void addKeyToBuffer(uint8_t scancode) {
+void addKeyToBuffer(uint8_t scancode, uint64_t * registers) {
+    // Manejar shift (press y release)
+    if (scancode == 0x2A || scancode == 0x36) {  // Left/Right Shift press
+        shiftPressed = true;
+        return;
+    }
+    if (scancode == 0xAA || scancode == 0xB6) {  // Left/Right Shift release
+        shiftPressed = false;
+        return;
+    }
+    
+    // CapsLock toggle
     if (scancode == 0x3A) { 
         capsLock = !capsLock;
         return; 
     }
 
+    // Shift+Tab: Guardar snapshot de registros
+    if (scancode == 0x0F) {  // Tab
+        if (shiftPressed && registers != NULL) {
+            regsSaved = 1;
+            updateRegs(registers);
+            return;
+        }
+        // Si no hay shift, procesar tab normalmente (continúa abajo)
+    }
+
+    // Ignorar release events
     if (scancode & 0x80) {
         return;
     }
@@ -72,9 +122,9 @@ void addKeyToBuffer(uint8_t scancode) {
     pushEvent(ev);
 }
 
-void keyboardPressed(void) {
+void keyboardPressed(uint64_t * registers) {
     uint8_t sc = inb(0x60);
-    addKeyToBuffer(sc);
+    addKeyToBuffer(sc, registers);
 }
 
 bool hasNextKey(void) {
@@ -108,3 +158,4 @@ void waitForEnter(void) {
     }
     _cli();     //_cli() es el wrapper para CLI: limpia IF (IF = 0) y bloquea la entrega de interrupciones externas.
 }
+

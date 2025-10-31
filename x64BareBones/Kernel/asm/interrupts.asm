@@ -17,13 +17,10 @@ GLOBAL _irq06Handler
 GLOBAL _exception0Handler
 GLOBAL _exception6Handler
 
-;GLOBAL _exception0Handler
 
 EXTERN syscall_handler
 EXTERN irqDispatcher
-;EXTERN exceptionDispatcher
-extern regs_save
-extern exceptionDispatcher
+EXTERN exceptionDispatcher
 
 
 SECTION .text
@@ -70,6 +67,7 @@ SECTION .text
 	pushState
 
 	mov rdi, %1 ; pasaje de parametro
+	mov rsi, rsp ; pasaje de puntero a registros en el stack (use LEA to get address)
 	call irqDispatcher
 
 	; signal pic EOI (End of Interrupt)
@@ -81,60 +79,6 @@ SECTION .text
 %endmacro
 
 
-%macro SaveRegisters 0
-mov [rel exc_regs], rax
-mov [rel exc_regs + 8], rbx
-mov [rel exc_regs + 2*8], rcx
-mov [rel exc_regs + 3*8], rdx
-mov [rel exc_regs + 4*8], rbp
-mov [rel exc_regs + 5*8], rdi
-mov [rel exc_regs + 6*8], rsi
-mov [rel exc_regs + 7*8], r8
-mov [rel exc_regs + 8*8], r9
-mov [rel exc_regs + 9*8], r10
-mov [rel exc_regs + 10*8], r11
-mov [rel exc_regs + 11*8], r12
-mov [rel exc_regs + 12*8], r13
-mov [rel exc_regs + 13*8], r14
-mov [rel exc_regs + 14*8], r15
-
-mov rax, rsp
-mov [rel exc_regs + 15*8], rax    ; REG_RSP
-
-	
-mov rax, [rsp + 15*8]
-mov [rel exc_regs + 16*8], rax    ; REG_RIP
-
-mov rax, [rsp + 16*8]
-mov [rel exc_regs + 17*8], rax    ; REG_CS
-
-mov rax, [rsp + 17*8]
-mov [rel exc_regs + 18*8], rax    ; REG_RFLAGS
-
-; Save segment selectors (DS, ES, FS, GS, SS) into low 16 bits.
-xor rax, rax
-mov ax, ds
-mov [rel exc_regs + 19*8], rax    ; REG_DS
-
-xor rax, rax
-mov ax, es
-mov [rel exc_regs + 20*8], rax    ; REG_ES
-
-xor rax, rax
-mov ax, fs
-mov [rel exc_regs + 21*8], rax    ; REG_FS
-
-xor rax, rax
-mov ax, gs
-mov [rel exc_regs + 22*8], rax    ; REG_GS
-
-xor rax, rax
-mov ax, ss
-mov [rel exc_regs + 23*8], rax    ; REG_SS
-
-lea rdi, [rel exc_regs]
-call regs_save
-%endmacro
 
 ; exceptionHandler macro
 ; args:
@@ -142,15 +86,12 @@ call regs_save
 ;   2 = skip bytes (number of bytes to advance saved RIP so faulting
 ;       instruction is not re-executed). Optional, default 0.
 
-%macro exceptionHandler 2
+%macro exceptionHandler 1
 	pushState
 
-	; advance saved RIP by %2 bytes; saved RIP is at [rsp + 15*8]
-	add qword [rsp + 15*8], %2
-
-	SaveRegisters
-
-	mov rdi, %1
+	mov rdi, %1           ; primer argumento: exception ID
+	mov rsi, rsp          ; segundo argumento: puntero al stack (frame de registros)
+	
 	call exceptionDispatcher
 
 	popState
@@ -199,54 +140,23 @@ _irq05Handler:
 
 ;Zero Division Exception
 _exception0Handler:
-	; Divide Error (DIV by zero) — skip 3 bytes (48 F7 F0) and dispatch
-	exceptionHandler 0, 3
+	exceptionHandler 0
 
-;OP Exception
+;OP Exception (Invalid Opcode)
 _exception6Handler:
-	; Invalid Opcode (UD2) — skip 2 bytes and dispatch
-	exceptionHandler 6, 2
+	exceptionHandler 6
+
 
 
 ; syscall 
 _irq06Handler:
-    push rbp
-    push r8
-    push r9
-    push r10
-    push r11
-    push r12
-    push r13
-    push r14
-    push r15
-    sti
+    pushState  ;preservo los registros
+   
+    mov rdi, [rsp + 14*8]   ; numero de syscall(recibido por userland)
+    mov rsi, rsp         ; 2nd arg: puntero a registros 
+    call syscall_handler
 
-    ; guardar registros en la struct
-    mov [registers], rax        ; rax (el que vino de userland, el nro de syscall)
-    mov [registers+8], rbx
-    mov [registers+16], rcx
-    mov [registers+24], rdx
-    mov [registers+32], rsi
-    mov [registers+40], rdi
-
-    mov rdi, registers
-    call syscall_handler        ; acá el C te pone registers->rax = resultado
-
-    ; recuperar RAX que dejó el kernel en la struct
-    mov rax, [registers]        ; ❷ ahora sí: rax = registers->rax (el resultado de la syscall)
-
-    ; signal pic EOI si corresponde
-    ; ...
-
-    pop r15
-    pop r14
-    pop r13
-    pop r12
-    pop r11
-    pop r10
-    pop r9
-    pop r8
-    pop rbp
+    popState  ;les hago pop
     iretq
 	 
 haltcpu:
@@ -267,11 +177,3 @@ SECTION .data
 	dq 0
 	dq 0
 	dq 0
-	
-; buffer temporal para snapshot de excepciones (15 regs x 8 bytes)
-
-; buffer temporal para snapshot de excepciones (REG_COUNT regs x 8 bytes)
-; Ajustado a 24 entradas: RAX..R15, RSP, RIP, CS, RFLAGS, DS, ES, FS, GS, SS
-exc_regs:
-	dq 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
-	

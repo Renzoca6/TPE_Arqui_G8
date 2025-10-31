@@ -16,7 +16,7 @@ extern uint8_t endOfKernel;
 
 static const uint64_t PageSize = 0x1000;
 
-static void * const shellAddress = (void*)0x400000;
+void * const shellAddress = (void*)0x400000;  // Eliminado 'static' para hacerlo visible globalmente
 
 
 typedef int (*EntryPoint)();

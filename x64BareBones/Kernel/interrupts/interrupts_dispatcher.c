@@ -9,15 +9,15 @@
 
 
 static void int_20();
-static void int_21();
+static void int_21(uint64_t * registers);
 
-void irqDispatcher(uint64_t irq) {
+void irqDispatcher(uint64_t irq, uint64_t * registers) {
 	switch (irq) {
 		case 0:
 			int_20();
 			break;
 		case 1:
-			int_21();
+			int_21(registers);
 			break;
 	}
 	return;
@@ -28,8 +28,8 @@ void int_20() {
     pic_send_eoi(0); 
 }
 
-void int_21() {
-	keyboardPressed();
+void int_21(uint64_t * registers) {
+	keyboardPressed(registers);
 	pic_send_eoi(0); 
 }
 

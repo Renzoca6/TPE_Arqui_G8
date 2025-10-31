@@ -9,6 +9,6 @@ typedef enum {
     EXC_INVALID_OPCODE = 0x06
 } exception_id_t;
 
-void exceptionDispatcher(int exception_id);
+void exceptionDispatcher(int exception_id, uint64_t * registers);
 
 #endif
