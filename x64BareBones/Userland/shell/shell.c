@@ -14,10 +14,10 @@ int main() {
 
     // 2) dibujamos la grilla que dejó el init
     // color gris oscuro, target = 0 (cambiá si tu enum es otro)
-    map_draw_grid_lines(&game, 1);
+    map_draw_grid_lines(&game, 0);
 
     for (int i = 0; i < 10; i++){
-        map_draw_cell(&game, i, 0, 0x0FF000, 1);
+        map_draw_cell(&game, i, 0, 0x0FF000, 0);
     }
 
     //present_fullframe();

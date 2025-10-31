@@ -14,9 +14,14 @@ extern void sys_putPixel(uint32_t color, uint32_t x, uint32_t y, uint32_t target
 extern char sys_getchar();
 extern char sys_print_registers();
 extern void touch_regs();
+extern uint64_t sys_get_ms_since_boot();
 
 #define STDIN   0
 #define STDOUT  1
+
+uint64_t get_ms_since_boot(void) {
+    return sys_get_ms_since_boot();
+}
 
 // target: 0 = PIXEL_VRAM, 1 = PIXEL_BACK
 void putPixel(uint32_t color, uint32_t x, uint32_t y, int target) {

@@ -12,6 +12,7 @@ GLOBAL sys_present_fullframe
 GLOBAL sys_print_registers
 global sys_getchar
 global sys_putPixel
+global sys_get_ms_since_boot
 
 sys_read:
     push rbp
@@ -207,4 +208,12 @@ sys_putPixel:
 
     leave
     ret
+sys_get_ms_since_boot:
+    push rbp
+    mov  rbp, rsp
 
+    mov  rax, 13       ; nuevo ID
+    int  80h
+
+    leave
+    ret

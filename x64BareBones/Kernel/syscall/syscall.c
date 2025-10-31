@@ -30,6 +30,7 @@ static void syscall_getScreen_Info(syscall_Registers * regs);
 static void syscall_print_registers(syscall_Registers * regs);
 static void syscall_getchar(syscall_Registers *regs);
 static void syscall_putPixel(syscall_Registers *  regs);
+static void syscall_get_ms_since_boot(syscall_Registers *regs);
 
 
 int syscall_handler(syscall_Registers *regs) {
@@ -74,10 +75,18 @@ int syscall_handler(syscall_Registers *regs) {
         case 12:
             syscall_putPixel(regs);
             break;    
+        case 13:
+            syscall_get_ms_since_boot(regs);
+            break;    
         default:
             return 0;
     }
     return 0;
+}
+
+
+static void syscall_get_ms_since_boot(syscall_Registers *regs){
+    regs->rax = timer_ms_since_boot();
 }
 
 static void syscall_putPixel(syscall_Registers *  regs){
