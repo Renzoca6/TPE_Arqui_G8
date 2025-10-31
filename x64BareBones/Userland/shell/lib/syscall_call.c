@@ -13,13 +13,9 @@ extern int sys_get_screen_info(int aux);
 extern void sys_putPixel(uint32_t color, uint32_t x, uint32_t y, uint32_t target);
 extern char sys_getchar();
 extern char sys_print_registers();
-<<<<<<< HEAD
 extern void touch_regs();
 extern void sys_sleep_ms(uint64_t ms);
 extern uint64_t sys_get_ms_since_boot();
-=======
-
->>>>>>> origin/change-registers-logic
 
 #define STDIN   0
 #define STDOUT  1

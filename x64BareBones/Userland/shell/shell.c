@@ -7,6 +7,8 @@
 
 int main() {
     char buf[256];
+    sleep_ms(1);
+    write("adada");
     while (1){
         write("- ");
         read(buf);

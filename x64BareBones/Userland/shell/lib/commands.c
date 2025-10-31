@@ -27,7 +27,7 @@ extern void touch_regs();
 //IMPORTANTE DEBE SER EN ORDEN ALFABETICO
 const command_t COMMANDS[] = {
     {"a", 10},
-    {"b", 11},
+    {"ba", 11},
     { "benchmark",  8 },
     { "clear", 0 },
     { "date",  1 },

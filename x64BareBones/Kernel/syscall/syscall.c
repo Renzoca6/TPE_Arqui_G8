@@ -5,10 +5,11 @@
 #include "realTimeClock.h"
 #include "benchmark.h"
 #include "registers.h"
+#include "timer.h"
 
 extern void enable_interrupts(void);
 
-#define MAX_SYSCALLS 13
+#define MAX_SYSCALLS 15
 
 // Forward declarations de handlers
 static void syscall_read(uint64_t *registers);
@@ -24,6 +25,9 @@ static void syscall_getScreen_Info(uint64_t *registers);
 static void syscall_print_registers(uint64_t *registers);
 static void syscall_getchar(uint64_t *registers);
 static void syscall_putPixel(uint64_t *registers);
+static void syscall_get_ms_since_boot(uint64_t *registers);
+static void syscall_sleep_ms(uint64_t *registers);
+
 
 // Tipo para punteros a funciones handler
 typedef void (*SysCallHandler)(uint64_t *);
@@ -42,7 +46,9 @@ static SysCallHandler sysCallHandlers[MAX_SYSCALLS] = {
     syscall_getScreen_Info,    // 9: SYS_GET_SCREEN_INFO
     syscall_print_registers,   // 10: SYS_PRINT_REGISTERS
     syscall_getchar,           // 11: SYS_GETCHAR
-    syscall_putPixel           // 12: SYS_PUT_PIXEL
+    syscall_putPixel,           // 12: SYS_PUT_PIXEL
+    syscall_get_ms_since_boot, // 13: syscall_get_ms_since_boot
+    syscall_sleep_ms,          // 14: syscall_sleep_ms
 };
 
 // Dispatcher principal - recibe puntero al stack frame con registros
@@ -63,8 +69,7 @@ void syscall_handler (uint64_t rax, uint64_t *registers) {
     // registers[12] = rcx
     // registers[13] = rbx
     // registers[14] = rax
-    
-    
+
     if (rax < MAX_SYSCALLS) {
         sysCallHandlers[rax](registers);
     } else {
@@ -88,11 +93,26 @@ static void syscall_write_at(uint64_t *registers, PixelTarget target) {
     vdPrintStyled_AT(str, col, fil, fColor, bgColor, target);
 }
 
-static void syscall_putPixel(uint64_t *registers) {
-    // En userland: 0 = PIXEL_VRAM, 1 = PIXEL_BACK
-    PixelTarget target = (registers[8] == 0) ? PIXEL_VRAM : PIXEL_BACK;   // RSI
-    putPixel(registers[13], registers[12], registers[11], target);   // RBX, RCX, RDX
+
+static void syscall_sleep_ms(uint64_t *registers){
+    sleep_ms(10); 
 }
+
+static void syscall_get_ms_since_boot(uint64_t *registers){
+    registers[14] = timer_ms_since_boot();
+}
+
+
+static void syscall_putPixel(uint64_t *  registers){
+    PixelTarget target;
+    if (registers[8] == 0){
+        target = PIXEL_VRAM;
+    }else{ target = PIXEL_BACK;}
+    
+    putPixel(registers[13], registers[12], registers[11] ,target);
+
+}
+
 
 static void syscall_write_at_VRAM(uint64_t *registers) {
     syscall_write_at(registers, PIXEL_VRAM);

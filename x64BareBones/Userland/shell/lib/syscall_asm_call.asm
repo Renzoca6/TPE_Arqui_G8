@@ -65,25 +65,8 @@ sys_get_screen_info:    SYSCALL 9
 sys_print_registers:    SYSCALL 10 
 sys_getchar:            SYSCALL 11
 sys_putPixel:           SYSCALL 12
+sys_get_ms_since_boot:  SYSCALL 13
+sys_sleep_ms:           SYSCALL 14
 
 
-sys_get_ms_since_boot:
-    push rbp
-    mov  rbp, rsp
-
-    mov  rax, 13       ; nuevo ID
-    int  80h
-
-    leave
-    ret
-sys_sleep_ms:
-    push rbp
-    mov  rbp, rsp
-
-    mov  rax, 14       ; nuevo ID
-    mov rbx, rdi        ;tiempo en ms
-    int  80h
-
-    leave
-    ret
 

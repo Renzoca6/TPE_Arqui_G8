@@ -50,7 +50,6 @@ uint64_t timer_ms_since_boot(void) {
 // un sleep 
 void sleep_ms(uint64_t ms) {
     if (g_tick_hz == 0) return;
-
     uint64_t start = g_ticks;
     uint64_t ticks_to_wait = (ms * g_tick_hz) / 1000;
     while ((g_ticks - start) < ticks_to_wait) {
