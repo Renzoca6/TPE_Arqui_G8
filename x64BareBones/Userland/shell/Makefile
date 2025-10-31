@@ -10,18 +10,21 @@ OBJECTS_C   := $(SOURCES_C:.c=.o)
 OBJECTS_ASM := $(SOURCES_ASM:.asm=.o)
 OBJECTS     := $(OBJECTS_C) $(OBJECTS_ASM)
 
+# directorios de includes
+INCLUDES := -I./lib -I./commands -I./tron2/include
+
 all: $(MODULE)
 
 $(MODULE): $(OBJECTS)
-	$(GCC) $(GCCFLAGS) -T shell.ld ./_loader.c $(OBJECTS) -I./lib -I./commands -o ../$(MODULE) 
+	$(GCC) $(GCCFLAGS) -T shell.ld ./_loader.c $(OBJECTS) $(INCLUDES) -o ../$(MODULE)
 
 %.o: %.c
-	$(GCC) $(GCCFLAGS) -I./lib -I./commands -c $< -o $@
+	$(GCC) $(GCCFLAGS) $(INCLUDES) -c $< -o $@
 
 %.o: %.asm
 	nasm -f elf64 $< -o $@
 
 clean:
-	rm -rf *.o
+	rm -rf *.o */*.o
 
 .PHONY: all clean print

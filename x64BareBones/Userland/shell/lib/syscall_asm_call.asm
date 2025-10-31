@@ -13,6 +13,7 @@ GLOBAL sys_print_registers
 global sys_getchar
 global sys_putPixel
 global sys_get_ms_since_boot
+global sys_sleep_ms
 
 sys_read:
     push rbp
@@ -196,18 +197,19 @@ sys_getchar:
 
 sys_putPixel:
     push rbp
-    mov rbp, rsp
+    mov  rbp, rsp
 
-    mov rax, 12         ;ID sycall
-    mov rbx, rdi        ;color
-    mov rcx, rsi        ;X
-    mov rdx, rdx        ;y
-    mov rsi, rcx        ;target
+    mov  rax, 12          ; ID syscall
+    mov  r8,  rcx         ; r8 = target (4to parámetro original)
+    mov  rbx, rdi         ; color
+    mov  rcx, rsi         ; x
+    mov  rsi, r8          ; rsi = target (lo que vino como 4to arg)
 
     int  80h
 
     leave
     ret
+
 sys_get_ms_since_boot:
     push rbp
     mov  rbp, rsp
@@ -217,3 +219,14 @@ sys_get_ms_since_boot:
 
     leave
     ret
+sys_sleep_ms:
+    push rbp
+    mov  rbp, rsp
+
+    mov  rax, 14       ; nuevo ID
+    mov rbx, rdi        ;tiempo en ms
+    int  80h
+
+    leave
+    ret
+

@@ -9,11 +9,11 @@
 #define TRON_MARGIN_RIGHT     128
 #define TRON_MARGIN_BOTTOM    64
 #define TRON_GRID_COLOR_LINE  0x303030 //0x303030
-#define TRON_GRID_COLOR_BG    0x3A7BD5
+#define TRON_GRID_COLOR_BG    0x000000
 #define TRON_P1_COLOR         0x00FF00
 #define TRON_P2_COLOR         0x00AAFF
 #define TRON_BG_COLOR         0x000000
-#define TRON_TICK_MS          40       // ~25 FPS lógicos
+#define TRON_TICK_MS          80
 
 // teclas (ajustá a tu keycode)
 #define KEY_W 'w'

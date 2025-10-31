@@ -25,7 +25,7 @@ void  map_init(TronGame *G){
     G->grid.cols = usable_w / TRON_CELL_PX;
     G->grid.rows = usable_h / TRON_CELL_PX;
 
-    // 5) occ estática
+    // 5) occ estática 
     static uint8_t occ_buffer[128 * 128];
     G->occ = occ_buffer;
 
@@ -86,6 +86,7 @@ void  map_draw_cell(const TronGame *G, uint16_t col, uint16_t row, uint32_t colo
             putPixel(color, x, y, target);
         }
     }
+    
 }
 
 void cell_to_pixel(const Grid *g, uint16_t col, uint16_t row, uint32_t *px, uint32_t *py) {

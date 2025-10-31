@@ -31,6 +31,7 @@ static void syscall_print_registers(syscall_Registers * regs);
 static void syscall_getchar(syscall_Registers *regs);
 static void syscall_putPixel(syscall_Registers *  regs);
 static void syscall_get_ms_since_boot(syscall_Registers *regs);
+static void syscall_sleep_ms(syscall_Registers *regs);
 
 
 int syscall_handler(syscall_Registers *regs) {
@@ -78,10 +79,17 @@ int syscall_handler(syscall_Registers *regs) {
         case 13:
             syscall_get_ms_since_boot(regs);
             break;    
+        case 14:
+            syscall_sleep_ms(regs);
+            break;   
         default:
             return 0;
     }
     return 0;
+}
+
+static void syscall_sleep_ms(syscall_Registers *regs){
+    sleep_ms(regs->rbx); 
 }
 
 
@@ -90,7 +98,12 @@ static void syscall_get_ms_since_boot(syscall_Registers *regs){
 }
 
 static void syscall_putPixel(syscall_Registers *  regs){
-    PixelTarget target = (regs->rsi == 0) ? PIXEL_VRAM : PIXEL_BACK;
+    PixelTarget target;
+    if (regs->rsi == 0){
+        target = PIXEL_VRAM;
+        
+    }else{ target = PIXEL_BACK;}
+    
     putPixel(regs->rbx, regs->rcx, regs->rdx ,target);
 
 }

@@ -26,6 +26,7 @@ uint64_t get_screen_height(void);
 
 uint64_t get_screen_width(void);
 char getchar_sys(void);
+void sleep_ms(uint64_t ms);
 
 void putPixel(uint32_t color, uint32_t x, uint32_t y, int target);
 

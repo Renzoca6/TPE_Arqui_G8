@@ -1,6 +1,7 @@
 #include "./include/player.h"
 #include "./include/types.h"
 #include "./include/map.h"
+#include "../lib/syscall_call.h"
 
 
 // Dónde dibujar: 0 = VRAM directa, 1 = back buffer (ajustá si querés)
@@ -68,16 +69,17 @@ int  player_step_and_paint(TronGame *G, Player *p){
     uint16_t ny = (uint16_t)(p->row + p->dy);
 
     // Chequeo de ocupación (trails de cualquiera)
-    if (occ_get( &G, nx, ny) != 0)
+    if (occ_get( G, nx, ny) != 0)
         return 0;  // choca contra trail (propio o ajeno)
 
     // Reservar celda y pintar trail
-    occ_set(&G, nx, ny, p->id_cell);
-    map_draw_cell(&G, nx, ny, p->color, DRAW_TARGET); //
+    occ_set(G, nx, ny, p->id_cell);
+    map_draw_cell(G, nx, ny, p->color, DRAW_TARGET); //
 
     // Avanzar player
     p->col = nx;
     p->row = ny;
+
     return 1;
 } // 0=muere, 1=sigue
 

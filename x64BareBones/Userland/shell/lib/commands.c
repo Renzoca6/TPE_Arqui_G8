@@ -3,6 +3,7 @@
 #include "help.h"
 #include "../utils/utils.h"
 #include "../commands/benchmark.h"
+#include "../commands/tron_game.h"
 
 
 // —— declaraciones mínimas para que compile ——
@@ -18,9 +19,11 @@ void testZeroDivision();
 extern void throw_zero_division();
 void resize(int argc, char *argv[]);
 extern void throw_invalid_opcode ();
+void tron();
 
 //IMPORTANTE DEBE SER EN ORDEN ALFABETICO
 const command_t COMMANDS[] = {
+    { "a",  10 },
     { "benchmark",  8 },
     { "clear", 0 },
     { "date",  1 },
@@ -47,8 +50,14 @@ void commands_Handler(int func, int argc, char *argv[]) {
         case 7: time();                                 break;   
         case 8: benchmark();                            break; 
         case 9: registers();                            break;
+        case 10: tron();                                break;
         default:                                        break;
     }
+}
+
+
+void tron(){
+    startGame();
 }
 
 

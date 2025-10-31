@@ -27,6 +27,7 @@
         "audio.h": "c",
         "map.h": "c",
         "config.h": "c",
-        "types.h": "c"
+        "types.h": "c",
+        "tron_game.h": "c"
     }
 }
