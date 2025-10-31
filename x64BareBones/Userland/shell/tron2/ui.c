@@ -123,7 +123,7 @@ int tron_show_start_menu(void)
     print_centered_line("Presione una tecla para continuar...", sw, 14, hintColor, bgColor, 16, false);
 
     present_fullframe();
-
+    do_resize("1");
     // loop de entrada
     while (1) {
         char ch = getchar_sys();
@@ -140,7 +140,5 @@ int tron_show_start_menu(void)
             return 0;   // salir
     }
 
-    // no debería llegar acá
-    do_resize("1");
     return 0;
 }

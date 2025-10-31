@@ -53,11 +53,17 @@ void startGame(){
             in_game = false;
         }
 
-        // d) (opcional) backbuffer → present. Si usás backbuffer para todo, llamá present_fullframe();
-        // present_fullframe();
-
 
     }
+
+    map_free(&game);
+
+    while (1)
+    {
+        /* code */
+    }
+    
+
     //clearwindow(0x000000);
     
 }
