@@ -25,5 +25,6 @@ void present_fullframe(void);
 uint64_t get_screen_height(void);
 
 uint64_t get_screen_width(void);
+char getchar_sys(void);
 
 #endif

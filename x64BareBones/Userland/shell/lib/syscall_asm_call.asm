@@ -10,6 +10,7 @@ GLOBAL sys_write_at_back
 GLOBAL sys_get_screen_info
 GLOBAL sys_present_fullframe
 GLOBAL sys_print_registers
+global sys_getchar
 
 sys_read:
     push rbp
@@ -178,5 +179,15 @@ sys_print_registers:
     mov  rax, 10      ; ID = 10 -> registers
     int  80h
 
+    leave
+    ret
+
+sys_getchar:
+    push rbp
+    mov rbp, rsp
+
+    mov rax, 11          ; ID de la syscall getchar
+    int 80h             ; entra al kernel
+    ; el kernel deja el char en RAX
     leave
     ret

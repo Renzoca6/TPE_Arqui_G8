@@ -1,9 +1,5 @@
 #include "video.h"
 #include "font8x16.h"
-
-// Prototipo de la función auxiliar que convierte enteros a string en base dada
-static uint32_t uintToBase(uint64_t value, char * buffer, uint32_t base);
-
 // Buffer temporal para almacenar strings numéricos
 static char buffer[64] = { '0' };
 
@@ -352,7 +348,7 @@ void vdPrintBase(uint64_t value, uint32_t base, PixelTarget target) {
 }
 
 
-static uint32_t uintToBase(uint64_t value, char * buffer, uint32_t base) {
+uint32_t uintToBase(uint64_t value, char * buffer, uint32_t base) {
     char *p = buffer;
     char *p1, *p2;
     uint32_t digits = 0;

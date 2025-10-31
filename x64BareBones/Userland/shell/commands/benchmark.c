@@ -2,72 +2,125 @@
 #include "../utils/utils.h"
 
 void print_benchmark(void) {
-    // 1) limpiar pantalla (negro)
     clearwindow(0x00000000);
 
-    // 2) agrandar letra (podés probar "3" o "4")
+    // agrandar letra
     int size = 16;
     do_resize("2");
 
-    // 3) obtener tamaño de pantalla
     uint64_t sw = get_screen_width();
-    uint64_t sh = get_screen_height();
-  
 
-    // 4) medir cosas
-    char buf[64];
+    const char *hline = "+--------------------------------------------+";
 
-    uint64_t fps  = do_benchmark_fps();
-    uint64_t hw   = do_benchmark_hardware_access();
-    uint64_t flt  = do_benchmark_floating_point();
+    int top_row    = 2;
+    int title_row  = top_row + 1;
+    int fps_row    = top_row + 3;
+    int hw_row     = top_row + 4;
+    int flt_row    = top_row + 5;
+    int bottom_row = top_row + 6;
 
-    //5) Titulo
-    print_centered_line("SYSTEM BENCHMARK", sw, 3, 0xFFFFFFFF, 0x000000, size, false);
+    bool running = true;
 
-    // 6) armar y mostrar cada línea
-    // FPS
-    uintToBase(fps, buf, 10);
-    // "FPS: 12345"
-    char line_fps[64] = "FPS: ";
-    // concateno: como no tenés strcat acá, lo hacemos manual
-    {
-        char *p = line_fps;
-        while (*p) p++;
-        char *q = buf;
-        while (*q) *p++ = *q++;
-        *p = '\0';
+    while (running) {
+        // medir
+        char buf[64];
+        uint64_t fps  = do_benchmark_fps();
+        uint64_t hw   = do_benchmark_hardware_access();
+        uint64_t flt  = do_benchmark_floating_point();
+
+        // armar strings
+        char line_fps[64] = "FPS: ";
+        uintToBase(fps, buf, 10);
+        {
+            char *p = line_fps;
+            while (*p) p++;
+            char *q = buf;
+            while (*q) *p++ = *q++;
+            *p = '\0';
+        }
+
+        char line_hw[64] = "HW ACCESS: ";
+        uintToBase(hw, buf, 10);
+        {
+            char *p = line_hw;
+            while (*p) p++;
+            char *q = buf;
+            while (*q) *p++ = *q++;
+            *p = '\0';
+        }
+
+        char line_flt[64] = "FLOAT: ";
+        uintToBase(flt, buf, 10);
+        {
+            char *p = line_flt;
+            while (*p) p++;
+            char *q = buf;
+            while (*q) *p++ = *q++;
+            *p = '\0';
+        }
+
+        // caja
+        print_centered_line(hline, sw, top_row, 0xFFFFFF, 0x000000, size, true);
+        print_centered_line("|              SYSTEM BENCHMARK              |", sw, title_row, 0xFFFFFF, 0x000000, size, true);
+        print_centered_line("|                                            |", sw, top_row + 2, 0xFFFFFF, 0x000000, size, true);
+
+        // FPS
+        {
+            char line_box[80] = "|                                            |";
+            int box_width = 44;
+            int text_len = 0;
+            while (line_fps[text_len]) text_len++;
+            int start = (box_width - text_len) / 2;
+            char *dst = line_box + 1 + start;
+            char *src = line_fps;
+            while (*src) *dst++ = *src++;
+            print_centered_line(line_box, sw, fps_row, 0xFFFFFF, 0x000000, size, true);
+        }
+
+        // HW
+        {
+            char line_box[80] = "|                                            |";
+            int box_width = 44;
+            int text_len = 0;
+            while (line_hw[text_len]) text_len++;
+            int start = (box_width - text_len) / 2;
+            char *dst = line_box + 1 + start;
+            char *src = line_hw;
+            while (*src) *dst++ = *src++;
+            print_centered_line(line_box, sw, hw_row, 0xFFFFFF, 0x000000, size, true);
+        }
+
+        // FLOAT
+        {
+            char line_box[80] = "|                                            |";
+            int box_width = 44;
+            int text_len = 0;
+            while (line_flt[text_len]) text_len++;
+            int start = (box_width - text_len) / 2;
+            char *dst = line_box + 1 + start;
+            char *src = line_flt;
+            while (*src) *dst++ = *src++;
+            print_centered_line(line_box, sw, flt_row, 0xFFFFFF, 0x000000, size, true);
+        }
+
+        print_centered_line(hline, sw, bottom_row, 0xFFFFFF, 0x000000, size, true);
+
+        // mensaje afuera
+        do_resize("1");
+        write_at_vram("Press any key to stop", 50, 18, 0xFFFFFF, 0x000000);
+
+        //present_fullframe();
+
+        // detectar tecla
+        char c = getchar_sys();
+        if (!(c == 0))
+            running = false;
+
+        // restaurar tamaño para siguiente iteración
+        do_resize("2");
     }
-    print_centered_line(line_fps, sw, 5, 0xFFFFFF, 0x000000,size, false);
-
-    // Hardware access
-    uintToBase(hw, buf, 10);
-    char line_hw[64] = "HW ACCESS: ";
-    {
-        char *p = line_hw;
-        while (*p) p++;
-        char *q = buf;
-        while (*q) *p++ = *q++;
-        *p = '\0';
-    }
-    print_centered_line(line_hw, sw, 7, 0xFFFFFF, 0x000000,size, false);
-
-    // Floating point
-    uintToBase(flt, buf, 10);
-    char line_flt[64] = "FLOAT: ";
-    {
-        char *p = line_flt;
-        while (*p) p++;
-        char *q = buf;
-        while (*q) *p++ = *q++;
-        *p = '\0';
-    }
-    print_centered_line(line_flt, sw, 9, 0xFFFFFF, 0x000000,size, false);
-
-    
-    print_centered_line("Press Enter to continue", sw, 10, 0xFFFFFF, 0x000000, size, false);
-    present_fullframe();
     do_resize("1");
-    //HAY QUE BLOQUEAR QUE PUEDA ESCRIBIR 
-    //HAY QUE HACER UNA FUNCION QUE ESPERE A UN ENTER que sea generica es la idea 
+
     clearwindow(0x00000000);
+
 }

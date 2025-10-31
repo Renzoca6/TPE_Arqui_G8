@@ -21,7 +21,7 @@
         "timer.h": "c",
         "type_traits": "c",
         "help.h": "c",
-        "registers.h": "c"
-        "utils.h": "c"
+        "registers.h": "c",
+        "random": "c"
     }
 }

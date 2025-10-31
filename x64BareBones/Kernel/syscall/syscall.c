@@ -28,6 +28,7 @@ static void  syscall_present_fullframe();
 static void syscall_write_at(syscall_Registers * regs, PixelTarget target);
 static void syscall_getScreen_Info(syscall_Registers * regs); 
 static void syscall_print_registers(syscall_Registers * regs);
+static void syscall_getchar(syscall_Registers *regs);
 
 
 int syscall_handler(syscall_Registers *regs) {
@@ -65,6 +66,9 @@ int syscall_handler(syscall_Registers *regs) {
             break;
         case 10:
             syscall_print_registers(regs);
+            break;
+        case 11:
+            syscall_getchar(regs);
             break;
         default:
             return 0;
@@ -198,6 +202,27 @@ static void syscall_read(syscall_Registers *regs) {
     }
 
     //falta funcion para apagar las interrupts
+}
+static void syscall_getchar(syscall_Registers *regs) {
+    enable_interrupts();
+    uint64_t start = timer_ms_since_boot();   // tiempo inicial
+    const uint64_t timeout_ms = 50;           // esperar 50 milisegundos
+
+    while (1) {
+        if (hasNextKey()) {
+            KeyBufferStruct k = getNextKey();
+            if (k.is_pressed) {
+                regs->rax = (uint64_t)k.key;
+                return; // devolvemos la tecla
+            }
+        }
+
+        // si pasaron más de timeout_ms sin tecla -> salir con 0
+        if (timer_ms_since_boot() - start > timeout_ms) {
+            regs->rax = 0;
+            return;
+        }
+    }
 }
 
 static void syscall_print_registers(syscall_Registers * regs){

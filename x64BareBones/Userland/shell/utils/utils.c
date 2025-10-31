@@ -8,7 +8,9 @@
 void print_centered_line(const char *text, uint64_t screen_w, int row_cells, uint32_t fColor, uint32_t bgColor, int fontSize,  bool vram) {
     if (vram){
         print_centered_line_Vram(text,  screen_w, row_cells,  fColor,  bgColor,  fontSize);
-    }else {print_centered_line_Back(text,  screen_w, row_cells,  fColor,  bgColor,  fontSize);} 
+    }else {
+        print_centered_line_Back(text,  screen_w, row_cells,  fColor,  bgColor,  fontSize);
+    } 
     
 }
 
@@ -30,7 +32,7 @@ void print_centered_line_Vram(const char *text, uint64_t screen_w, int row_cells
         col = (cols - len) / 2;
 
     // imprimir centrado con los colores dados
-    write_at_back(text, col, row_cells, fColor, bgColor);
+    write_at_vram(text, col, row_cells, fColor, bgColor);
 }
 
 

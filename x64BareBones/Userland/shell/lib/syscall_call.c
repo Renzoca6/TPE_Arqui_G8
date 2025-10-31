@@ -86,6 +86,10 @@ uint64_t  do_benchmark_hardware_access(){
     return sys_benchmark (2);
 }
 
+char getchar_sys(void) {
+    return (char) sys_getchar();
+}
+
 
 
 

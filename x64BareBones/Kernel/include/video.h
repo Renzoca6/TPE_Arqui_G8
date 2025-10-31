@@ -51,7 +51,7 @@ unsigned int str_to_uint_ignore_sign(const char *s);
 
 
 
-static uint32_t uintToBase(uint64_t value, char * buffer, uint32_t base);
+uint32_t uintToBase(uint64_t value, char * buffer, uint32_t base);
 void vdPrintBase(uint64_t value, uint32_t base, PixelTarget target);
 void vdPrintHex(uint64_t value, PixelTarget target);
 
