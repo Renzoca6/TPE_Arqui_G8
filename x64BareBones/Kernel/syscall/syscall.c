@@ -29,6 +29,7 @@ static void syscall_write_at(syscall_Registers * regs, PixelTarget target);
 static void syscall_getScreen_Info(syscall_Registers * regs); 
 static void syscall_print_registers(syscall_Registers * regs);
 static void syscall_getchar(syscall_Registers *regs);
+static void syscall_putPixel(syscall_Registers *  regs);
 
 
 int syscall_handler(syscall_Registers *regs) {
@@ -70,10 +71,20 @@ int syscall_handler(syscall_Registers *regs) {
         case 11:
             syscall_getchar(regs);
             break;
+        case 12:
+            syscall_putPixel(regs);
+            break;    
         default:
             return 0;
     }
     return 0;
+}
+
+static void syscall_putPixel(syscall_Registers *  regs){
+    PixelTarget target = (regs->rsi) ? PIXEL_VRAM:PIXEL_BACK;
+
+    putPixel(regs->rbx, regs->rcx, regs->rdx ,target);
+
 }
 
 

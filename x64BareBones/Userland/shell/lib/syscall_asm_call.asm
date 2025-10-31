@@ -11,6 +11,7 @@ GLOBAL sys_get_screen_info
 GLOBAL sys_present_fullframe
 GLOBAL sys_print_registers
 global sys_getchar
+global sys_putPixel
 
 sys_read:
     push rbp
@@ -191,3 +192,19 @@ sys_getchar:
     ; el kernel deja el char en RAX
     leave
     ret
+
+sys_putPixel:
+    push rbp
+    mov rbp, rsp
+
+    mov rax, 12         ;ID sycall
+    mov rbx, rdi        ;color
+    mov rcx, rsi        ;X
+    mov rdx, rdx        ;y
+    mov rsi, rcx        ;target
+
+    int  80h
+
+    leave
+    ret
+

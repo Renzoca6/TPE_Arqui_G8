@@ -22,6 +22,7 @@
         "type_traits": "c",
         "help.h": "c",
         "registers.h": "c",
-        "random": "c"
+        "random": "c",
+        "tronutils.h": "c"
     }
 }

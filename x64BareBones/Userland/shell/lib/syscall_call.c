@@ -10,10 +10,17 @@ extern uint64_t sys_write_at_vram(const char *str, int col, int fil, uint32_t fC
 extern uint64_t sys_write_at_back(const char *str, int col, int fil, uint32_t fColor, uint32_t bgColor);
 extern void sys_present_fullframe();
 extern int sys_get_screen_info(int aux);
-
+extern void sys_putPixel(uint32_t color, uint32_t x, uint32_t y, uint32_t target);
+extern char sys_getchar();
+extern char sys_print_registers();
 
 #define STDIN   0
 #define STDOUT  1
+
+// target: 0 = PIXEL_VRAM, 1 = PIXEL_BACK
+void putPixel(uint32_t color, uint32_t x, uint32_t y, int target) {
+    sys_putPixel(color, x, y, target);
+}
 
 int write(const char* buf){
     return sys_write(STDOUT, buf);
