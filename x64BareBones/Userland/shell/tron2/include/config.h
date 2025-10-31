@@ -1,4 +1,6 @@
-#pragma once
+#ifndef CONFIG_H
+#define CONFIG_H
+
 #include <stdint.h>
 
 #define TRON_CELL_PX          10       // tamaño de celda en píxeles
@@ -21,3 +23,5 @@
 #define KEY_LEFT  0x4B00
 #define KEY_DOWN  0x5000
 #define KEY_RIGHT 0x4D00
+
+#endif

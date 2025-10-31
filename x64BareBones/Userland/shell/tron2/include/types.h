@@ -1,4 +1,5 @@
-#pragma once
+#ifndef TYPES_H
+#define TYPES_H
 #include <stdint.h>
 
 typedef struct {
@@ -20,3 +21,5 @@ typedef struct {
     uint8_t *occ;        // rows*cols bytes (0 libre, >0 ocupado)
     Player  p1, p2;
 } TronGame;
+
+#endif
