@@ -4,6 +4,10 @@
 #include <stdbool.h>
 
 
+#include <stdint.h>
+
+
+
 //aux = 1 vram aux != 1 back
 void print_centered_line(const char *text, uint64_t screen_w, int row_cells, uint32_t fColor, uint32_t bgColor, int fontSize,  bool vram) {
     if (vram){

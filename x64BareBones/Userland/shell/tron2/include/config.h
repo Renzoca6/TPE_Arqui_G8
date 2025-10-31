@@ -10,8 +10,8 @@
 #define TRON_MARGIN_BOTTOM    64
 #define TRON_GRID_COLOR_LINE  0x303030 //0x303030
 #define TRON_GRID_COLOR_BG    0x000000
-#define TRON_P1_COLOR         0x00FF00
-#define TRON_P2_COLOR         0x00AAFF
+#define TRON_P1_COLOR         0x00C4872B
+#define TRON_P2_COLOR         0x001A9BA0
 #define TRON_BG_COLOR         0x000000
 #define TRON_TICK_MS          80
 

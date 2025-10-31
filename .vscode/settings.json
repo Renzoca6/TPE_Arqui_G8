@@ -28,6 +28,8 @@
         "map.h": "c",
         "config.h": "c",
         "types.h": "c",
-        "tron_game.h": "c"
+        "tron_game.h": "c",
+        "utils.h": "c",
+        "functional": "c"
     }
 }

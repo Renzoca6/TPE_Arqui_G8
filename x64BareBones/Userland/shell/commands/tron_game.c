@@ -8,7 +8,9 @@
 #include <stdint.h>
 
 void startGame(){
-    clearwindow(0x000000);
+    
+    int mode = tron_show_start_menu();
+    //clearwindow(0x000000);
 
     TronGame game;
     map_init(&game);
