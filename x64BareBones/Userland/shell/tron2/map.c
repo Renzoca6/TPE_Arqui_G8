@@ -104,6 +104,8 @@ void cell_to_pixel(const Grid *g, uint16_t col, uint16_t row, uint32_t *px, uint
 bool grid_contains_cell(const Grid *g, uint16_t col, uint16_t row) {
     return (col < g->cols && row < g->rows);
 }
+
+
 // Convierte (col, row) a índice lineal en el array occ[]
 uint32_t occ_idx(const Grid *g, uint16_t col, uint16_t row) {
     return (uint32_t)row * g->cols + col;

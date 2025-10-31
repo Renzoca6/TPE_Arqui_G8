@@ -81,8 +81,7 @@ int syscall_handler(syscall_Registers *regs) {
 }
 
 static void syscall_putPixel(syscall_Registers *  regs){
-    PixelTarget target = (regs->rsi) ? PIXEL_VRAM:PIXEL_BACK;
-
+    PixelTarget target = (regs->rsi == 0) ? PIXEL_VRAM : PIXEL_BACK;
     putPixel(regs->rbx, regs->rcx, regs->rdx ,target);
 
 }

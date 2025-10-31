@@ -1,6 +1,6 @@
-#include "../include/player.h"
-#include "../include/types.h"
-#include "../include/map.h"
+#include "./include/player.h"
+#include "./include/types.h"
+#include "./include/map.h"
 
 
 // Dónde dibujar: 0 = VRAM directa, 1 = back buffer (ajustá si querés)
@@ -9,10 +9,6 @@
 #endif
 
 /* ------------------ Helpers locales ------------------ */
-
-static inline int in_bounds(const Grid *g, uint16_t c, uint16_t r) {
-    return (c < g->cols) && (r < g->rows);  // puede que sea menor o igual, no entiendo muy bien como se delimita la pared
-}
 
 // Centro vertical del tablero (fila)
 static inline uint16_t center_row(const Grid *g) {
@@ -71,17 +67,13 @@ int  player_step_and_paint(TronGame *G, Player *p){
     uint16_t nx = (uint16_t)(p->col + p->dx);
     uint16_t ny = (uint16_t)(p->row + p->dy);
 
-    // Chequeo de límites
-    if (!in_bounds(&G->grid, nx, ny))
-        return 0;  // choca contra pared
-
     // Chequeo de ocupación (trails de cualquiera)
-    if (occ_get(G->occ, &G->grid, nx, ny) != 0)
+    if (occ_get( &G, nx, ny) != 0)
         return 0;  // choca contra trail (propio o ajeno)
 
     // Reservar celda y pintar trail
-    occ_set(G->occ, &G->grid, nx, ny, p->id_cell);
-    draw_cell(&G->grid, nx, ny, p->color, DRAW_TARGET);
+    occ_set(&G, nx, ny, p->id_cell);
+    map_draw_cell(&G, nx, ny, p->color, DRAW_TARGET); //
 
     // Avanzar player
     p->col = nx;
