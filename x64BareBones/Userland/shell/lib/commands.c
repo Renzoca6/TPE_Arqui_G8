@@ -1,6 +1,8 @@
 #include "commands.h"
 #include "syscall_call.h"
 #include "help.h"
+#include "../utils/utils.h"
+#include "../commands/benchmark.h"
 
 
 // —— declaraciones mínimas para que compile ——
@@ -60,13 +62,7 @@ void resize(int argc, char *argv[]){
 }
 
 void benchmark(){
-    while (1){
-        do_benchmark_fps();
-        do_benchmark_hardware_access();
-        do_benchmark_floating_point();
-        
-    }
-    
+    print_benchmark();
 }
 
 void date(){

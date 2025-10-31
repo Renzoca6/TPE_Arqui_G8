@@ -8,6 +8,8 @@ extern int sys_date_time (int tpye);
 extern uint64_t  sys_benchmark (int type);
 extern uint64_t sys_write_at_vram(const char *str, int col, int fil, uint32_t fColor, uint32_t bgColor);
 extern uint64_t sys_write_at_back(const char *str, int col, int fil, uint32_t fColor, uint32_t bgColor);
+extern void sys_present_fullframe();
+extern int sys_get_screen_info(int aux);
 
 
 #define STDIN   0
@@ -23,11 +25,12 @@ int println(const char* buf){
     return 1;
 }
 
-//   uint64_t width, height;
-//get_screen_info(&height, &width);
+uint64_t get_screen_height(void) {
+    return sys_get_screen_info(0);  // 0 = height
+}
 
-void get_screen_info(uint64_t *height, uint64_t *width) {
-    sys_get_screen_info(height, width);
+uint64_t get_screen_width(void) {
+    return sys_get_screen_info(1);  // 1 = width
 }
 
 void present_fullframe(void) {
@@ -74,13 +77,13 @@ void printRegisters(){
 
 
 uint64_t  do_benchmark_fps(){
-    sys_benchmark (0);
+    return sys_benchmark (0);
 }
 uint64_t  do_benchmark_floating_point(){
-    sys_benchmark (1);
+    return sys_benchmark (1);
 }
 uint64_t  do_benchmark_hardware_access(){
-    sys_benchmark (2);
+    return sys_benchmark (2);
 }
 
 

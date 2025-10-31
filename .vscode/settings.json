@@ -22,5 +22,6 @@
         "type_traits": "c",
         "help.h": "c",
         "registers.h": "c"
+        "utils.h": "c"
     }
 }

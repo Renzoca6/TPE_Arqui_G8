@@ -210,45 +210,44 @@ _exception6Handler:
 
 ; syscall 
 _irq06Handler:
-	push rbp
-	push r8
-	push r9
-	push r10
-	push r11
-	push r12
-	push r13
-	push r14
-	push r15
+    push rbp
+    push r8
+    push r9
+    push r10
+    push r11
+    push r12
+    push r13
+    push r14
+    push r15
+    sti
 
-	sti
+    ; guardar registros en la struct
+    mov [registers], rax        ; rax (el que vino de userland, el nro de syscall)
+    mov [registers+8], rbx
+    mov [registers+16], rcx
+    mov [registers+24], rdx
+    mov [registers+32], rsi
+    mov [registers+40], rdi
 
-	mov [registers], rax		;ID
-	mov [registers+8], rbx
-	mov [registers+16], rcx
-	mov [registers+24], rdx
-	mov [registers+32], rsi
-	mov [registers+40], rdi
+    mov rdi, registers
+    call syscall_handler        ; acá el C te pone registers->rax = resultado
 
-	mov rdi, registers
-	call syscall_handler
+    ; recuperar RAX que dejó el kernel en la struct
+    mov rax, [registers]        ; ❷ ahora sí: rax = registers->rax (el resultado de la syscall)
 
-	; signal pic EOI (End of Interrupt)
-	; mov al, 20h
-	; out 20h, al
+    ; signal pic EOI si corresponde
+    ; ...
 
-
-	pop r15
-	pop r14
-	pop r13
-	pop r12
-	pop r11
-	pop r10
-	pop r9
-	pop r8
-	pop rbp
-
-	iretq
-	
+    pop r15
+    pop r14
+    pop r13
+    pop r12
+    pop r11
+    pop r10
+    pop r9
+    pop r8
+    pop rbp
+    iretq
 	 
 haltcpu:
 	cli
@@ -268,6 +267,7 @@ SECTION .data
 	dq 0
 	dq 0
 	dq 0
+	
 ; buffer temporal para snapshot de excepciones (15 regs x 8 bytes)
 
 ; buffer temporal para snapshot de excepciones (REG_COUNT regs x 8 bytes)
