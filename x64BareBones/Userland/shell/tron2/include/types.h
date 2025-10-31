@@ -3,9 +3,11 @@
 #include <stdint.h>
 
 typedef struct {
-    uint32_t x0, y0;     // origen del tablero (px)
-    uint16_t cols, rows; // tamaño lógico (celdas)
-    uint16_t cell_px;    // px por celda
+    uint32_t x0, y0;        // origen del tablero (px)
+    uint16_t cols, rows;    // tamaño lógico (celdas)
+    uint16_t cell_px;       // px por celda
+    uint32_t line_color;    //color de la grid
+    uint32_t bg_color;    //color de la grid
 } Grid;
 
 typedef struct {
