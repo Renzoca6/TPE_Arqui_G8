@@ -21,7 +21,7 @@ extern void throw_invalid_opcode ();
 
 //IMPORTANTE DEBE SER EN ORDEN ALFABETICO
 const command_t COMMANDS[] = {
-    { "a",  8 },
+    { "benchmark",  8 },
     { "clear", 0 },
     { "date",  1 },
     { "echo",  2 },
@@ -37,17 +37,17 @@ const int N_COMMANDS = sizeof(COMMANDS) / sizeof(COMMANDS[0]);
 
 void commands_Handler(int func, int argc, char *argv[]) {
     switch (func) {
-        case 0: clear();                       break;
-        case 1: date();                        break; 
+        case 0: clear();                                break;
+        case 1: date();                                 break; 
         case 2: echo(argc,argv);                        break;
-        case 3: help(COMMANDS, N_COMMANDS, argc, argv);    break;
-        case 4: resize(argc,argv);    break;   
-        case 5: testInvalidOpcode();            break;
-        case 6: testZeroDivision();            break;
-        case 7: time();                        break;   
-        case 8: benchmark();                    break; 
-        case 9: registers();               break;
-        default:                               break;
+        case 3: help(COMMANDS, N_COMMANDS, argc, argv); break;
+        case 4: resize(argc,argv);                      break;   
+        case 5: testInvalidOpcode();                    break;
+        case 6: testZeroDivision();                     break;
+        case 7: time();                                 break;   
+        case 8: benchmark();                            break; 
+        case 9: registers();                            break;
+        default:                                        break;
     }
 }
 

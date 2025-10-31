@@ -23,6 +23,7 @@
         "help.h": "c",
         "registers.h": "c",
         "random": "c",
-        "tronutils.h": "c"
+        "tronutils.h": "c",
+        "audio.h": "c"
     }
 }
