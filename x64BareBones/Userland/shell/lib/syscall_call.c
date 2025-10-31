@@ -45,7 +45,6 @@ void present_fullframe(void) {
     sys_present_fullframe();
 }
 
-
 void write_at_back(const char *str, int col, int fil, uint32_t fColor, uint32_t bgColor){
     sys_write_at_back(str,col,fil,fColor,bgColor);
 }
