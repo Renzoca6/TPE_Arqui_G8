@@ -19,6 +19,7 @@
         "time.h": "c",
         "timer.h": "c",
         "type_traits": "c",
-        "help.h": "c"
+        "help.h": "c",
+        "utils.h": "c"
     }
 }

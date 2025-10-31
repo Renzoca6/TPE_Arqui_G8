@@ -21,7 +21,8 @@ void write_at_vram(const char *str, int col, int fil, uint32_t fColor, uint32_t 
 void get_screen_info(uint64_t *height, uint64_t *width);
 void present_fullframe(void);
 
+uint64_t get_screen_height(void);
 
-
+uint64_t get_screen_width(void);
 
 #endif

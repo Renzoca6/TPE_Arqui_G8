@@ -332,11 +332,14 @@ void vdclearScreenDB(uint32_t color) {
     uint8_t R = (color >> 16) & 0xFF;
 
     for (uint32_t y = 0; y < h; y++) {
-        uint8_t row = g_back + y * pitch;
+        uint8_t *row = g_back + y * pitch;     // ← Puntero, no uint8_t
         fb_fill_row(row, w, B, G, R);
     }
+
     present_fullframe();
-    x = 0; y = 0;
+
+    x = 0;
+    y = 0;
 }
 
 void vdPrintHex(uint64_t value, PixelTarget target) {

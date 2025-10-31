@@ -84,12 +84,16 @@ static void syscall_write_at(syscall_Registers * regs, PixelTarget target){
     uint32_t fColor   = (uint32_t)regs->rsi;       // color fuente
     uint32_t bgColor  = (uint32_t)regs->rdi;       // color fondo
 
-    vdPrintStyled_AT(str, col, fil, fColor, bgColor, target);
+    vdPrintStyled_AT(str, col, fil, fColor, bgColor, target); 
 }
 
-static void syscall_getScreen_Info(syscall_Registers * regs){
-    regs->rbx = vdGetHeight;
-    regs->rcx = vdGetWidth;
+static void syscall_getScreen_Info(syscall_Registers *regs) {
+    uint64_t which = regs->rbx;   // 0 = height, 1 = width
+    if (which == 0) {
+        regs->rax = vdGetHeight();
+    } else {
+        regs->rax = vdGetWidth();
+    }
 }
 
 static void  syscall_present_fullframe(){

@@ -97,9 +97,9 @@ sys_benchmark:
     mov  rbx, rdi      ; which: 0=fps, 1=floating, 2=vram
     int  80h
 
-    ; Al volver, RAX = bits IEEE754 del double
-    ; Mover bits a XMM0 para retornar double según SysV ABI
-    movq xmm0, rax
+    ; Al volver del int 80h:
+    ; RAX ya trae el resultado uint64_t del kernel.
+    ; No hay que tocar xmm0 ni nada.
 
     pop  rbx
     leave
@@ -110,62 +110,61 @@ sys_write_at_vram:
     mov  rbp, rsp
 
     push rbx
+    push r9           ; vamos a usar r9 como temporal
 
-    mov  rax, 6          ; ID = 6 -> write_at_VRAM
-
-    mov  rbx, rdi        ; RBX = str
-    mov  rcx, rsi        ; RCX = col
-    mov  rsi, rcx        ; RSI = fColor
-    mov  rdi, r8         ; RDI = bgColor
+    mov  rax, 6       ; syscall id
+    mov  r9, rcx          ; r9 = fColor
+    mov  rbx, rdi         ; regs->rbx = str
+    mov  rcx, rsi         ; regs->rcx = col
+    mov  rsi, r9          ; regs->rsi = fColor
+    mov  rdi, r8          ; regs->rdi = bgColor
 
     int  80h
 
+    pop  r9
     pop  rbx
     leave
     ret
-
 sys_write_at_back:
     push rbp
     mov  rbp, rsp
 
     push rbx
+    push r9           ; vamos a usar r9 como temporal
 
-    mov  rax, 7          ; ID = 7 -> write_at_BACK
-
-    mov  rbx, rdi        ; RBX = str
-    mov  rcx, rsi        ; RCX = col
-    mov  rsi, rcx        ; RSI = fColor
-    mov  rdi, r8         ; RDI = bgColor
+    mov  rax, 7       ; syscall id
+    mov  r9, rcx          ; r9 = fColor
+    mov  rbx, rdi         ; regs->rbx = str
+    mov  rcx, rsi         ; regs->rcx = col
+    mov  rsi, r9          ; regs->rsi = fColor
+    mov  rdi, r8          ; regs->rdi = bgColor
 
     int  80h
 
+    pop  r9
     pop  rbx
     leave
+    ret
     ret
 sys_get_screen_info:
     push rbp
     mov  rbp, rsp
-
     push rbx
-    push rcx
 
-    mov  rax, 8      ; ID = 8 -> getScreen_Info
-    int  80h         ; al volver: RBX = height, RCX = width
+    mov  rax, 9       ; syscall id
+    mov  rbx, rdi     ; which: 0=height, 1=width
+    int  80h
 
-    ; guardar en los punteros que nos pasó el caller
-    mov  [rdi], rbx  ; *height = RBX
-    mov  [rsi], rcx  ; *width  = RCX
-
-    pop  rcx
+    ; al volver, RAX YA TIENE el valor
     pop  rbx
-
     leave
-    ret    
+    ret
+
 sys_present_fullframe:
     push rbp
     mov  rbp, rsp
 
-    mov  rax, 9      ; ID = 9 -> present_fullframe
+    mov  rax, 8     ; ID = 8 -> present_fullframe
     int  80h
 
     leave
