@@ -94,10 +94,17 @@ static void syscall_write_at(uint64_t *registers, PixelTarget target) {
 }
 
 
-static void syscall_sleep_ms(uint64_t *registers){
-    sleep_ms(10); 
-}
+static void syscall_sleep_ms(uint64_t *registers) {
+    // el userland te manda el ms en RBX → registers[13]
+    uint64_t ms = registers[13];
 
+    // MUY importante: estamos dentro de una interrupción, así que
+    // tenemos que volver a habilitar las interrupciones para que
+    // el timer pueda seguir incrementando g_ticks.
+    enable_interrupts();
+
+    sleep_ms(ms);
+}
 static void syscall_get_ms_since_boot(uint64_t *registers){
     registers[14] = timer_ms_since_boot();
 }

@@ -9,7 +9,7 @@
 
 void startGame(){
     
-    //int mode = tron_show_start_menu();
+    int mode = tron_show_start_menu();
     //clearwindow(0x000000);
 
     TronGame game;
@@ -46,7 +46,6 @@ void startGame(){
         //    por ahora, sin input: siguen en su dirección actual
 
         // c) avanzar jugadores (pintan y reservan celdas; 0 = muere si choca)
-        write("aca");
         int alive1 = player_step_and_paint(&game, &p1);
         int alive2 = player_step_and_paint(&game, &p2);
 
