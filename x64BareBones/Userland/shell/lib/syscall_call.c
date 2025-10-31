@@ -13,7 +13,7 @@ extern int sys_get_screen_info(int aux);
 extern void sys_putPixel(uint32_t color, uint32_t x, uint32_t y, uint32_t target);
 extern char sys_getchar();
 extern char sys_print_registers();
-extern void touch_regs();
+
 
 #define STDIN   0
 #define STDOUT  1
@@ -79,7 +79,6 @@ void get_date(){
 }
 
 void printRegisters(){
-    touch_regs();
     sys_print_registers();
 }
 

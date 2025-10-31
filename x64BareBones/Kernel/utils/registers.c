@@ -5,30 +5,10 @@
 
 /* Exportamos los nombres desde un solo lugar. Deben coincidir con pushState */
 const char * const REG_NAMES[REG_COUNT] = {
-    "RAX", "RBX", "RCX", "RDX",
-    "RBP", "RDI", "RSI",
-    "R8",  "R9",  "R10", "R11", "R12", "R13", "R14", "R15", "RSP",
-    "RIP", "RFLAGS", "CS", "DS", "ES", "FS", "GS", "SS"
+    "R15", "R14", "R13", "R12", "R11", "R10", "R9", "R8",
+    "RSI", "RDI", "RBP", "RDX", "RCX", "RBX", "RAX", 
+    "RIP", "CS", "RFLAGS", "RSP", "SS"
 };
-
-static uint64_t snapshot[REG_COUNT] = {0};
-static volatile bool snapshot_ready = false;
-
-void regs_save(const uint64_t *frame) {
-    for (int i = 0; i < REG_COUNT; i++) {
-        snapshot[i] = frame[i];
-    }
-    snapshot_ready = true;
-}
-
-bool regs_ready(void) {
-    return snapshot_ready;
-}
-
-const uint64_t *regs_get(void) {
-    return snapshot_ready ? snapshot : NULL;
-}
-
 
 /* Helper: print a 64-bit value as 16 hex digits (zero-padded) */
 static void printHexPadded(uint64_t v) {
@@ -46,10 +26,10 @@ static void printHexPadded(uint64_t v) {
 /* Evita crash si no hay snapshot todavía */
 void print_registers(void)
 {
-    const uint64_t *regs = regs_get();
+    const uint64_t *regs = getSavedRegs();
 
     if (regs == NULL) {
-        vdPrint("Register snapshot not available.", PIXEL_VRAM);
+        vdPrint("Register snapshot not available, press SHIFT+TAB", PIXEL_VRAM);
         vdNewline();
         return;
     }

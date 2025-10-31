@@ -5,238 +5,226 @@
 #include "realTimeClock.h"
 #include "benchmark.h"
 #include "registers.h"
+
 extern void enable_interrupts(void);
 
-typedef struct {
-    uint64_t rax;
-    uint64_t rbx;
-    uint64_t rcx;
-    uint64_t rdx;
-    uint64_t rsi;
-    uint64_t rdi;
-} syscall_Registers;
+#define MAX_SYSCALLS 13
 
-static void syscall_write(syscall_Registers *regs);
-static void  syscall_read(syscall_Registers *regs);
-static void syscall_getDate(syscall_Registers *regs);
-static void syscall_benchmark(syscall_Registers *regs);
-static void syscall_resize(syscall_Registers *regs);
-static void syscall_clearwindow(syscall_Registers *regs);
-static void syscall_write_at_VRAM(syscall_Registers * regs);
-static void syscall_write_at_BACK(syscall_Registers * regs);     
-static void  syscall_present_fullframe();      
-static void syscall_write_at(syscall_Registers * regs, PixelTarget target);
-static void syscall_getScreen_Info(syscall_Registers * regs); 
-static void syscall_print_registers(syscall_Registers * regs);
-static void syscall_getchar(syscall_Registers *regs);
-static void syscall_putPixel(syscall_Registers *  regs);
+// Forward declarations de handlers
+static void syscall_read(uint64_t *registers);
+static void syscall_write(uint64_t *registers);
+static void syscall_clearwindow(uint64_t *registers);
+static void syscall_getDate(uint64_t *registers);
+static void syscall_resize(uint64_t *registers);
+static void syscall_benchmark(uint64_t *registers);
+static void syscall_write_at_VRAM(uint64_t *registers);
+static void syscall_write_at_BACK(uint64_t *registers);
+static void syscall_present_fullframe(uint64_t *registers);
+static void syscall_getScreen_Info(uint64_t *registers);
+static void syscall_print_registers(uint64_t *registers);
+static void syscall_getchar(uint64_t *registers);
+static void syscall_putPixel(uint64_t *registers);
 
+// Tipo para punteros a funciones handler
+typedef void (*SysCallHandler)(uint64_t *);
 
-int syscall_handler(syscall_Registers *regs) {
-    switch ((int)regs->rax) {
-        case 0:
-            syscall_read(regs);
-            break;
-        case 1:
-            syscall_write(regs);
-            break;
-        case 2:
-            syscall_clearwindow(regs);
-            break;
-        case 3:
-            syscall_getDate(regs);
-            break;
-        case 4:
-            syscall_resize(regs);
-            break;
-        case 5:
-            // benchmark: deja el resultado en regs->rax
-            syscall_benchmark(regs);
-            break;
-        case 6:
-            syscall_write_at_VRAM(regs);    
-            break; 
-        case 7:
-            syscall_write_at_BACK(regs);    
-            break; 
-        case 8:
-            syscall_present_fullframe();    
-            break; 
-        case 9:
-            syscall_getScreen_Info(regs); 
-            break;
-        case 10:
-            syscall_print_registers(regs);
-            break;
-        case 11:
-            syscall_getchar(regs);
-            break;
-        case 12:
-            syscall_putPixel(regs);
-            break;    
-        default:
-            return 0;
+// Array de handlers indexado por número de syscall
+static SysCallHandler sysCallHandlers[MAX_SYSCALLS] = {
+    syscall_read,              // 0: SYS_READ
+    syscall_write,             // 1: SYS_WRITE
+    syscall_clearwindow,       // 2: SYS_CLEAR_WINDOW
+    syscall_getDate,           // 3: SYS_GET_DATE
+    syscall_resize,            // 4: SYS_RESIZE
+    syscall_benchmark,         // 5: SYS_BENCHMARK
+    syscall_write_at_VRAM,     // 6: SYS_WRITE_AT_VRAM
+    syscall_write_at_BACK,     // 7: SYS_WRITE_AT_BACK
+    syscall_present_fullframe, // 8: SYS_PRESENT_FULLFRAME
+    syscall_getScreen_Info,    // 9: SYS_GET_SCREEN_INFO
+    syscall_print_registers,   // 10: SYS_PRINT_REGISTERS
+    syscall_getchar,           // 11: SYS_GETCHAR
+    syscall_putPixel           // 12: SYS_PUT_PIXEL
+};
+
+// Dispatcher principal - recibe puntero al stack frame con registros
+void syscall_handler (uint64_t rax, uint64_t *registers) {
+    // Layout de registers (después de pushState):
+    // registers[0] = r15
+    // registers[1] = r14
+    // registers[2] = r13
+    // registers[3] = r12
+    // registers[4] = r11
+    // registers[5] = r10
+    // registers[6] = r9
+    // registers[7] = r8
+    // registers[8] = rsi
+    // registers[9] = rdi
+    // registers[10] = rbp
+    // registers[11] = rdx
+    // registers[12] = rcx
+    // registers[13] = rbx
+    // registers[14] = rax
+    
+    
+    if (rax < MAX_SYSCALLS) {
+        sysCallHandlers[rax](registers);
+    } else {
+        registers[14] = -1;  // Error: syscall inválida
     }
-    return 0;
 }
 
-static void syscall_putPixel(syscall_Registers *  regs){
-    PixelTarget target = (regs->rsi) ? PIXEL_VRAM:PIXEL_BACK;
+// ============================================================================
+// HANDLERS DE SYSCALLS
+// ============================================================================
 
-    putPixel(regs->rbx, regs->rcx, regs->rdx ,target);
+// Helper para write_at (usado por VRAM y BACK)
+static void syscall_write_at(uint64_t *registers, PixelTarget target) {
+    // Layout snapshot: [13]=RBX, [12]=RCX, [11]=RDX, [8]=RSI, [9]=RDI
+    const char *str   = (const char *)registers[13];   // RBX: texto
+    int col           = (int)registers[12];            // RCX: x en celdas
+    int fil           = (int)registers[11];            // RDX: y en celdas
+    uint32_t fColor   = (uint32_t)registers[8];        // RSI: color fuente
+    uint32_t bgColor  = (uint32_t)registers[9];        // RDI: color fondo
 
+    vdPrintStyled_AT(str, col, fil, fColor, bgColor, target);
 }
 
-
-static void syscall_write_at_VRAM(syscall_Registers * regs){
-    syscall_write_at(regs, PIXEL_VRAM);
+static void syscall_putPixel(uint64_t *registers) {
+    // En userland: 0 = PIXEL_VRAM, 1 = PIXEL_BACK
+    PixelTarget target = (registers[8] == 0) ? PIXEL_VRAM : PIXEL_BACK;   // RSI
+    putPixel(registers[13], registers[12], registers[11], target);   // RBX, RCX, RDX
 }
 
-static void syscall_write_at_BACK(syscall_Registers * regs){
-    syscall_write_at(regs, PIXEL_BACK);
+static void syscall_write_at_VRAM(uint64_t *registers) {
+    syscall_write_at(registers, PIXEL_VRAM);
 }
 
-static void syscall_write_at(syscall_Registers * regs, PixelTarget target){
-    const char *str   = (const char *)regs->rbx;   // texto
-    int col           = (int)regs->rcx;            // x en celdas
-    int fil           = (int)regs->rdx;            // y en celdas
-    uint32_t fColor   = (uint32_t)regs->rsi;       // color fuente
-    uint32_t bgColor  = (uint32_t)regs->rdi;       // color fondo
-
-    vdPrintStyled_AT(str, col, fil, fColor, bgColor, target); 
+static void syscall_write_at_BACK(uint64_t *registers) {
+    syscall_write_at(registers, PIXEL_BACK);
 }
 
-static void syscall_getScreen_Info(syscall_Registers *regs) {
-    uint64_t which = regs->rbx;   // 0 = height, 1 = width
+static void syscall_getScreen_Info(uint64_t *registers) {
+    uint64_t which = registers[13];   // RBX: 0 = height, 1 = width
     if (which == 0) {
-        regs->rax = vdGetHeight();
+        registers[14] = vdGetHeight();  // Retornar en RAX
     } else {
-        regs->rax = vdGetWidth();
+        registers[14] = vdGetWidth();   // Retornar en RAX
     }
 }
 
-static void  syscall_present_fullframe(){
+static void syscall_present_fullframe(uint64_t *registers) {
     present_fullframe();
-}  
+}
 
-static void syscall_write(syscall_Registers *regs) {
-    if (regs->rbx == 1) {
-        vdPrint( (const char*) regs->rcx, PIXEL_VRAM);
+static void syscall_write(uint64_t *registers) {
+    if (registers[13] == 1) {  // RBX
+        vdPrint((const char*)registers[12], PIXEL_VRAM);  // RCX
     } else {
-        vdPrintStyled( (const char*) regs->rcx, 0x00ffffff, 0x00FF0000, PIXEL_VRAM);
+        vdPrintStyled((const char*)registers[12], 0x00ffffff, 0x00FF0000, PIXEL_VRAM);
     }
 }
 
-/*
- * syscall_benchmark:
- * - entra con regs->rbx = cuál benchmark correr
- * - sale con regs->rax = resultado
- */
-static void syscall_benchmark(syscall_Registers *regs) {
-    uint64_t which = regs->rbx;             // 0=fps, 1=floating, 2=vram
+static void syscall_benchmark(uint64_t *registers) {
+    // Habilitar interrupciones mientras corre el benchmark
+    // para que el timer (IRQ0) avance y timer_ms_since_boot() progrese.
+    enable_interrupts();
+    uint64_t which = registers[13];  // RBX: cuál benchmark correr
     uint64_t res = 0;
 
     switch (which) {
         case 0: res = benchmark_fps();             break;
         case 1: res = benchmark_floating_point();  break;
         case 2: res = benchmark_hardware_access(); break;
-        default: res = (uint64_t)-1;               break; // inválido
+        default: res = (uint64_t)-1;               break;
     }
 
-    // devolver el entero directamente por RAX
-    regs->rax = res;
-    // no hace falta return res, porque el kernel ya tiene regs
+    registers[14] = res;  // Retornar resultado en RAX
 }
 
+static void syscall_resize(uint64_t *registers) {
+    int s = str_to_uint_ignore_sign((char *)registers[13]);  // RBX
 
-static void syscall_resize(syscall_Registers *regs) {
-    int s = str_to_uint_ignore_sign((char *)regs->rbx);     // <-- paso el valor del char * que se pasa desde el assembler a un entero
-
-    // 2) Validar / clamp simple (defensivo en kernel)
+    // Validar / clamp
     if (s < 1) s = 1;
-    if (s > 4) s = 4;         // si esta fuera del rango que printee que esta fuera de rango (FALTA HACER ESTO)
+    if (s > 4) s = 4;
 
-    // 3) Se setea el GD_Scale en el valor que tiene S
     vdSetFontScale(s);
 }
 
-
-static void syscall_getDate(syscall_Registers *regs) {
-    if (regs->rbx == 1) {
+static void syscall_getDate(uint64_t *registers) {
+    if (registers[13] == 1) {  // RBX
        vdPrint(getDateString(), PIXEL_VRAM);
        return;
     }
     vdPrint(getTimeString(), PIXEL_VRAM);
 }
 
-static void syscall_clearwindow(syscall_Registers *regs) {
-    vdclearScreenDB(regs->rbx);
+static void syscall_clearwindow(uint64_t *registers) {
+    vdclearScreenDB(registers[13]);  // RBX
 }
 
-
-static void syscall_read(syscall_Registers *regs) {
-    char *buf = (char *)regs->rbx;
+static void syscall_read(uint64_t *registers) {
+    char *buf = (char *)registers[13];  // RBX
     int   size = 0;
 
-    clearKeyBoardBuffer();                 //limpio el buffer del teclado
-
-    enable_interrupts();        //habilito (Interrupt Flag)
+    clearKeyBoardBuffer();
+    enable_interrupts();
 
     while (1) {
         if (hasNextKey()) {
             KeyBufferStruct k = getNextKey();
             if (k.is_pressed) {
                 if (k.key == '\n') {
-                    vdPrintChar('\n', PIXEL_VRAM);         // enter
-                    buf[size] = '\0';          // pongo null
-                    regs->rax = (uint64_t)size; // también lo dejo en rax por si el user lo espera ahí
+                    vdPrintChar('\n', PIXEL_VRAM);
+                    buf[size] = '\0';
+                    registers[14] = (uint64_t)size;  // Retornar en RAX
                     return;
                 } else if (k.key == '\b') {
                     if (size > 0) {
                         size--;
                         buf[size] = '\0';
-                        vdBackSpace(PIXEL_VRAM);           // borro
+                        vdBackSpace(PIXEL_VRAM);
                     }
                 } else if (k.key) {
-                    if (size + 1 < 256) {      // deja espacio para \0
+                    if (size + 1 < 256) {
                         buf[size++] = k.key;
-                        vdPrintChar(k.key, PIXEL_VRAM);    //print
+                        vdPrintChar(k.key, PIXEL_VRAM);
                     } else {
-                        vdPrintChar('\n', PIXEL_VRAM);         // enter
-                        buf[size] = '\0';          // pongo null
-                        regs->rax = (uint64_t)size;
+                        vdPrintChar('\n', PIXEL_VRAM);
+                        buf[size] = '\0';
+                        registers[14] = (uint64_t)size;
                         return;
                     }
                 }
             }
         }
     }
-
-    //falta funcion para apagar las interrupts
 }
-static void syscall_getchar(syscall_Registers *regs) {
+
+static void syscall_getchar(uint64_t *registers) {
     enable_interrupts();
-    uint64_t start = timer_ms_since_boot();   // tiempo inicial
-    const uint64_t timeout_ms = 50;           // esperar 50 milisegundos
+    uint64_t start = timer_ms_since_boot();
+    const uint64_t timeout_ms = 50;
 
     while (1) {
         if (hasNextKey()) {
             KeyBufferStruct k = getNextKey();
             if (k.is_pressed) {
-                regs->rax = (uint64_t)k.key;
-                return; // devolvemos la tecla
+                registers[14] = (uint64_t)k.key;  // Retornar en RAX
+                return;
             }
         }
 
-        // si pasaron más de timeout_ms sin tecla -> salir con 0
         if (timer_ms_since_boot() - start > timeout_ms) {
-            regs->rax = 0;
+            registers[14] = 0;  // Timeout
             return;
         }
     }
 }
 
-static void syscall_print_registers(syscall_Registers * regs){
-    regs_save(regs);
+static void syscall_print_registers(uint64_t *registers) {
+    // Si hay snapshot de Shift+Tab, limpiarlo
+    if (areRegsSaved()) {
+        clearRegsSaved();
+    }
     print_registers();
 }

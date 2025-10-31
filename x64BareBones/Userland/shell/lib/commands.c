@@ -18,9 +18,11 @@ void testZeroDivision();
 extern void throw_zero_division();
 void resize(int argc, char *argv[]);
 extern void throw_invalid_opcode ();
+extern void touch_regs();
 
 //IMPORTANTE DEBE SER EN ORDEN ALFABETICO
 const command_t COMMANDS[] = {
+    {"a", 10},
     { "benchmark",  8 },
     { "clear", 0 },
     { "date",  1 },
@@ -47,6 +49,7 @@ void commands_Handler(int func, int argc, char *argv[]) {
         case 7: time();                                 break;   
         case 8: benchmark();                            break; 
         case 9: registers();                            break;
+        case 10: prueba();                              break;
         default:                                        break;
     }
 }
@@ -101,4 +104,8 @@ void testInvalidOpcode() {
 
 void registers(){
     printRegisters();
+}
+
+void prueba(){
+    touch_regs();
 }
