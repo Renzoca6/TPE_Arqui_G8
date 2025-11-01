@@ -83,9 +83,11 @@ int  player_step_and_paint(TronGame *G, Player *p){
     return 1;
 } // 0=muere, 1=sigue
 
-int player_action_tick(TronGame *G, Player *p) {
+int player_action_tick(TronGame *G, Player *p,player_Intent intent) {
     // 2) aplicar intención → dirección efectiva
-    player_set_dir(p, p->dx, p->dy);
+
+    player_set_dir(p, intent.x, intent.y);
+    
     // 3) avanzar y pintar
     int alive1 = player_step_and_paint(G, p);
     if (!alive1){
