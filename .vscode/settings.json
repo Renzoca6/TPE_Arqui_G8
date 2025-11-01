@@ -30,6 +30,7 @@
         "types.h": "c",
         "tron_game.h": "c",
         "utils.h": "c",
-        "functional": "c"
+        "functional": "c",
+        "ui.h": "c"
     }
 }

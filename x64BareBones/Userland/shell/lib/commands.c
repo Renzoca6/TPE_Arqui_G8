@@ -21,6 +21,8 @@ void resize(int argc, char *argv[]);
 extern void throw_invalid_opcode ();
 void tron();
 extern void touch_regs();
+void registers();
+void prueba();
 
 
 

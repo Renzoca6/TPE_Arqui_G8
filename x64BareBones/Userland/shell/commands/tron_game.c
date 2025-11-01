@@ -5,12 +5,14 @@
 #include "../tron2/include/types.h"
 #include "../lib/syscall_call.h"
 #include "../tron2/include/config.h"
+#include "../tron2/include/ui.h"    
 #include <stdint.h>
 
 void startGame(){
     
     int mode = tron_show_start_menu();
     //clearwindow(0x000000);
+
 
     TronGame game;
     map_init(&game);
@@ -31,7 +33,6 @@ void startGame(){
     bool in_game = true;
 
     uint64_t start = get_ms_since_boot();
-    int i = 0 ; 
     while (in_game) {
         // a) esperar a próximo tick lógico
         uint64_t now = get_ms_since_boot();

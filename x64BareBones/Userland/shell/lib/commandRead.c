@@ -22,14 +22,7 @@ static int my_tolower(int c) {
 static size_t my_strlen(const char* s) {
     size_t n = 0; if (!s) return 0; while (s[n]) n++; return n;
 }
-static int my_strncmp(const char* a, const char* b, size_t n) {
-    for (size_t i = 0; i < n; i++) {
-        unsigned char ca = (unsigned char)a[i], cb = (unsigned char)b[i];
-        if (ca != cb) return (ca < cb) ? -1 : 1;
-        if (ca == 0) return 0;
-    }
-    return 0;
-}
+
 
 // -----------------------------------------------------------------------------
 // Tokenización simple (destructiva): separa por espacio/tab/CR/LF
