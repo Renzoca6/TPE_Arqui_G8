@@ -14,5 +14,5 @@ void score_init(TronGame *G);
 void score_update(const TronGame *G);
 
 
-int tron_show_end_menu(int won, int level);
+int tron_show_end_menu(bool coop, int won, int level);
 #endif
