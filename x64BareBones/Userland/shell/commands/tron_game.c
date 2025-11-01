@@ -17,7 +17,7 @@ void startGame(){
 
     
     TronGame game;
-    player_Intent p1_Intent;
+    player_Intent p1_Intent,p2_Intent;
     map_init(&game);
     map_draw_grid_lines(&game , 1);
 
@@ -45,25 +45,26 @@ void startGame(){
             continue;
         }
         start = get_ms_since_boot();
-        tron_handle_input_edge(p1_Intent);
-        int aux = player_action_tick(&p1);
-        if (aux != 0) {
+        tron_handle_input_edge_coop(p1_Intent,p2_Intent);
+        int p1Action = player_action_tick(&p1);
+        int p2Action = player_action_tick(&p2);
+        if (p2Action || p1Action == 0) {
             in_game = false;
-            if (aux == 1){
-                println("perdiste inutil");
-            }
-            else if(aux == 2){
-                println("ganaste... no sos tan inutil al final (igual lo podrias haber hecho mejor)");
-            }
-            else if(aux == 3){
+            if (p2Action && p1Action == 0){
                 println("empate, son los 2 horribles");
+            }
+            else if(p1Action == 0){
+                println("gano player 2");
+            }
+            else{
+                println("gano player 1");
             }   
         }
 
 
     }
 
-    map_free(&game);
+    //map_free(&game);
 
     while (1)
     {

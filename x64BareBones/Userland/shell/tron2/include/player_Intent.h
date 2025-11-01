@@ -5,10 +5,10 @@
 typedef struct{
     int8_t x;
     int8_t y;
-} g_player_intent;
+} player_Intent;
 
 // procesa todos los eventos pendientes y actualiza las intenciones
-void tron_handle_input_edge(g_player_intent p1);
-void tron_handle_input_edg_coop(g_player_intent p1, g_player_intent p2);
+void tron_handle_input_edge(player_Intent p1);
+void tron_handle_input_edg_coop(player_Intent p1, player_Intent p2);
 
 #endif
