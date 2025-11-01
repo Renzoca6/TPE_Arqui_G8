@@ -64,22 +64,34 @@ int ai_choose_dir_simple(const TronGame *G,
 {
     if (!G || !bot || !out) return 0;
 
-    static uint32_t s_count = 0;   // ← PERSISTE entre frames
+    static uint32_t s_count = 0;
     s_count++;
 
     const int fdx = bot->dx, fdy = bot->dy;
 
-    /* 1) Cada N pasos, intento jitter:
-          exactamente como vos querías: si jitter devuelve 1, NO entro al flujo de abajo.
-          Si devuelve 0, sigo con recto→izq→der. */
-    if ((s_count % TRON_AI_JITTER_PERIOD) == 0) {
+    /* NUEVO: período según nivel */
+    uint8_t lvl = G->level ? G->level : 1;
+    // nivel 1 → 7 (lo que tenías)
+    // nivel 2 → 6
+    // nivel 3 → 5
+    // mínimo 2
+    uint32_t period = TRON_AI_JITTER_PERIOD;
+    if (lvl > 1) {
+        uint32_t dec = (uint32_t)(lvl - 1);
+        if (dec >= period - 2)
+            period = 2;
+        else
+            period = period - dec;
+    }
+
+    if ((s_count % period) == 0) {
         if (ai_jitter3_simple(G, bot, out)) {
-            return 1;  // ya decidió por jitter
+            return 1;
         }
         // si no pudo, sigo con flujo simple…
     }
 
-    /* 2) Flujo simple: recto → izquierda → derecha */
+    /* flujo simple: recto → izq → der (igual que antes) */
     int fx = (int)bot->col + fdx;
     int fy = (int)bot->row + fdy;
     if (cell_is_free(G, fx, fy)) {
@@ -103,6 +115,5 @@ int ai_choose_dir_simple(const TronGame *G,
         return 1;
     }
 
-    /* 3) No hay escapatoria → el caller puede dejar dirección anterior. */
     return 0;
 }

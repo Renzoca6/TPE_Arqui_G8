@@ -30,7 +30,7 @@ void sleep_ms(uint64_t ms);
 uint64_t get_ms_since_boot(void);
 
 void putPixel(uint32_t color, uint32_t x, uint32_t y, int target);
-
+int get_multiple_chars_sys(char *buf, uint64_t max_len);
 void audio_play(uint32_t freq_hz);
 void audio_stop(void);
 void audio_beep(uint32_t freq_hz, uint32_t duration_ms);

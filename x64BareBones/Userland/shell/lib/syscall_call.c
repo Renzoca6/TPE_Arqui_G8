@@ -208,8 +208,3 @@ void printRegisters() {
     print_registers();
 }
 
-
-//apagado
-//registros del procesador
-//fps
-//ETC

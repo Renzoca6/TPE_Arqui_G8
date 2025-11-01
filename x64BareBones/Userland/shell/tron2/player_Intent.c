@@ -1,6 +1,6 @@
 #include "./include/player_Intent.h"
 #include "./include/config.h"   // KEY_W, etc.
-
+#include "../lib/syscall_call.h"
 // Por defecto: P1 va a la derecha; P2 va a la izquierda
 
 

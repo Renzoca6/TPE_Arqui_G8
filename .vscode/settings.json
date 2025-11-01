@@ -35,6 +35,7 @@
         "player_intent.h": "c",
         "player.h": "c",
         "game.h": "c",
-        "syscall.h": "c"
+        "syscall.h": "c",
+        "ai.h": "c"
     }
 }

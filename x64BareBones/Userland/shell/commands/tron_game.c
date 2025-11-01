@@ -42,14 +42,15 @@ static void tron_setup_match(TronGame *game, Player *p1, Player *p2) {
 static void play_Game(TronGame *game, Player *p1, Player *p2, int mode);
 
 /* ================================ */
-void startGame(void)
-{
+void startGame(void) {
     int mode = tron_show_start_menu();
 
     TronGame game;
     Player p1, p2;
 
-    tron_setup_match(&game, &p1, &p2);   // tablero limpio + HUD visible + score 0-0
+    tron_setup_match(&game, &p1, &p2);   // tablero limpio + HUD + score en 0
+    game.level = 1;                      // ← NUEVO: arrancamos siempre en nivel 1
+
     play_Game(&game, &p1, &p2, mode);    // juega primer BO5
 
     // Menú final y control de “continuar”
@@ -59,32 +60,38 @@ void startGame(void)
         int toGo = 0;
         switch (mode) {
             case 1: { // SINGLE
-                if (game.score.p1 == 3 && game.score.p2 == 3)
-                    toGo = tron_show_end_menu(0, 0, 1);
-                else if (game.score.p1 == 3)
-                    toGo = tron_show_end_menu(0, 1, 1);
-                else
-                    toGo = tron_show_end_menu(0, 0, 1);
+                int gano_p1 = (game.score.p1 == 3 && game.score.p2 < 3);
+                // ahora sí pasamos el level real
+                toGo = tron_show_end_menu(0, gano_p1 ? 1 : 0, game.level);
                 break;
             }
             case 2: { // COOP
-                if (game.score.p1 == 3 && game.score.p2 == 3)
-                    toGo = tron_show_end_menu(1, 2, 1);
-                else if (game.score.p1 == 3)
-                    toGo = tron_show_end_menu(1, 1, 1);
-                else
-                    toGo = tron_show_end_menu(1, 2, 1);
+                int gano_p1 = (game.score.p1 == 3);
+                // en coop no vamos a escalar dificultad, pero igual pasamos level
+                toGo = tron_show_end_menu(1, gano_p1 ? 1 : 2, game.level);
                 break;
             }
             default:
-                return; // startGame es void
+                return;
         }
 
         if (toGo == 2) {
-            // “Continuar jugando”: empezar un match nuevo YA (resetea tablero y score)
-            tron_setup_match(&game, &p1, &p2);
+            /* “Continuar jugando” */
+
+            // Si estamos en single y el jugador REAL ganó, recién ahí subimos nivel
+            if (mode == 1 && game.score.p1 == 3 && game.score.p2 < 3) {
+                if (game.level < 99)
+                    game.level++;   // subir dificultad
+            }
+
+            // guardo el nivel para no perderlo cuando reseteo el match
+            uint8_t lvl = game.level;
+
+            tron_setup_match(&game, &p1, &p2);  // esto resetea score
+            game.level = lvl;                   // ← lo vuelvo a poner
+
             play_Game(&game, &p1, &p2, mode);
-            continue;  // vuelve a mostrar el end menu al terminar ese match
+            continue;
         } else if (toGo == 1) {
             // “Volver al menú principal”
             clearwindow(0x000000);
@@ -98,12 +105,27 @@ void startGame(void)
     }
 }
 
+static uint32_t tron_tick_for_level(const TronGame *game) {
+    uint32_t base = TRON_TICK_MS;   // lo que ya tenés en config
+    uint8_t  lvl  = game->level ? game->level : 1;
+
+    // cada nivel baja 8 ms, pero no menos de 20 ms
+    uint32_t dec = (uint32_t)(lvl - 1) * 8u;
+
+    if (base <= 20u)      // por si alguien puso un valor ridículo en config
+        return base;
+
+    if (dec >= base - 20u)
+        return 20u;
+
+    return base - dec;
+}
+
 
 /* =============================================================== */
 /*             MISMA LÓGICA QUE TENÍAS, FUERA DE startGame         */
 /* =============================================================== */
-static void play_Game(TronGame *game, Player *p1, Player *p2, int mode)
-{
+static void play_Game(TronGame *game, Player *p1, Player *p2, int mode){
     while (game->score.p1 < 3 && game->score.p2 < 3) {
 
         player_Intent p1_Intent = (player_Intent){  1, 0 };
@@ -121,16 +143,19 @@ static void play_Game(TronGame *game, Player *p1, Player *p2, int mode)
         bool in_game = true;
         uint64_t start = get_ms_since_boot();
 
+        /* NUEVO: calculo tick según el nivel actual */
+        uint32_t tick_ms = tron_tick_for_level(game);
+
         while (in_game) {
-            uint64_t now = get_ms_since_boot();
+            uint64_t now     = get_ms_since_boot();
             uint64_t elapsed = now - start;
-            if (elapsed < TRON_TICK_MS) {
-                sleep_ms(TRON_TICK_MS - elapsed);
+            if (elapsed < tick_ms) {
+                sleep_ms(tick_ms - elapsed);
                 continue;
             }
             start = get_ms_since_boot();
 
-            // INPUT según modo (idéntico a tu código)
+            // INPUT según modo
             switch (mode) {
                 case 1: {
                     tron_handle_input_edge(&p1_Intent);
@@ -155,29 +180,25 @@ static void play_Game(TronGame *game, Player *p1, Player *p2, int mode)
                 in_game = false;
 
                 if (p2Action == 0 && p1Action == 0) {
-                    println("tie, both players lost");
                     game->score.p1++;
                     game->score.p2++;
                 } else if (p1Action == 0) {
-                    println("player 2 wins");
                     game->score.p2++;
                 } else {
-                    println("player 1 wins");
                     game->score.p1++;
                 }
 
-                score_update(game); // tu display de score
+                score_update(game);
             }
         }
 
-        // Entre rondas: esperar tecla para seguir (si nadie llegó a 3)
+        // Entre rondas
         if (game->score.p1 < 3 && game->score.p2 < 3) {
             while (1) {
                 if (getchar() != 0) break;
             }
         }
 
-        // Limpiar tablero para la próxima ronda
         map_free(game);
     }
 }

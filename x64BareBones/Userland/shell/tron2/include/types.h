@@ -28,6 +28,7 @@ typedef struct {
     uint8_t *occ;        // rows*cols bytes (0 libre, >0 ocupado)
     Player  p1, p2;
     Score score;
+    uint8_t level;
 } TronGame;
 
 #endif
