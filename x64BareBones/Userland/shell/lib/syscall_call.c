@@ -12,7 +12,7 @@ extern void sys_present_fullframe();
 extern int sys_get_screen_info(int aux);
 extern void sys_putPixel(uint32_t color, uint32_t x, uint32_t y, uint32_t target);
 extern uint64_t sys_getchar(char *buffer, uint64_t max_len);
-extern char sys_print_registers();
+extern int sys_print_registers(uint64_t *buffer);  // Retorna 0 si ok, -1 si no hay snapshot
 extern void touch_regs();
 extern void sys_sleep_ms(uint64_t ms);
 extern uint64_t sys_get_ms_since_boot();
@@ -87,11 +87,6 @@ void get_date(){
     sys_date_time (1);
 }
 
-void printRegisters(){
-    sys_print_registers();
-}
-
-
 
 uint64_t  do_benchmark_fps(){
     return sys_benchmark (0);
@@ -113,6 +108,89 @@ char getchar(void) {
     return (n > 0) ? c : 0;
 }
 
+// ============================================================================
+// REGISTER PRINTING (moved from kernel to userland)
+// ============================================================================
+
+#define REG_COUNT 20
+
+/* Register names matching pushState order */
+static const char * const REG_NAMES[REG_COUNT] = {
+    "R15", "R14", "R13", "R12", "R11", "R10", "R9", "R8",
+    "RSI", "RDI", "RBP", "RDX", "RCX", "RBX", "RAX", 
+    "RIP", "CS", "RFLAGS", "RSP", "SS"
+};
+
+/* Helper: print a 64-bit value as 16 hex digits (zero-padded) */
+static void printHexPadded(uint64_t v) {
+    char buf[17];
+    const char *hex = "0123456789ABCDEF";
+    for (int i = 0; i < 16; i++) {
+        uint8_t nibble = (v >> ((15 - i) * 4)) & 0xF;
+        buf[i] = hex[nibble];
+    }
+    buf[16] = '\0';
+    write(buf);
+}
+
+void print_registers(void) {
+    uint64_t regs[REG_COUNT];
+    
+    // Call syscall to copy registers to our buffer
+    int result = sys_print_registers(regs);
+    
+    if (result == -1) {
+        println("Register snapshot not available, press SHIFT+TAB");
+        return;
+    }
+
+    /* Decorative box header */
+    println("+----------------------------------------------------+");
+    println("|                  REGISTER SNAPSHOT                 |");
+    println("+----------------------------------------------------+");
+
+    /* Print registers in two columns */
+    for (int i = 0; i < REG_COUNT; i += 2) {
+        char namebuf[10];
+
+        /* start left border */
+        write("|");
+
+        /* Left column name (pad to 6 chars) */
+        const char *n = REG_NAMES[i];
+        int j = 0;
+        while (j < 6 && n[j]) { namebuf[j] = n[j]; j++; }
+        while (j < 6) { namebuf[j++] = ' '; }
+        namebuf[6] = ':'; namebuf[7] = ' '; namebuf[8] = '\0';
+        write(namebuf);
+        printHexPadded(regs[i]); /* prints 16 hex chars */
+
+        /* spacing between columns */
+        write("    ");
+
+        /* Right column */
+        if (i + 1 < REG_COUNT) {
+            const char *n2 = REG_NAMES[i+1];
+            int k = 0;
+            while (k < 6 && n2[k]) { namebuf[k] = n2[k]; k++; }
+            while (k < 6) { namebuf[k++] = ' '; }
+            namebuf[6] = ':'; namebuf[7] = ' '; namebuf[8] = '\0';
+            write(namebuf);
+            printHexPadded(regs[i+1]);
+        }
+
+        /* end right border */
+        write("|");
+        write("\n");
+    }
+
+    /* Decorative footer */
+    println("+----------------------------------------------------+");
+}
+
+void printRegisters() {
+    print_registers();
+}
 
 
 //apagado

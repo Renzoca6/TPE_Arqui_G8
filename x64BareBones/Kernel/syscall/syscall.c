@@ -4,7 +4,6 @@
 #include "keyboard_handler.h"
 #include "realTimeClock.h"
 #include "benchmark.h"
-#include "registers.h"
 #include "timer.h"
 
 
@@ -282,11 +281,18 @@ static void syscall_getchar(uint64_t *registers) {
 
 
 static void syscall_print_registers(uint64_t *registers) {
-    // Si hay snapshot de Shift+Tab, limpiarlo
+    uint64_t *user_buffer = (uint64_t *)registers[13];  // RBX = puntero al buffer del usuario
+    
     if (areRegsSaved()) {
-        clearRegsSaved();
+        uint64_t *saved = getSavedRegs();
+        // Copiar los REG_COUNT (20) registros al buffer del usuario
+        for (int i = 0; i < 20; i++) {  // REG_COUNT = 20
+            user_buffer[i] = saved[i];
+        }
+        registers[14] = 0;  // RAX = 0 (success)
+    } else {
+        registers[14] = -1;  // RAX = -1 (no hay snapshot)
     }
-    print_registers();
 }
 
 static void syscall_kill_system(uint64_t *registers){
