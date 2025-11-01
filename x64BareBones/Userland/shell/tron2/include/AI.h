@@ -11,4 +11,15 @@ int ai_choose_dir_simple(const TronGame *G,
                          const Player   *bot,
                          player_Intent  *out);
 
+
+
+int ai_choose_dir_track(const TronGame *G,
+                        const Player   *bot,
+                        const Player   *target,
+                        player_Intent  *out);        
+                        
+                        int ai_choose_dir_cutoff(const TronGame *G,
+                         const Player   *bot,
+                         const Player   *target,
+                         player_Intent  *out);
 #endif

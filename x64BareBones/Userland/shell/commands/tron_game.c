@@ -158,9 +158,28 @@ static void play_Game(TronGame *game, Player *p1, Player *p2, int mode){
             // INPUT según modo
             switch (mode) {
                 case 1: {
+                    // player humano
                     tron_handle_input_edge(&p1_Intent);
-                    player_Intent bot_next = p2_Intent; // fallback
-                    if (ai_choose_dir_simple(game, p2, &bot_next)) {
+
+                    // IA del bot
+                    player_Intent bot_next = p2_Intent;
+                    int decided = 0;
+
+                    /* primero: si ya tenemos sistema de niveles, el corte lo activamos
+                    desde nivel 3 (ajustá el número si querés) */
+                    if (game->level >= 10) {
+                        decided = ai_choose_dir_cutoff(game, p2, p1, &bot_next);
+                    } else if (game->level >= 2) {
+                        // nivel 2: solo trackea
+                        decided = ai_choose_dir_track(game, p2, p1, &bot_next);
+                    }
+
+                    // si todavía no decidió (o no tenés level implementado), usa la simple
+                    if (!decided) {
+                        decided = ai_choose_dir_simple(game, p2, &bot_next);
+                    }
+
+                    if (decided) {
                         p2_Intent = bot_next;
                     }
                     break;
@@ -173,8 +192,9 @@ static void play_Game(TronGame *game, Player *p1, Player *p2, int mode){
                     return;
             }
 
-            int p1Action = player_action_tick(game, p1, p1_Intent);
             int p2Action = player_action_tick(game, p2, p2_Intent);
+            int p1Action = player_action_tick(game, p1, p1_Intent);
+            
 
             if (p2Action == 0 || p1Action == 0) {
                 in_game = false;

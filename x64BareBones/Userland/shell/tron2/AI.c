@@ -117,3 +117,200 @@ int ai_choose_dir_simple(const TronGame *G,
 
     return 0;
 }
+
+
+/* =========================================================
+   IA que “persigue” a un jugador:
+   - trata de ir hacia la columna del player
+   - luego hacia la fila del player
+   - solo toma una dirección si la celda está libre
+   - si nada sirve, cae a la IA simple
+   ========================================================= */
+static inline int iabs(int x) { return x < 0 ? -x : x; }
+
+int ai_choose_dir_track(const TronGame *G,
+                        const Player   *bot,
+                        const Player   *target,
+                        player_Intent  *out)
+{
+    if (!G || !bot || !target || !out)
+        return 0;
+
+    const Grid *grid = &G->grid;
+
+    /* diferencia en celdas */
+    int dc = (int)target->col - (int)bot->col;   // + → player a la derecha
+    int dr = (int)target->row - (int)bot->row;   // + → player abajo
+
+    /* vamos a armar una lista de direcciones “deseadas” en orden */
+    int cand_dx[4];
+    int cand_dy[4];
+    int n = 0;
+
+    /* 1) elegimos eje principal: el que está más lejos */
+    if (iabs(dc) >= iabs(dr)) {
+        /* primero horizontal hacia el player */
+        if (dc > 0) { cand_dx[n] =  1; cand_dy[n] =  0; n++; }   // ir derecha
+        else if (dc < 0) { cand_dx[n] = -1; cand_dy[n] =  0; n++; } // ir izquierda
+
+        /* después vertical hacia el player */
+        if (dr > 0) { cand_dx[n] =  0; cand_dy[n] =  1; n++; }   // ir abajo
+        else if (dr < 0) { cand_dx[n] =  0; cand_dy[n] = -1; n++; } // ir arriba
+    } else {
+        /* primero vertical hacia el player */
+        if (dr > 0) { cand_dx[n] =  0; cand_dy[n] =  1; n++; }   // ir abajo
+        else if (dr < 0) { cand_dx[n] =  0; cand_dy[n] = -1; n++; } // ir arriba
+
+        /* después horizontal hacia el player */
+        if (dc > 0) { cand_dx[n] =  1; cand_dy[n] =  0; n++; }   // ir derecha
+        else if (dc < 0) { cand_dx[n] = -1; cand_dy[n] =  0; n++; } // ir izquierda
+    }
+
+    /* 2) añadimos como opción la dirección actual (para no hacer cosas raras) */
+    cand_dx[n] = bot->dx;
+    cand_dy[n] = bot->dy;
+    n++;
+
+    /* 3) probamos en ese orden */
+    for (int i = 0; i < n; i++) {
+        int nx = (int)bot->col + cand_dx[i];
+        int ny = (int)bot->row + cand_dy[i];
+
+        if (nx >= 0 && ny >= 0 && nx < (int)grid->cols && ny < (int)grid->rows) {
+            if (occ_get(G, (uint16_t)nx, (uint16_t)ny) == 0) {
+                out->x = (int8_t)cand_dx[i];
+                out->y = (int8_t)cand_dy[i];
+                return 1;
+            }
+        }
+    }
+
+    /* 4) si nada de lo anterior sirvió, usamos tu IA de antes */
+    return ai_choose_dir_simple(G, bot, out);
+}
+
+
+
+/* =========================================================
+   IA que intenta CORTAR EL CAMINO al player.
+   Estrategia:
+   1. Predice 3 posiciones futuras del player (según su dx,dy).
+   2. Para cada posición futura, busca un movimiento del bot que lo acerque
+      MÁS RÁPIDO a esa posición (horizontal o vertical primero).
+   3. Si alguna de esas direcciones está libre, la usa.
+   4. Si no pudo, prueba con "track" (seguir al player).
+   5. Si tampoco, cae a la IA simple de siempre.
+   ========================================================= */
+static inline int ai_abs(int x) { return x < 0 ? -x : x; }
+
+/* chiquita: ¿esta celda (c,r) está dentro y libre? */
+static int ai_cell_free(const TronGame *G, int c, int r) {
+    return cell_is_free(G, c, r);  // ya la tenías
+}
+
+/* mueve bot 1 paso hacia (tc,tr) si se puede */
+static int ai_move_towards(const TronGame *G,
+                           const Player   *bot,
+                           int             tc,   // target col
+                           int             tr,   // target row
+                           player_Intent  *out)
+{
+    int bc = (int)bot->col;
+    int br = (int)bot->row;
+
+    /* prioridad: el eje donde más diferencia hay */
+    int dc = tc - bc;
+    int dr = tr - br;
+
+    int cand_dx[4];
+    int cand_dy[4];
+    int n = 0;
+
+    if (ai_abs(dc) >= ai_abs(dr)) {
+        /* primero horizontal hacia el target */
+        if (dc > 0) { cand_dx[n] =  1; cand_dy[n] =  0; n++; }
+        else if (dc < 0) { cand_dx[n] = -1; cand_dy[n] =  0; n++; }
+
+        /* después vertical hacia el target */
+        if (dr > 0) { cand_dx[n] =  0; cand_dy[n] =  1; n++; }
+        else if (dr < 0) { cand_dx[n] =  0; cand_dy[n] = -1; n++; }
+    } else {
+        /* primero vertical */
+        if (dr > 0) { cand_dx[n] =  0; cand_dy[n] =  1; n++; }
+        else if (dr < 0) { cand_dx[n] =  0; cand_dy[n] = -1; n++; }
+
+        /* después horizontal */
+        if (dc > 0) { cand_dx[n] =  1; cand_dy[n] =  0; n++; }
+        else if (dc < 0) { cand_dx[n] = -1; cand_dy[n] =  0; n++; }
+    }
+
+    /* por último, su dirección actual (para no hacer giros tontos) */
+    cand_dx[n] = bot->dx;
+    cand_dy[n] = bot->dy;
+    n++;
+
+    for (int i = 0; i < n; i++) {
+        int nx = bc + cand_dx[i];
+        int ny = br + cand_dy[i];
+        if (ai_cell_free(G, nx, ny)) {
+            out->x = (int8_t)cand_dx[i];
+            out->y = (int8_t)cand_dy[i];
+            return 1;
+        }
+    }
+
+    return 0;
+}
+
+int ai_choose_dir_cutoff(const TronGame *G,
+                         const Player   *bot,
+                         const Player   *target,
+                         player_Intent  *out)
+{
+    if (!G || !bot || !target || !out)
+        return 0;
+
+    /* 1) predecimos hasta 3 pasos del player */
+    int tdx = target->dx;
+    int tdy = target->dy;
+
+    /* si el player está quieto (raro), no sirve cortar, pasamos a track/simple */
+    if ((tdx == 0 && tdy == 0))
+        goto fallback;
+
+    /* posiciones futuras del player */
+    int fut_c[3];
+    int fut_r[3];
+
+    fut_c[0] = (int)target->col + tdx;
+    fut_r[0] = (int)target->row + tdy;
+
+    fut_c[1] = fut_c[0] + tdx;
+    fut_r[1] = fut_r[0] + tdy;
+
+    fut_c[2] = fut_c[1] + tdx;
+    fut_r[2] = fut_r[1] + tdy;
+
+    /* 2) para cada futura, intentamos mover el bot HACIA esa celda */
+    for (int k = 0; k < 3; k++) {
+        int tc = fut_c[k];
+        int tr = fut_r[k];
+
+        /* la celda que queremos cortar puede estar ocupada por el trail del player;
+           igual intentamos pararnos en la celda previa al corte. */
+        if (!cell_is_inside(&G->grid, tc, tr))
+            continue;
+
+        if (ai_move_towards(G, bot, tc, tr, out)) {
+            return 1;
+        }
+    }
+
+fallback:
+    /* 3) si no pudo cortar, que lo persiga primero... */
+    if (ai_choose_dir_track(G, bot, target, out))
+        return 1;
+
+    /* 4) ...y si tampoco, que haga lo de siempre */
+    return ai_choose_dir_simple(G, bot, out);
+}

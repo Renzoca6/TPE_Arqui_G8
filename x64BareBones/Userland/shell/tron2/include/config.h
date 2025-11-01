@@ -14,7 +14,7 @@
 #define TRON_P1_COLOR             0xC4872B
 #define TRON_P2_COLOR             0x1A9BA0
 #define TRON_BG_COLOR             0x000000
-#define TRON_TICK_MS          80
+#define TRON_TICK_MS          70
 #define TRON_BAND          4 
 
 // teclas (ajustá a tu keycode)
