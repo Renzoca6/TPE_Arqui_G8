@@ -10,16 +10,13 @@
 #include <stdint.h>
 
 void startGame(){
-    
     int mode = tron_show_start_menu();
-    //clearwindow(0x000000);
 
-
-    
     TronGame game;
-    player_Intent p1_Intent,p2_Intent;
+    player_Intent p1_Intent, p2_Intent;
     map_init(&game);
     map_draw_grid_lines(&game , 1);
+    map_draw_border_lines(&game, 1);
 
     Player p1, p2;
     player_spawn_center_left(&game, &p1, 1, TRON_P1_COLOR);
@@ -32,6 +29,8 @@ void startGame(){
     map_draw_cell(&game, p2.col,p2.row, p2.color, 1);
 
     present_fullframe();
+
+    //tron_draw_scores(&game, 1, 2);
     
     bool in_game = true;
 

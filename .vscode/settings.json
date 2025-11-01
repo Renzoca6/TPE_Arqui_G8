@@ -33,6 +33,7 @@
         "functional": "c",
         "ui.h": "c",
         "player_intent.h": "c",
-        "player.h": "c"
+        "player.h": "c",
+        "game.h": "c"
     }
 }

@@ -15,6 +15,7 @@ uint8_t  occ_get(const TronGame *G, uint16_t col, uint16_t row);
 void     occ_set(TronGame *G, uint16_t col, uint16_t row, uint8_t v);
 void  map_draw_cell(const TronGame *G, uint16_t col, uint16_t row, uint32_t color, int target);
 void  map_free(TronGame *G);
+void map_draw_border_lines(const TronGame *G, int target);
 
 
 

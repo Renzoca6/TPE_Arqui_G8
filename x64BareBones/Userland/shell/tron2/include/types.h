@@ -8,6 +8,7 @@ typedef struct {
     uint16_t cell_px;       // px por celda
     uint32_t line_color;    //color de la grid
     uint32_t bg_color;    //color de la grid
+    uint32_t border_color;    //color de la grid
 } Grid;
 
 typedef struct {

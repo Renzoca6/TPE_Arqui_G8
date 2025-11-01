@@ -3,6 +3,7 @@
 #include "../utils/utils.h"
 #include "../lib/syscall_call.h"
 #include <stdbool.h>
+#include "./include/ui.h"
 
 void  map_init(TronGame *G){
  uint64_t w = get_screen_width();
@@ -13,6 +14,7 @@ void  map_init(TronGame *G){
     G->grid.y0 = TRON_MARGIN_TOP;
     G->grid.line_color = TRON_GRID_COLOR_LINE;
     G->grid.bg_color = TRON_GRID_COLOR_BG;
+    G->grid.border_color = TRON_GRID_COLOR_BORDER;
  
     // 2) tamaño de celda
     G->grid.cell_px = TRON_CELL_PX;
@@ -37,6 +39,60 @@ void  map_init(TronGame *G){
 
     for (uint32_t i = 0; i < total; i++) {
         G->occ[i] = 0;
+    }
+}
+
+
+void map_draw_border_lines(const TronGame *G, int target){
+    if (G == NULL)
+        return;
+
+    const Grid *g = &G->grid;
+
+    uint32_t x0 = g->x0;
+    uint32_t y0 = g->y0;
+    uint32_t w  = (uint32_t)g->cols * g->cell_px;
+    uint32_t h  = (uint32_t)g->rows * g->cell_px;
+    uint32_t t  = g->cell_px;   // grosor del borde
+    uint32_t color = g->border_color;
+
+    uint32_t screen_w = get_screen_width();
+    uint32_t screen_h = get_screen_height();
+
+    uint32_t x_left   = (x0 >= t) ? (x0 - t) : 0;
+    uint32_t y_top    = (y0 >= t) ? (y0 - t) : 0;
+    uint32_t x_right  = x0 + w;
+    uint32_t y_bottom = y0 + h;
+
+    if (x_right + t > screen_w)  x_right  = screen_w - t;
+    if (y_bottom + t > screen_h) y_bottom = screen_h - t;
+
+    // --- borde superior ---
+    for (uint32_t y = y_top; y < y0; y++) {
+        for (uint32_t x = x_left; x < x_right + t && x < screen_w; x++) {
+            putPixel(color, x, y, target);
+        }
+    }
+
+    // --- borde inferior ---
+    for (uint32_t y = y_bottom; y < y_bottom + t && y < screen_h; y++) {
+        for (uint32_t x = x_left; x < x_right + t && x < screen_w; x++) {
+            putPixel(color, x, y, target);
+        }
+    }
+
+    // --- borde izquierdo ---
+    for (uint32_t y = y_top; y < y_bottom + t && y < screen_h; y++) {
+        for (uint32_t x = x_left; x < x0 && x < screen_w; x++) {
+            putPixel(color, x, y, target);
+        }
+    }
+
+    // --- borde derecho ---
+    for (uint32_t y = y_top; y < y_bottom + t && y < screen_h; y++) {
+        for (uint32_t x = x_right; x < x_right + t && x < screen_w; x++) {
+            putPixel(color, x, y, target);
+        }
     }
 }
 
