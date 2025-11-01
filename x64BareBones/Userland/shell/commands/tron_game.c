@@ -104,14 +104,14 @@ void startGame(){
 
     //map_free(&game);
     clearwindow(0x000000);
-    tron_show_end_menu(1);
+    tron_show_end_menu(0, 1);
     while (1)
     {
         /* code */
     }
     
 
-    //clearwindow(0x000000);
+    clearwindow(0x000000);
     
 }
 

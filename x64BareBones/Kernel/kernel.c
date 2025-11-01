@@ -48,9 +48,8 @@ void * initializeKernelBinary() {
 void killSystem(){
 	kill = 1;
 	// Halt the system permanently
-	while (1) {
-		_hlt();
-	}
+	_hlt();
+
 }
 
 int main() {

@@ -174,40 +174,48 @@ int tron_show_start_menu(void)
 
     return 0;
 }
-
-int tron_show_end_menu(int won)
+int tron_show_end_menu(int won, int level)
 {
-    // agrandar letra
     do_resize("2");
-
-    // fondo TRON
     tron_draw_background();
 
-    // colores
-    uint32_t bgColor     = 0x000000;   // negro
-    uint32_t titleColor  = won ? 0x00FF00 : 0xFF0000;   // verde si ganó, rojo si perdió
-    uint32_t textColor   = 0x99FFFF;   // azul claro
-    uint32_t hintColor   = 0x44AAAA;   // azul más oscuro
+    uint32_t bgColor     = 0x000000;                   // negro
+    uint32_t titleColor  = won ? 0x00FF00 : 0xFF0000;  // verde si ganó, rojo si perdió
+    uint32_t textColor   = 0x99FFFF;                   // azul claro
+    uint32_t hintColor   = 0x44AAAA;                   // azul más oscuro
 
     uint64_t sw = get_screen_width();
 
-    // título principal
-    if (won)
-        print_centered_line("HAS GANADO!", sw, 7,  titleColor, bgColor, 16, false);
-    else
-        print_centered_line("HAS PERDIDO", sw, 7,  titleColor, bgColor, 16, false);
+    // --- construir el mensaje dinámicamente ---
+    char title[64];
+    char numBuf[16];
+    uintToBase(won ? level + 1 : level, numBuf, 10);   // convertir número a string
 
-    // opciones
+    // copiar mensaje base
+    char *p = title;
+    if (won) {
+        const char *msg = "HAS GANADO! PASAS AL LEVEL ";
+        while (*msg) *p++ = *msg++;
+    } else {
+        const char *msg = "HAS PERDIDO. REINTENTAR LEVEL ";
+        while (*msg) *p++ = *msg++;
+    }
+
+    // concatenar número
+    char *n = numBuf;
+    while (*n) *p++ = *n++;
+    *p = '\0';
+
+    // --- mostrar texto ---
+    print_centered_line(title, sw, 7, titleColor, bgColor, 16, false);
     print_centered_line("A) Volver al menu principal", sw, 9,  textColor, bgColor, 16, false);
     print_centered_line("B) Continuar jugando",        sw, 10, textColor, bgColor, 16, false);
-
     print_centered_line("Presione una tecla para continuar...", sw, 13, hintColor, bgColor, 16, false);
 
-    // mostrar en pantalla
     present_fullframe();
     do_resize("1");
 
-    // loop de entrada
+    // --- leer tecla ---
     while (1) {
         char ch = getchar();
         if (ch == 0) {
