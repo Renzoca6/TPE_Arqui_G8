@@ -1,9 +1,19 @@
 #include "keyboard_handler.h"
 #include <stdio.h>
 #include <stdbool.h>
+#include <stdint.h>
 #include "io.h"
 #include <string.h>
 #include "registers.h"  // For REG_COUNT
+
+// --- estado para scancodes extendidos (E0) ---
+static bool e0_prefix = false;
+
+// --- Opción B: tokens propios para flechas (recomendado) ---
+#define KEY_UP    ((char)0xF1)
+#define KEY_DOWN  ((char)0xF2)
+#define KEY_LEFT  ((char)0xF3)
+#define KEY_RIGHT ((char)0xF4)
 
 extern void enable_interrupts(void);
 extern void disable_interrupts(void);
@@ -124,6 +134,52 @@ void addKeyToBuffer(uint8_t scancode, uint64_t * registers) {
 
 void keyboardPressed(uint64_t * registers) {
     uint8_t sc = inb(0x60);
+
+
+    // 1) Prefijo extendido
+    if (sc == 0xE0) {
+        e0_prefix = true;
+        return;
+    }
+
+    // 2) Break code (release)
+    bool released = (sc & 0x80) != 0;
+    uint8_t code  = sc & 0x7F;
+
+    if (e0_prefix) {
+        // Flechas set 1: E0 48 (UP), E0 50 (DOWN), E0 4B (LEFT), E0 4D (RIGHT)
+        if (!released) {
+            char out = 0;
+
+            // --- ELEGIR UNA OPCIÓN ---
+            // Opción A: mapear flechas -> WASD (todo ASCII, fácil)
+            // switch (code) {
+            //     case 0x48: out = 'w'; break; // UP
+            //     case 0x50: out = 's'; break; // DOWN
+            //     case 0x4B: out = 'a'; break; // LEFT
+            //     case 0x4D: out = 'd'; break; // RIGHT
+            // }
+
+            // Opción B: usar tokens propios 0xF1..0xF4
+            switch (code) {
+                case 0x48: out = KEY_UP;    break;
+                case 0x4B: out = KEY_DOWN;  break;
+                case 0x50: out = KEY_LEFT;  break;
+                case 0x4D: out = KEY_RIGHT; break;
+            }
+
+            if (out) {
+                KeyBufferStruct ev = {0};
+                ev.scancode   = sc;     // informativo
+                ev.is_pressed = true;   // solo el edge “press”
+                ev.key        = out;    // ¡clave!
+                pushEvent(ev);
+            }
+        }
+        e0_prefix = false; // siempre limpiar el prefijo
+        return;
+    }
+    
     addKeyToBuffer(sc, registers);
 }
 

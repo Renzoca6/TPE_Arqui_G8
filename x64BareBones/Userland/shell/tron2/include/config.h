@@ -20,9 +20,9 @@
 #define KEY_A 'a'
 #define KEY_S 's'
 #define KEY_D 'd'
-#define KEY_UP    0x4800  // si usás scancodes, ajustá
-#define KEY_LEFT  0x4B00
-#define KEY_DOWN  0x5000
-#define KEY_RIGHT 0x4D00
+#define KEY_UP    ((char)0xF1)  // si usás scancodes, ajustá
+#define KEY_LEFT  ((char)0xF2)
+#define KEY_DOWN  ((char)0xF3)
+#define KEY_RIGHT ((char)0xF4)
 
 #endif

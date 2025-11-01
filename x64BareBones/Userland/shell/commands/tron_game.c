@@ -17,7 +17,8 @@ void startGame(){
 
     
     TronGame game;
-    player_Intent p1_Intent,p2_Intent;
+    player_Intent p1_Intent = (player_Intent){  1, 0 };
+    player_Intent p2_Intent = (player_Intent){  -1, 0 };
     map_init(&game);
     map_draw_grid_lines(&game , 1);
 
@@ -45,12 +46,13 @@ void startGame(){
             continue;
         }
         start = get_ms_since_boot();
-        tron_handle_input_edge_coop(p1_Intent,p2_Intent);
-        int p1Action = player_action_tick(&p1);
-        int p2Action = player_action_tick(&p2);
-        if (p2Action || p1Action == 0) {
+        tron_handle_input_edge_coop(&p1_Intent,&p2_Intent);
+        int p1Action = player_action_tick(&game,&p1,p1_Intent);
+        int p2Action = player_action_tick(&game,&p2,p2_Intent);
+
+        if (p2Action == 0 || p1Action == 0) {
             in_game = false;
-            if (p2Action && p1Action == 0){
+            if (p2Action == 0 && p1Action == 0){
                 println("empate, son los 2 horribles");
             }
             else if(p1Action == 0){
