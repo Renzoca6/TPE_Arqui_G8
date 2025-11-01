@@ -31,7 +31,7 @@ void updateRegs(uint64_t * registers){
     lastRegsState = savedRegisters; 
 }
 
-char areRegsSaved(){
+bool areRegsSaved(){
     return regsSaved;
 }
 
@@ -193,12 +193,12 @@ KeyBufferStruct getNextKey(void) {
     count--;
     return ev;
 }
-void clearKeyBoardBuffer(void) {
+void clearKeyboardBuffer(void) {
     lastkey = nextkey = count = 0;
 }
 
 void waitForEnter(void) {
-    clearKeyBoardBuffer();      //limpio cualquier tecla previa
+    clearKeyboardBuffer();      //limpio cualquier tecla previa
     enable_interrupts(); 
     while (1) {
         if (!hasNextKey()) continue;

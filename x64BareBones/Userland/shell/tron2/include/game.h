@@ -1,11 +1,19 @@
-// game.h
 #ifndef GAME_H
 #define GAME_H
 
 #include "types.h"
 
-void game_init(TronGame *G);
-void game_countdown(TronGame *G, int seconds);
-void game_loop(TronGame *G); // bloquea hasta que haya ganador
+/* ===================== */
+/*     Ciclo principal    */
+/* ===================== */
 
-#endif
+/** Inicializa el juego. */
+void game_init(TronGame *G);
+
+/** Muestra cuenta regresiva antes de iniciar. */
+void game_countdown(TronGame *G, int seconds);
+
+/** Ejecuta el bucle principal del juego (bloquea hasta que haya ganador). */
+void game_loop(TronGame *G);
+
+#endif /* GAME_H */

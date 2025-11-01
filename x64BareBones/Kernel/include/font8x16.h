@@ -1,7 +1,11 @@
-#ifndef FONT8x16_H
-#define FONT8x16_H
+#ifndef FONT8X16_H
+#define FONT8X16_H
 
-    extern unsigned char font8x16[][16];
-    
+/* ===================== */
+/*    Fuente 8x16         */
+/* ===================== */
 
-#endif // FONT8x16_H
+/* Cada carácter ocupa 16 bytes. */
+extern unsigned char font8x16[][16];
+
+#endif /* FONT8X16_H */

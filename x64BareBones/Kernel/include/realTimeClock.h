@@ -3,15 +3,26 @@
 
 #include <stdint.h>
 
-int getSeconds();
-int getMinutes();
-int getHours();
-int getDay();
-int getMonth();
-int getYear_YY();
-int getYear_YYYY();
-char * getDateString();
-char * getTimeString();
+/* ===================== */
+/*    Reloj en tiempo real */
+/* ===================== */
 
+int getSeconds(void);
+int getMinutes(void);
+int getHours(void);
+int getDay(void);
+int getMonth(void);
+int getYear_YY(void);
+int getYear_YYYY(void);
 
-#endif
+/**
+ * Devuelve una cadena estática con la fecha formateada.
+ */
+char *getDateString(void);
+
+/**
+ * Devuelve una cadena estática con la hora formateada.
+ */
+char *getTimeString(void);
+
+#endif /* REAL_TIME_CLOCK_H */

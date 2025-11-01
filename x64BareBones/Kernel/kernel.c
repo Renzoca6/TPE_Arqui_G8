@@ -4,7 +4,7 @@
 #include <moduleLoader.h>
 #include <video.h>
 #include <realTimeClock.h>
-#include "interrups_dispatcher.h"
+#include "interrupts_dispatcher.h"
 #include "keyboard_handler.h"
 #include "syscall.h"
 

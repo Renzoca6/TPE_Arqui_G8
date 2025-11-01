@@ -233,7 +233,7 @@ static void syscall_read(uint64_t *registers) {
     char *buf = (char *)registers[13];  // RBX
     int   size = 0;
 
-    clearKeyBoardBuffer();
+    clearKeyboardBuffer();
     enable_interrupts();
 
     while (1) {
