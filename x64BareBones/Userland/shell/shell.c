@@ -7,9 +7,11 @@
 
 int main() {
     char buf[256];
-    while (1){
+    int should_exit = 0;
+    while (!should_exit){
         write("- ");
         read(buf);
-        cr_dispatch_exact(buf);}
-    return 1;
+        should_exit = cr_dispatch_exact(buf);
+    }
+    return 0;
 }

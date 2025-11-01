@@ -14,4 +14,4 @@ typedef struct {
 extern const command_t COMMANDS[];
 extern const int       N_COMMANDS;
 
-void commands_Handler(int func, int argc, char *argv[]);
+int commands_Handler(int func, int argc, char *argv[]);

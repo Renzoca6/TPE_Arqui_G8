@@ -1,4 +1,4 @@
-//#include "../include/syscall.h"
+#include "syscall.h"
 #include <stdint.h>
 #include "video.h"
 #include "keyboard_handler.h"
@@ -11,7 +11,7 @@
 extern void enable_interrupts(void);
 extern void disable_interrupts(void);
 
-#define MAX_SYSCALLS 15
+#define MAX_SYSCALLS 16
 
 // Forward declarations de handlers
 static void syscall_read(uint64_t *registers);
@@ -29,6 +29,7 @@ static void syscall_getchar(uint64_t *registers);
 static void syscall_putPixel(uint64_t *registers);
 static void syscall_get_ms_since_boot(uint64_t *registers);
 static void syscall_sleep_ms(uint64_t *registers);
+static void syscall_kill_system(uint64_t *registers);
 
 
 // Tipo para punteros a funciones handler
@@ -51,6 +52,7 @@ static SysCallHandler sysCallHandlers[MAX_SYSCALLS] = {
     syscall_putPixel,           // 12: SYS_PUT_PIXEL
     syscall_get_ms_since_boot, // 13: syscall_get_ms_since_boot
     syscall_sleep_ms,          // 14: syscall_sleep_ms
+    syscall_kill_system,        //15: syscall_kill_system
 };
 
 // Dispatcher principal - recibe puntero al stack frame con registros
@@ -285,4 +287,8 @@ static void syscall_print_registers(uint64_t *registers) {
         clearRegsSaved();
     }
     print_registers();
+}
+
+static void syscall_kill_system(uint64_t *registers){
+    killSystem();
 }
