@@ -10,8 +10,9 @@
 #include <stdint.h>
 
 void startGame(){
-    
+  
     int mode = tron_show_start_menu();
+
     //clearwindow(0x000000);
 
 
@@ -46,7 +47,35 @@ void startGame(){
             continue;
         }
         start = get_ms_since_boot();
-        tron_handle_input_edge_coop(&p1_Intent,&p2_Intent);
+
+
+        // b) INPUT según modo
+        switch (mode) {
+        case 1: { // SINGLE: P1 humano, P2 bot simple
+            // P1 por teclado (edge)
+            tron_handle_input_edge(&p1_Intent);
+
+            // P2 por IA simple (si no hay movimiento seguro, se queda con su dirección actual)
+            player_Intent bot_next = p2_Intent; // fallback
+            if (ai_choose_dir_simple(&game, &p2, &bot_next)) {
+                p2_Intent = bot_next;
+            }
+            break;
+        }
+        case 2: { // COOP: P1 y P2 por teclado
+            tron_handle_input_edge_coop(&p1_Intent, &p2_Intent);
+            break;
+        }
+        default:
+            // Si el menú devolvió algo raro, salimos
+            return;
+        }
+
+
+
+
+
+
         int p1Action = player_action_tick(&game,&p1,p1_Intent);
         int p2Action = player_action_tick(&game,&p2,p2_Intent);
 
