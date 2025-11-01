@@ -19,8 +19,6 @@ static const uint64_t PageSize = 0x1000;
 
 void * const shellAddress = (void*)0x400000;  // Eliminado 'static' para hacerlo visible globalmente
 
-static int kill=0;
-
 typedef int (*EntryPoint)();
 
 void clearBSS(void * bssAddress, uint64_t bssSize) {
@@ -42,13 +40,6 @@ void * initializeKernelBinary() {
 	loadModules(&endOfKernelBinary, moduleAddresses);
 	clearBSS(&bss, &endOfKernel - &bss);
 	return getStackBase();
-
-}
-
-void killSystem(){
-	kill = 1;
-	// Halt the system permanently
-	_hlt();
 
 }
 

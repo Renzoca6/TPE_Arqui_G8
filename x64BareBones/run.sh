@@ -8,4 +8,5 @@ qemu-system-x86_64 \
   -m "$MEM" \
   -drive file="$IMG",if=ide,format=qcow2 \
   -audiodev sdl,id=snd0 \
-  -machine pcspk-audiodev=snd0
+  -machine pcspk-audiodev=snd0 \
+  -device isa-debug-exit,iobase=0xf4,iosize=0x04

@@ -10,7 +10,7 @@ int main() {
     while (!should_exit){
         write("- ");
         read(buf);
-        should_exit = cr_dispatch_exact(buf);
+        cr_dispatch_exact(buf);
     }
     return 0;
 }

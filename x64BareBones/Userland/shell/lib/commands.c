@@ -59,7 +59,7 @@ int commands_Handler(int func, int argc, char *argv[]) {
         case 8: benchmark();                            break; 
         case 9: registers();                            break;
         case 10: tron();                                break;
-        case 11: kill(); return 1;                      break;
+        case 11: kill();                                break;
         case 12: testSound();                           break;
         default:                                        break;
     }

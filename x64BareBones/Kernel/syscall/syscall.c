@@ -330,7 +330,7 @@ static void syscall_print_registers(uint64_t *registers) {
         registers[14] = -1;  // RAX = -1 (no hay snapshot)
     }
 }
-
+#include "io.h"
 static void syscall_kill_system(uint64_t *registers){
-    killSystem();
+    outb(0xF4, 0x00);
 }
