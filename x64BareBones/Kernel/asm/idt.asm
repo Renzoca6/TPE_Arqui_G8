@@ -1,5 +1,6 @@
 global load_idt
-GLOBAL enable_interrupts
+global enable_interrupts
+global disable_interrupts:
 section .text
 
 load_idt:
@@ -12,4 +13,8 @@ load_idt:
 
 enable_interrupts:
     sti
+    ret
+
+disable_interrupts:
+    cli
     ret

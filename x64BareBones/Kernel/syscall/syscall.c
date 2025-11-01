@@ -7,7 +7,9 @@
 #include "registers.h"
 #include "timer.h"
 
+
 extern void enable_interrupts(void);
+extern void disable_interrupts(void);
 
 #define MAX_SYSCALLS 15
 
@@ -225,28 +227,57 @@ static void syscall_read(uint64_t *registers) {
             }
         }
     }
+    disable_interrupts();
 }
 
 static void syscall_getchar(uint64_t *registers) {
-    enable_interrupts();
-    uint64_t start = timer_ms_since_boot();
+    // args desde userland
+    char *user_buf     = (char *)registers[13];  // RBX: puntero al buffer
+    uint64_t max_len   = registers[12];          // RCX: tamaño máximo
     const uint64_t timeout_ms = 50;
+
+    enable_interrupts();
+
+    uint64_t last_event_time = timer_ms_since_boot();
+    uint64_t written = 0;
 
     while (1) {
         if (hasNextKey()) {
             KeyBufferStruct k = getNextKey();
             if (k.is_pressed) {
-                registers[14] = (uint64_t)k.key;  // Retornar en RAX
-                return;
+                if (written < max_len) {
+                    char ch = (char)k.key;
+
+                    // --- convertir a minúscula si es letra ---
+                    if (ch >= 'A' && ch <= 'Z') {
+                        ch = ch + ('a' - 'A');
+                    }
+
+                    user_buf[written] = ch;
+                    written++;
+                }
+                last_event_time = timer_ms_since_boot();
+
+                if (written >= max_len) {
+                    break;
+                }
             }
         }
 
-        if (timer_ms_since_boot() - start > timeout_ms) {
-            registers[14] = 0;  // Timeout
-            return;
+        if (timer_ms_since_boot() - last_event_time > timeout_ms) {
+            break;
         }
     }
+
+    if (written < max_len) {
+        user_buf[written] = '\0';
+    }
+
+    // devolver cantidad de teclas leídas
+    registers[14] = written;    // RAX
+    disable_interrupts();
 }
+
 
 static void syscall_print_registers(uint64_t *registers) {
     // Si hay snapshot de Shift+Tab, limpiarlo

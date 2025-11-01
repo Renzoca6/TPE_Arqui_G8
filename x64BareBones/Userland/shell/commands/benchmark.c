@@ -112,7 +112,7 @@ void print_benchmark(void) {
         //present_fullframe();
 
         // detectar tecla
-        char c = getchar_sys();
+        char c = getchar();
         if (!(c == 0))
             running = false;
 

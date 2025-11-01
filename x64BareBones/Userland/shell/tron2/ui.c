@@ -126,15 +126,15 @@ int tron_show_start_menu(void)
     do_resize("1");
     // loop de entrada
     while (1) {
-        char ch = getchar_sys();
+        char ch = getchar();
         if (ch == 0) {
             sleep_ms(10);
             continue;
         }
 
-        if (ch == 'A' || ch == 'a')
+        if (ch == 'a' )
             return 1;   // un jugador
-        if (ch == 'B' || ch == 'b')
+        if (ch == 'b')
             return 2;   // dos jugadores
         if (ch == '\n' || ch == '\r' || ch == 27)
             return 0;   // salir

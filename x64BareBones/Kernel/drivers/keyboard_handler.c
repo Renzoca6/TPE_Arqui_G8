@@ -5,8 +5,8 @@
 #include <string.h>
 #include "registers.h"  // For REG_COUNT
 
-extern void _sti();
-extern void _cli();
+extern void enable_interrupts(void);
+extern void disable_interrupts(void);
 
 // === Guardado de registros (snapshot con Shift+Tab) ===
 static char regsSaved = 0;
@@ -146,7 +146,7 @@ void clearKeyBoardBuffer(void) {
 
 void waitForEnter(void) {
     clearKeyBoardBuffer();      //limpio cualquier tecla previa
-    _sti();     //_sti() es un wrapper (asm) que ejecuta la instrucción STI: pone a 1 el Interrupt Flag (IF). Eso permite que las interrupciones externas (IRQ) sean entregadas por la CPU.
+    enable_interrupts(); 
     while (1) {
         if (!hasNextKey()) continue;
 
@@ -156,6 +156,6 @@ void waitForEnter(void) {
             break; // Se presionó Enter → salir
         }
     }
-    _cli();     //_cli() es el wrapper para CLI: limpia IF (IF = 0) y bloquea la entrega de interrupciones externas.
+    disable_interrupts();    
 }
 

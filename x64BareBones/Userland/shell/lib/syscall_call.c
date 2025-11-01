@@ -11,7 +11,7 @@ extern uint64_t sys_write_at_back(const char *str, int col, int fil, uint32_t fC
 extern void sys_present_fullframe();
 extern int sys_get_screen_info(int aux);
 extern void sys_putPixel(uint32_t color, uint32_t x, uint32_t y, uint32_t target);
-extern char sys_getchar();
+extern uint64_t sys_getchar(char *buffer, uint64_t max_len);
 extern char sys_print_registers();
 extern void touch_regs();
 extern void sys_sleep_ms(uint64_t ms);
@@ -103,11 +103,15 @@ uint64_t  do_benchmark_hardware_access(){
     return sys_benchmark (2);
 }
 
-char getchar_sys(void) {
-    return (char) sys_getchar();
+int get_multiple_chars_sys(char *buf, uint64_t max_len) {
+    return (int) sys_getchar(buf, max_len);
 }
 
-
+char getchar(void) {
+    char c;
+    int n = sys_getchar(&c, 1);
+    return (n > 0) ? c : 0;
+}
 
 
 

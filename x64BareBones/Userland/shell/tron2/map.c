@@ -134,36 +134,62 @@ void occ_set(TronGame *G, uint16_t col, uint16_t row, uint8_t v) {
     G->occ[idx] = (v > 0) ? 1 : 0;
 }
 
+static void tron_clear_cell(const TronGame *G, uint16_t col, uint16_t row, int target) {
+    const Grid *g = &G->grid;
+
+    uint32_t x0, y0;
+    cell_to_pixel(g, col, row, &x0, &y0);
+
+    uint32_t size = g->cell_px;
+    uint32_t x1 = x0 + size - 1;  // borde derecho
+    uint32_t y1 = y0 + size - 1;  // borde inferior
+
+    // 1) limpiar interior (dejamos 1 px de borde)
+    for (uint32_t y = y0 + 1; y <= y1; y++) {
+        for (uint32_t x = x0 + 1; x <= x1; x++) {
+            putPixel(g->bg_color, x, y, target);
+        }
+    }
+
+    // 2) redibujar los 4 bordes de la celda
+
+    // arriba
+    for (uint32_t x = x0; x <= x1; x++) {
+        putPixel(g->line_color, x, y0, target);
+    }
+
+    // abajo
+    for (uint32_t x = x0; x <= x1; x++) {
+        putPixel(g->line_color, x, y1+1, target);
+    }
+
+    // izquierda
+    for (uint32_t y = y0; y <= y1; y++) {
+        putPixel(g->line_color, x0, y, target);
+    }
+
+    // derecha
+    for (uint32_t y = y0; y <= y1; y++) {
+        putPixel(g->line_color, x1+1, y, target);
+    }
+}
+
 void map_free(TronGame *G) {
-    if (G == NULL)
+    if (G == NULL || G->occ == NULL)
         return;
 
     Grid *g = &G->grid;
-
-    if (G->occ == NULL)
-        return; // no hay ocupación que limpiar
-
     uint32_t cols = g->cols;
     uint32_t rows = g->rows;
 
     for (uint16_t row = 0; row < rows; row++) {
         for (uint16_t col = 0; col < cols; col++) {
             uint32_t idx = (uint32_t)row * cols + col;
-
             if (G->occ[idx] != 0) {
-                // había algo dibujado acá → lo borro
-                uint32_t x0, y0;
-                cell_to_pixel(g, col, row, &x0, &y0);
-
-                for (uint32_t y = y0; y < y0 + g->cell_px; y++) {
-                    for (uint32_t x = x0; x < x0 + g->cell_px; x++) {
-                        putPixel(g->bg_color, x, y, 0);   // target = 0
-                    }
-                }
-
-                // y marco libre
+                tron_clear_cell(G, col, row, 0);  
                 G->occ[idx] = 0;
             }
         }
     }
 }
+

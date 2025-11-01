@@ -1,7 +1,5 @@
 default rel
 
-GLOBAL _cli
-GLOBAL _sti
 GLOBAL picMasterMask
 GLOBAL picSlaveMask
 GLOBAL haltcpu
@@ -102,15 +100,6 @@ SECTION .text
 _hlt:
 	sti
 	hlt
-	ret
-
-_cli:
-	cli
-	ret
-
-
-_sti:
-	sti
 	ret
 
 ;8254 Timer (Timer Tick)
