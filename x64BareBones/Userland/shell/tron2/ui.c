@@ -1,18 +1,15 @@
 #include <stdint.h>
 #include <stdbool.h>
 
+#include "./include/ui.h"
 #include "../lib/syscall_call.h"   // get_screen_width, clearwindow, getchar_sys, sleep_ms, present_fullframe
 #include "../utils/utils.h"        // print_centered_line
+#include "./include/types.h"
+#include "./include/config.h"
 
-
-
-// Colores base (los que sacamos de tu imagen)
-#define TOP_COLOR    0x001A9BA0   // cyan/azul
-#define BOTTOM_COLOR 0x00C4872B   // naranja/dorado
 
 //
-static uint32_t lerp_color(uint32_t c1, uint32_t c2, uint32_t num, uint32_t den)
-{
+uint32_t lerp_color(uint32_t c1, uint32_t c2, uint32_t num, uint32_t den){
     if (den == 0) den = 1;
 
     uint8_t r1 = (c1 >> 16) & 0xFF;
