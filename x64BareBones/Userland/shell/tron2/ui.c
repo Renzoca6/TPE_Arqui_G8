@@ -32,11 +32,11 @@ void score_update(const TronGame *G) {
     // --- Player 1 ---
     uintToBase((uint64_t)G->score.p1, buf, 10);
     // limpiamos el valor anterior sobrescribiendo con fondo negro
-    write_at_back(buf, 3, 8, TRON_P1_COLOR, 0x000000);
+    write_at_vram(buf, 3, 8, TRON_P1_COLOR, 0x000000);
 
     // --- Player 2 ---
     uintToBase((uint64_t)G->score.p2, buf, 10);
-    write_at_back(buf, 59, 8, TRON_P2_COLOR, 0x000000);
+    write_at_vram(buf, 59, 8, TRON_P2_COLOR, 0x000000);
 
     // restaurar tamaño normal
     do_resize("1");
@@ -174,7 +174,7 @@ int tron_show_start_menu(void)
 
     return 0;
 }
-int tron_show_end_menu(int won, int level)
+int tron_show_end_menu(bool coop,int won, int level)
 {
     do_resize("2");
     tron_draw_background();
@@ -193,12 +193,23 @@ int tron_show_end_menu(int won, int level)
 
     // copiar mensaje base
     char *p = title;
-    if (won) {
-        const char *msg = "HAS GANADO! PASAS AL LEVEL ";
-        while (*msg) *p++ = *msg++;
+    if (coop) {
+        if (won == 1) {
+            const char *msg = "HA GANADO EL JUGADOR 1!";
+            while (*msg) *p++ = *msg++;
+        }
+        else {
+            const char *msg = "HA GANADO EL JUGADOR 2!";
+            while (*msg) *p++ = *msg++;
+        }
     } else {
-        const char *msg = "HAS PERDIDO. REINTENTAR LEVEL ";
-        while (*msg) *p++ = *msg++;
+        if (won) {
+            const char *msg = "HAS GANADO! PASAS AL LEVEL ";
+            while (*msg) *p++ = *msg++;
+        } else {
+            const char *msg = "HAS PERDIDO. REINTENTAR LEVEL ";
+            while (*msg) *p++ = *msg++;
+        }
     }
 
     // concatenar número
