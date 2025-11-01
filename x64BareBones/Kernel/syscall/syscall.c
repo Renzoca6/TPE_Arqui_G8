@@ -89,7 +89,7 @@ int syscall_handler(syscall_Registers *regs) {
 }
 
 static void syscall_sleep_ms(syscall_Registers *regs){
-    sleep_ms(regs->rbx); 
+    sleep_  ms(regs->rbx); 
 }
 
 
