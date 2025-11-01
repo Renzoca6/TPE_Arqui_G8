@@ -11,7 +11,7 @@
 int tron_show_start_menu(void);
 uint32_t lerp_color(uint32_t c1, uint32_t c2, uint32_t num, uint32_t den);
 
-void tron_draw_scores(const TronGame *G, int p1_score, int p2_score);
+
 
 
 #endif
