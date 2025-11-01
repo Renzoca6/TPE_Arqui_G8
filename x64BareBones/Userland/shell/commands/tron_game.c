@@ -46,17 +46,17 @@ void startGame(){
         }
         start = get_ms_since_boot();
         tron_handle_input_edge_coop(p1_Intent,p2_Intent);
-        int p1Action = player_action_tick(&p1);
-        int p2Action = player_action_tick(&p2);
-        if (p2Action || p1Action == 0) {
+
+        int p1Action = player_action_tick(&game,&p1);
+        int p2Action = player_action_tick(&game, &p2);
+        
+        if (p2Action == 0 || p1Action == 0) {
             in_game = false;
-            if (p2Action && p1Action == 0){
+            if (p2Action == 0 && p1Action == 0){
                 println("empate, son los 2 horribles");
-            }
-            else if(p1Action == 0){
+            }else if(p1Action == 0){
                 println("gano player 2");
-            }
-            else{
+            }else{
                 println("gano player 1");
             }   
         }

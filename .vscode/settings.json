@@ -31,6 +31,8 @@
         "tron_game.h": "c",
         "utils.h": "c",
         "functional": "c",
-        "ui.h": "c"
+        "ui.h": "c",
+        "player_intent.h": "c",
+        "player.h": "c"
     }
 }
