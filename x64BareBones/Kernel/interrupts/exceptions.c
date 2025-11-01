@@ -1,9 +1,97 @@
 #include "exceptions.h"
-#include "registers.h"
 #include "keyboard_handler.h"
 #include "video.h"   /* vdPrint, vdNewline, vdPrintHex, vdClear, etc. */
 #include "interrupts.h"
 #include <stdbool.h>
+#include <stddef.h>
+
+// Register names and count
+#define REG_COUNT 20
+
+// Register indices (matching pushState order)
+enum {
+    REG_R15 = 0, REG_R14, REG_R13, REG_R12, REG_R11, REG_R10, REG_R9, REG_R8,
+    REG_RSI, REG_RDI, REG_RBP, REG_RDX, REG_RCX, REG_RBX, REG_RAX,
+    REG_RIP, REG_CS, REG_RFLAGS, REG_RSP, REG_SS
+};
+
+/* Register names matching pushState order */
+static const char * const REG_NAMES[REG_COUNT] = {
+    "R15", "R14", "R13", "R12", "R11", "R10", "R9", "R8",
+    "RSI", "RDI", "RBP", "RDX", "RCX", "RBX", "RAX", 
+    "RIP", "CS", "RFLAGS", "RSP", "SS"
+};
+
+/* Helper: print a 64-bit value as 16 hex digits (zero-padded) */
+static void printHexPadded(uint64_t v) {
+    char buf[17];
+    const char *hex = "0123456789ABCDEF";
+    for (int i = 0; i < 16; i++) {
+        uint8_t nibble = (v >> ((15 - i) * 4)) & 0xF;
+        buf[i] = hex[nibble];
+    }
+    buf[16] = '\0';
+    vdPrint(buf, PIXEL_VRAM);
+}
+
+/* Print registers for exceptions */
+static void print_registers(void)
+{
+    const uint64_t *regs = getSavedRegs();
+
+    if (regs == NULL) {
+        vdPrint("Register snapshot not available", PIXEL_VRAM);
+        vdNewline();
+        return;
+    }
+
+    /* Decorative box header */
+    vdPrint("+----------------------------------------------------+", PIXEL_VRAM);
+    vdNewline();
+    vdPrint("|                  REGISTER SNAPSHOT                 |", PIXEL_VRAM);
+    vdNewline();
+    vdPrint("+----------------------------------------------------+", PIXEL_VRAM);
+    vdNewline();
+
+    /* Print registers in two columns */
+    for (int i = 0; i < REG_COUNT; i += 2) {
+        char namebuf[10];
+
+        /* start left border */
+        vdPrint("|", PIXEL_VRAM);
+
+        /* Left column name (pad to 6 chars) */
+        const char *n = REG_NAMES[i];
+        int j = 0;
+        while (j < 6 && n[j]) { namebuf[j] = n[j]; j++; }
+        while (j < 6) { namebuf[j++] = ' '; }
+        namebuf[6] = ':'; namebuf[7] = ' '; namebuf[8] = '\0';
+        vdPrint(namebuf, PIXEL_VRAM);
+        printHexPadded(regs[i]); /* prints 16 hex chars */
+
+        /* spacing between columns */
+        vdPrint("    ", PIXEL_VRAM);
+
+        /* Right column */
+        if (i + 1 < REG_COUNT) {
+            const char *n2 = REG_NAMES[i+1];
+            int k = 0;
+            while (k < 6 && n2[k]) { namebuf[k] = n2[k]; k++; }
+            while (k < 6) { namebuf[k++] = ' '; }
+            namebuf[6] = ':'; namebuf[7] = ' '; namebuf[8] = '\0';
+            vdPrint(namebuf, PIXEL_VRAM);
+            printHexPadded(regs[i+1]);
+        }
+
+        /* end right border */
+        vdPrint("|", PIXEL_VRAM);
+        vdNewline();
+    }
+
+    /* Decorative footer */
+    vdPrint("+----------------------------------------------------+", PIXEL_VRAM);
+    vdNewline();
+}
 
 // Declaraciones externas para reset de userland
 extern void * getStackBase();

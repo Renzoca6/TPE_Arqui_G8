@@ -4,7 +4,8 @@
 #include <stdint.h>
 #include "io.h"
 #include <string.h>
-#include "registers.h"  // For REG_COUNT
+
+#define REG_COUNT 20  // Register count matching pushState order
 
 // --- estado para scancodes extendidos (E0) ---
 static bool e0_prefix = false;
@@ -38,10 +39,6 @@ uint64_t* getSavedRegs(){
     return lastRegsState;
 }
 
-void clearRegsSaved(){
-    regsSaved = 0;
-    // No resetear lastRegsState - mantener el snapshot disponible
-}
 // === Fin guardado de registros ===
 
 
