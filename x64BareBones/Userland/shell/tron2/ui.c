@@ -8,7 +8,42 @@
 #include "./include/config.h"
 
 
-//
+
+
+void score_init(TronGame *G){
+    G->score.p1 = 0;
+    G->score.p2 = 0;
+    do_resize("2");
+    write_at_back("--P1--",1,6, TRON_P1_COLOR, 0x000000);
+    write_at_back(" Score:", 0,7, TRON_P1_COLOR, 0x000000);
+    write_at_back("0", 3,8, TRON_P1_COLOR, 0x000000);
+    write_at_back("--P2--",57,6, TRON_P2_COLOR, 0x000000);
+    write_at_back("Score:", 57,7, TRON_P2_COLOR, 0x000000);
+    write_at_back("0", 59,8, TRON_P2_COLOR, 0x000000);
+    do_resize("1");
+}
+
+void score_update(const TronGame *G) {
+    char buf[8];
+
+    // aumentar tamaño temporalmente para que se vea claro
+    do_resize("2");
+
+    // --- Player 1 ---
+    uintToBase((uint64_t)G->score.p1, buf, 10);
+    // limpiamos el valor anterior sobrescribiendo con fondo negro
+    write_at_back(buf, 3, 8, TRON_P1_COLOR, 0x000000);
+
+    // --- Player 2 ---
+    uintToBase((uint64_t)G->score.p2, buf, 10);
+    write_at_back(buf, 59, 8, TRON_P2_COLOR, 0x000000);
+
+    // restaurar tamaño normal
+    do_resize("1");
+}
+
+
+ 
 uint32_t lerp_color(uint32_t c1, uint32_t c2, uint32_t num, uint32_t den){
     if (den == 0) den = 1;
 
@@ -35,8 +70,8 @@ void draw_top_bottom_bands(int target) {
     // Colores sacados de tu imagen
     const uint32_t DARK         = 0x00000000;
 
-    // Cada banda ocupa 1/3
-    uint32_t band_h = h / 4;
+    // Cada banda ocupa 1/4
+    uint32_t band_h = h / TRON_BAND;
     if (band_h == 0) band_h = 1;
 
     // --- banda de arriba ---
@@ -133,6 +168,57 @@ int tron_show_start_menu(void)
             return 1;   // un jugador
         if (ch == 'b')
             return 2;   // dos jugadores
+        if (ch == '\n' || ch == '\r' || ch == 27)
+            return 0;   // salir
+    }
+
+    return 0;
+}
+
+int tron_show_end_menu(int won)
+{
+    // agrandar letra
+    do_resize("2");
+
+    // fondo TRON
+    tron_draw_background();
+
+    // colores
+    uint32_t bgColor     = 0x000000;   // negro
+    uint32_t titleColor  = won ? 0x00FF00 : 0xFF0000;   // verde si ganó, rojo si perdió
+    uint32_t textColor   = 0x99FFFF;   // azul claro
+    uint32_t hintColor   = 0x44AAAA;   // azul más oscuro
+
+    uint64_t sw = get_screen_width();
+
+    // título principal
+    if (won)
+        print_centered_line("HAS GANADO!", sw, 7,  titleColor, bgColor, 16, false);
+    else
+        print_centered_line("HAS PERDIDO", sw, 7,  titleColor, bgColor, 16, false);
+
+    // opciones
+    print_centered_line("A) Volver al menu principal", sw, 9,  textColor, bgColor, 16, false);
+    print_centered_line("B) Continuar jugando",        sw, 10, textColor, bgColor, 16, false);
+
+    print_centered_line("Presione una tecla para continuar...", sw, 13, hintColor, bgColor, 16, false);
+
+    // mostrar en pantalla
+    present_fullframe();
+    do_resize("1");
+
+    // loop de entrada
+    while (1) {
+        char ch = getchar();
+        if (ch == 0) {
+            sleep_ms(10);
+            continue;
+        }
+
+        if (ch == 'a')
+            return 1;   // volver al menú
+        if (ch == 'b')
+            return 2;   // continuar
         if (ch == '\n' || ch == '\r' || ch == 27)
             return 0;   // salir
     }

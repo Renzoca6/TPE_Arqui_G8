@@ -10,8 +10,9 @@
 
 int tron_show_start_menu(void);
 uint32_t lerp_color(uint32_t c1, uint32_t c2, uint32_t num, uint32_t den);
+void score_init(TronGame *G); 
+void score_update(const TronGame *G);
 
 
-
-
+int tron_show_end_menu(int won);
 #endif

@@ -20,9 +20,14 @@ typedef struct {
 } Player;
 
 typedef struct {
+    uint16_t p1, p2;
+} Score;
+
+typedef struct {
     Grid    grid;
     uint8_t *occ;        // rows*cols bytes (0 libre, >0 ocupado)
     Player  p1, p2;
+    Score score;
 } TronGame;
 
 #endif

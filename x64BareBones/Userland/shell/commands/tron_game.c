@@ -13,13 +13,17 @@ void startGame(){
     int mode = tron_show_start_menu();
 
     TronGame game;
+    
     player_Intent p1_Intent = (player_Intent){  1, 0 };
     player_Intent p2_Intent = (player_Intent){  -1, 0 };
     map_init(&game);
     map_draw_grid_lines(&game , 1);
     map_draw_border_lines(&game, 1);
 
+    
     Player p1, p2;
+    game.p1 = p1;
+
     player_spawn_center_left(&game, &p1, 1, TRON_P1_COLOR);
     player_spawn_center_right(&game, &p2, 2, TRON_P2_COLOR);
 
@@ -28,6 +32,12 @@ void startGame(){
 
     map_draw_cell(&game, p1.col,p1.row, p1.color, 1);
     map_draw_cell(&game, p2.col,p2.row, p2.color, 1);
+
+    score_init(&game);
+
+    game.score.p1 = 2;
+    game.score.p2 = 10;
+    score_update(&game);
 
     present_fullframe();
 
@@ -59,12 +69,11 @@ void startGame(){
                 println("gano player 1");
             }   
         }
-
-
     }
 
     //map_free(&game);
-
+    clearwindow(0x000000);
+    tron_show_end_menu(1);
     while (1)
     {
         /* code */
