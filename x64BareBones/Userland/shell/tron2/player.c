@@ -68,6 +68,12 @@ int  player_step_and_paint(TronGame *G, Player *p){
     uint16_t nx = (uint16_t)(p->col + p->dx);
     uint16_t ny = (uint16_t)(p->row + p->dy);
 
+
+    // 1) LÍMITE DEL TABLERO → MUERTE
+    if (!grid_contains_cell(&G->grid, nx, ny)) {
+        return 0;  // se fue del tablero → pierde
+    }
+
     // Chequeo de ocupación (trails de cualquiera)
     if (occ_get( G, nx, ny) != 0)
         return 0;  // choca contra trail (propio o ajeno)
