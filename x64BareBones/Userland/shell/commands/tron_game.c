@@ -6,6 +6,7 @@
 #include "../lib/syscall_call.h"
 #include "../tron2/include/config.h"
 #include "../tron2/include/ui.h"    
+#include "../tron2/include/player_Intent.h"
 #include <stdint.h>
 
 void startGame(){
@@ -14,7 +15,9 @@ void startGame(){
     //clearwindow(0x000000);
 
 
+    
     TronGame game;
+    player_Intent p1_Intent;
     map_init(&game);
     map_draw_grid_lines(&game , 1);
 
@@ -42,16 +45,19 @@ void startGame(){
             continue;
         }
         start = get_ms_since_boot();
-
-        // b) (en el futuro) procesar input no bloqueante y actualizar direcciones
-        //    por ahora, sin input: siguen en su dirección actual
-
-        // c) avanzar jugadores (pintan y reservan celdas; 0 = muere si choca)
-        int alive1 = player_step_and_paint(&game, &p1);
-        int alive2 = player_step_and_paint(&game, &p2);
-
-        if (!alive1 || !alive2) {
+        tron_handle_input_edge(p1_Intent);
+        int aux = player_action_tick(&p1);
+        if (aux != 0) {
             in_game = false;
+            if (aux == 1){
+                println("perdiste inutil");
+            }
+            else if(aux == 2){
+                println("ganaste... no sos tan inutil al final (igual lo podrias haber hecho mejor)");
+            }
+            else if(aux == 3){
+                println("empate, son los 2 horribles");
+            }   
         }
 
 
