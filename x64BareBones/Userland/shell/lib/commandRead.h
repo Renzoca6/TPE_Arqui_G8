@@ -35,7 +35,7 @@ extern char* cr_last_argv[CR_MAXARGS];   // argv sobre el mismo buffer
 //int cr_match_prefix_range(const char* token, int len, cr_match_t* out);
 
 // Matchea exacto y, si coincide, tokeniza y llama a tu handler desde commands.c.
-// En caso de error imprime "comando invalido". Devuelve el código que retorne tu handler.
-void cr_dispatch_exact(char* buf);
+// En caso de error imprime "comando invalido". Devuelve 0 para continuar, 1 para terminar.
+int cr_dispatch_exact(char* buf);
 
 #endif // COMMANDREAD_H

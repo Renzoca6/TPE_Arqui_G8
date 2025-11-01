@@ -14,7 +14,7 @@ global sys_getchar
 global sys_putPixel
 global sys_get_ms_since_boot
 global sys_sleep_ms
-
+global sys_kill_system
 
 ; Generic syscall stub
 ; Userland ABI (SysV):
@@ -67,6 +67,7 @@ sys_getchar:            SYSCALL 11
 sys_putPixel:           SYSCALL 12
 sys_get_ms_since_boot:  SYSCALL 13
 sys_sleep_ms:           SYSCALL 14
+sys_kill_system         SYSCALL 15
 
 
 

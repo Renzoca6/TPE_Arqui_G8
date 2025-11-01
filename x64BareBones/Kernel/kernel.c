@@ -6,6 +6,7 @@
 #include <realTimeClock.h>
 #include "interrups_dispatcher.h"
 #include "keyboard_handler.h"
+#include "syscall.h"
 
 extern uint8_t text;
 extern uint8_t rodata;
@@ -18,6 +19,7 @@ static const uint64_t PageSize = 0x1000;
 
 void * const shellAddress = (void*)0x400000;  // Eliminado 'static' para hacerlo visible globalmente
 
+static int kill=0;
 
 typedef int (*EntryPoint)();
 
@@ -41,6 +43,14 @@ void * initializeKernelBinary() {
 	clearBSS(&bss, &endOfKernel - &bss);
 	return getStackBase();
 
+}
+
+void killSystem(){
+	kill = 1;
+	// Halt the system permanently
+	while (1) {
+		_hlt();
+	}
 }
 
 int main() {

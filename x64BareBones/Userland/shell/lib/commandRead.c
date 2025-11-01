@@ -133,7 +133,7 @@ static int cr_find_cmd_idx_ci_exact(const char* token, int len){
 
 // -----------------------------------------------------------------------------
 // Punto de entrada: lee primer token, busca, tokeniza y despacha
-void cr_dispatch_exact(char* buf) {
+int cr_dispatch_exact(char* buf) {
     // estado seguro por defecto
     cr_last_cmd_id = -1;
     cr_last_argc   = 0;
@@ -141,16 +141,16 @@ void cr_dispatch_exact(char* buf) {
 
     // 1) primer token (sin alterar el buffer)
     cr_token_t t;
-    if (!cr_first_token(buf, &t)) { println("comando invalido"); return; }
+    if (!cr_first_token(buf, &t)) { println("invalid command"); return 0; }
 
     // 2) buscar índice (CI, binario, único + nombre completo)
     int idx = cr_find_cmd_idx_ci_exact(t.token, t.len);
-    if (idx < 0) { println("comando invalido"); return; }
+    if (idx < 0) { println("invalid command"); return 0; }
 
     // 3) tokenizar (alterando el buffer, poniendo /0 en los espacios) y despachar
     int argc = simple_tokenize(buf, cr_last_argv, CR_MAXARGS);
     cr_last_cmd_id = COMMANDS[idx].id;
     cr_last_argc   = argc;
 
-    commands_Handler(cr_last_cmd_id, cr_last_argc, cr_last_argv);
+    return commands_Handler(cr_last_cmd_id, cr_last_argc, cr_last_argv);
 }

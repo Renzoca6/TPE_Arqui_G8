@@ -2,6 +2,7 @@
 
 // Traemos solo lo que necesitamos del entorno:
 extern void println(const char* s);
+extern int write(const char* s);
 
 // ---- helpers locales (sin libc) ----
 static int my_tolower_(int c){ return (c>='A'&&c<='Z') ? c+('a'-'A') : c; }
@@ -14,15 +15,104 @@ static int ci_strcmp_(const char* a, const char* b){
     }
 }
 
+static int my_strlen_(const char *s){ int n=0; while (s && s[n]) n++; return n; }
+static void write_spaces_(int n){
+    char buf[64];
+    while (n > 0) {
+        int chunk = n > (int)(sizeof(buf) - 1) ? (int)(sizeof(buf) - 1) : n;
+        for (int i = 0; i < chunk; i++) buf[i] = ' ';
+        buf[chunk] = '\0';
+        write(buf);
+        n -= chunk;
+    }
+}
+
+// Dibuja una línea del tipo: | name - desc | con padding dentro del ancho fijo
+// Ancho de la caja (incluye los bordes). 78 entra cómodo en pantallas de 80 col.
+#define BOX_WIDTH 78
+
+// Línea horizontal: +-----...-----+
+static void write_box_edge_(void){
+    char buf[BOX_WIDTH + 1];
+    if (BOX_WIDTH < 2) return;
+    buf[0] = '+';
+    for (int i = 1; i < BOX_WIDTH - 1; i++) buf[i] = '-';
+    buf[BOX_WIDTH - 1] = '+';
+    buf[BOX_WIDTH] = '\0';
+    write(buf); write("\n");
+}
+
+// Título centrado: |    AVAILABLE COMMANDS    |
+static void write_box_title_(const char *title){
+    int inner = BOX_WIDTH - 2;
+    int len = my_strlen_(title);
+    if (len > inner) len = inner;
+    int left = (inner - len) / 2;
+    int right = inner - len - left;
+
+    write("|");
+    if (left > 0) write_spaces_(left);
+    // escribir 'len' chars del título
+    for (int i = 0; i < len; i++){
+        char b[2] = { title[i], 0 };
+        write(b);
+    }
+    if (right > 0) write_spaces_(right);
+    write("|"); write("\n");
+}
+static void write_boxed_line_(const char *name, const char *text){
+    // borde izquierdo
+    write("|");
+    // contenido limitado al interior (BOX_WIDTH - 2)
+    int inner = BOX_WIDTH - 2;
+    int used = 0;
+
+    // un espacio inicial para respirar
+    write(" "); used += 1;
+
+    // name
+    int ln = my_strlen_(name);
+    write(name); used += ln;
+
+    // separador " - "
+    if (text && text[0]){ write(" - "); used += 3; }
+
+    // texto (descripcion) posible truncado si no entra
+    if (text){
+        int lu = my_strlen_(text);
+        int room = inner - used;
+        if (room < 0) room = 0;
+        // escribir hasta room chars
+        for (int i=0; i<lu && i<room; i++){
+            char buf[2] = { text[i], 0 };
+            write(buf);
+        }
+        used += (lu < room) ? lu : room;
+    }
+
+    // rellenar con espacios si sobran
+    if (used < inner) write_spaces_(inner - used);
+
+    // borde derecho y salto de línea
+    write("|"); write("\n");
+}
+
 // ---- diccionario de ayuda (nombre -> desc/uso) ----
 typedef struct { const char* name; const char* desc; const char* usage; } help_entry_t;
 
 static const help_entry_t HELP_ENTRIES[] = {
-    { "clear", "Limpia la pantalla.",                "clear" },
-    { "date",  "Muestra la fecha del sistema.",      "date" },
-    { "echo",  "Imprime los argumentos recibidos.",  "echo [args...]" },
-    { "help",  "Muestra ayuda de comandos.",         "help [comando]" },
-    { "time",  "Muestra la hora del sistema.",       "time" },
+    { "benchmark", "Run system benchmarks (FPS, FP ops, HW access).",                  "benchmark" },
+    { "clear",     "Clear the screen.",                                                "clear" },
+    { "date",      "Show the current date.",                                           "date" },
+    { "echo",      "Print the provided arguments.",                                    "echo [args...]" },
+    { "help",      "Show command help.",                                               "help [command]" },
+    { "kill",      "Shutdown the system.",                                             "kill"},
+    { "registers", "Print the register snapshot captured with SHIFT+TAB.",             "registers" },
+    { "resize",    "Change font size (1-4).",                                          "resize <1-4>" },
+    { "testop",    "Trigger an invalid opcode exception (testing).",                   "testop" },
+    { "testzero",  "Trigger a divide-by-zero exception (testing).",                    "testzero" },
+    { "time",      "Show the current time.",                                           "time" },
+    { "tron",      "Start the Tron game.",                                             "tron" },
 };
 
 // Requiere: HELP_ENTRIES[] ORDENADO case-insensitive por 'name'
@@ -40,23 +130,28 @@ static const help_entry_t* find_help_entry_(const char* name){
 }
 
 static void help_list_all_(const command_t* comandos, int n){
-    println("Comandos disponibles:");
+    // encabezado dinámico según BOX_WIDTH
+    write_box_edge_();
+    write_box_title_("AVAILABLE COMMANDS");
+    write_box_edge_();
+    
     for (int i = 0; i < n; i++){
         const char* name = comandos[i].name;
         const help_entry_t* h = find_help_entry_(name);
-        println(name);
-        if (h) println(h->desc);
+        const char *desc = h ? h->desc : "";
+        write_boxed_line_(name, desc);
     }
+    write_box_edge_();
 }
 
 static void help_one_(const char* name){
     const help_entry_t* h = find_help_entry_(name);
-    if (!h){ println("help: comando desconocido"); return; }
-    println("Comando:");
+    if (!h){ println("help: unknown command"); return; }
+    println("Command:");
     println(h->name);
-    println("Descripcion:");
+    println("Description:");
     println(h->desc);
-    println("Uso:");
+    println("Usage:");
     println(h->usage);
 }
 

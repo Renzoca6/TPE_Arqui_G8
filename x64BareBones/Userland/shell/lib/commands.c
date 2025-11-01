@@ -19,32 +19,32 @@ void testZeroDivision();
 extern void throw_zero_division();
 void resize(int argc, char *argv[]);
 extern void throw_invalid_opcode ();
+extern void sys_kill_system();
 void tron();
-extern void touch_regs();
 void registers();
-void prueba();
+void kill();
 
 
 
 //IMPORTANTE DEBE SER EN ORDEN ALFABETICO
 const command_t COMMANDS[] = {
-    {"a", 10},
-    {"ba", 11},
     { "benchmark",  8 },
     { "clear", 0 },
     { "date",  1 },
     { "echo",  2 },
     { "help",  3 },
+    { "kill", 11},
     { "registers", 9},
     { "resize",4 },   
     { "testop", 5},
     { "testzero", 6},
-    { "time",  7 }
+    { "time",  7 },
+    { "tron", 10}
 };
 
 const int N_COMMANDS = sizeof(COMMANDS) / sizeof(COMMANDS[0]);
 
-void commands_Handler(int func, int argc, char *argv[]) {
+int commands_Handler(int func, int argc, char *argv[]) {
     switch (func) {
         case 0: clear();                                break;
         case 1: date();                                 break; 
@@ -57,9 +57,10 @@ void commands_Handler(int func, int argc, char *argv[]) {
         case 8: benchmark();                            break; 
         case 9: registers();                            break;
         case 10: tron();                                break;
-        case 11: prueba();                              break;
+        case 11: kill(); return 1;                      break;
         default:                                        break;
     }
+    return 0;
 }
 
 
@@ -70,7 +71,7 @@ void tron(){
 
 void resize(int argc, char *argv[]){
     if (argc != 2){
-        println("comando invalido");
+        println("invalid command");
     }
     else{
         return do_resize(argv[1]);
@@ -119,6 +120,18 @@ void registers(){
     printRegisters();
 }
 
-void prueba(){
-    touch_regs();
+void kill(){
+    println("");
+    println("         ______");
+    println("         |    |");
+    println("         |    O");
+    println("         |   /|\\");
+    println("         |   / \\");
+    println("         |");
+    println("        _|_");
+    println("");
+    println("          SYSTEM SHUTDOWN");
+    println("  The system has been terminated.");
+    println("");
+    sys_kill_system();
 }

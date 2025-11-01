@@ -53,11 +53,11 @@ void startGame(){
         if (p2Action == 0 || p1Action == 0) {
             in_game = false;
             if (p2Action == 0 && p1Action == 0){
-                println("empate, son los 2 horribles");
+                println("tie, both players lost");
             }else if(p1Action == 0){
-                println("gano player 2");
+                println("player 2 wins");
             }else{
-                println("gano player 1");
+                println("player 1 wins");
             }   
         }
 
