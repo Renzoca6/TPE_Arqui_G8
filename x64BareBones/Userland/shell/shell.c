@@ -6,8 +6,7 @@
 
 int main() {
     char buf[256];
-    int should_exit = 0;
-    while (!should_exit){
+    while (1){
         write("- ");
         read(buf);
         cr_dispatch_exact(buf);
