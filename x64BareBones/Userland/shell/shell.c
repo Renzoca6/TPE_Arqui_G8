@@ -4,7 +4,6 @@
 #include "./tron2/include/types.h"
 
 
-
 int main() {
     char buf[256];
     int should_exit = 0;

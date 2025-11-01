@@ -6,12 +6,13 @@
 #include "benchmark.h"
 #include "registers.h"
 #include "timer.h"
+#include "audio.h"
 
 
 extern void enable_interrupts(void);
 extern void disable_interrupts(void);
 
-#define MAX_SYSCALLS 16
+#define MAX_SYSCALLS 17
 
 // Forward declarations de handlers
 static void syscall_read(uint64_t *registers);
@@ -30,6 +31,7 @@ static void syscall_putPixel(uint64_t *registers);
 static void syscall_get_ms_since_boot(uint64_t *registers);
 static void syscall_sleep_ms(uint64_t *registers);
 static void syscall_kill_system(uint64_t *registers);
+static void syscall_audio(uint64_t *registers);
 
 
 // Tipo para punteros a funciones handler
@@ -53,6 +55,7 @@ static SysCallHandler sysCallHandlers[MAX_SYSCALLS] = {
     syscall_get_ms_since_boot, // 13: syscall_get_ms_since_boot
     syscall_sleep_ms,          // 14: syscall_sleep_ms
     syscall_kill_system,        //15: syscall_kill_system
+    syscall_audio,              //16: sycall_audio
 };
 
 // Dispatcher principal - recibe puntero al stack frame con registros
@@ -84,6 +87,40 @@ void syscall_handler (uint64_t rax, uint64_t *registers) {
 // ============================================================================
 // HANDLERS DE SYSCALLS
 // ============================================================================
+
+
+static void syscall_audio(uint64_t *registers) {
+    uint64_t op    = registers[13];          // RBX
+    uint32_t freq  = (uint32_t)registers[12]; // RCX
+    uint32_t dur   = (uint32_t)registers[11]; // RDX
+
+    switch (op) {
+        case 0: // play
+            if (freq == 0) {
+                registers[14] = (uint64_t)-1;
+                return;
+            }
+            play_sound(freq);
+            registers[14] = 0;
+            break;
+
+        case 1: // stop
+            stop_sound();
+            registers[14] = 0;
+            break;
+
+        case 2: // beep
+            // beep probablemente use sleep_ms, así que habilitamos IRQ
+            enable_interrupts();
+            beep(freq, dur);
+            registers[14] = 0;
+            break;
+
+        default:
+            registers[14] = (uint64_t)-1;
+            break;
+    }
+}
 
 // Helper para write_at (usado por VRAM y BACK)
 static void syscall_write_at(uint64_t *registers, PixelTarget target) {
@@ -236,13 +273,12 @@ static void syscall_getchar(uint64_t *registers) {
     // args desde userland
     char *user_buf     = (char *)registers[13];  // RBX: puntero al buffer
     uint64_t max_len   = registers[12];          // RCX: tamaño máximo
-    const uint64_t timeout_ms = 50;
+    const uint64_t timeout_ms = 10;
 
     enable_interrupts();
 
     uint64_t last_event_time = timer_ms_since_boot();
     uint64_t written = 0;
-
     while (1) {
         if (hasNextKey()) {
             KeyBufferStruct k = getNextKey();

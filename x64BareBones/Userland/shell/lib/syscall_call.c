@@ -16,6 +16,7 @@ extern char sys_print_registers();
 extern void touch_regs();
 extern void sys_sleep_ms(uint64_t ms);
 extern uint64_t sys_get_ms_since_boot();
+extern uint64_t sys_audio(uint64_t op, uint32_t freq, uint32_t dur_ms);   // <--- NUEVO
 
 #define STDIN   0
 #define STDOUT  1
@@ -91,6 +92,20 @@ void printRegisters(){
     sys_print_registers();
 }
 
+void audio_play(uint32_t freq_hz) {
+    // op=0, freq=freq_hz, dur=0
+    sys_audio(0, freq_hz, 0);
+}
+
+void audio_stop(void) {
+    // op=1
+    sys_audio(1, 0, 0);
+}
+
+void audio_beep(uint32_t freq_hz, uint32_t duration_ms) {
+    // op=2
+    sys_audio(2, freq_hz, duration_ms);
+}
 
 
 uint64_t  do_benchmark_fps(){

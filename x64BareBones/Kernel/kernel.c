@@ -52,6 +52,7 @@ void killSystem(){
 
 }
 
+
 int main() {
 	init_interrupts();
 	((EntryPoint)shellAddress)();

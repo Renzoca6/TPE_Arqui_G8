@@ -6,7 +6,7 @@
 
 void tron_handle_input_edge(player_Intent *p1) {
     char buf[20];
-    int buf_dim = get_multiple_chars_sys(buf,20);
+    int buf_dim = get_multiple_chars_sys(buf,5);
     while (buf_dim != 0){
         switch (buf[buf_dim-1]) {
             case KEY_W: *p1 = (player_Intent){  0, -1 }; break;

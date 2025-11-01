@@ -5,6 +5,7 @@
 #include "video.h"
 #include "keyboard_handler.h"
 #include "timer.h"
+extern void enable_interrupts(void);
 
 
 
@@ -33,8 +34,6 @@ void int_21(uint64_t * registers) {
 	pic_send_eoi(0); 
 }
 
-
-
 // === Inicialización general de interrupciones ===
 void init_interrupts(void) {
     idt_init();        // crear y cargar la IDT
@@ -45,5 +44,5 @@ void init_interrupts(void) {
     pic_unmask_irq(1);
 	
 
-    __asm__ __volatile__("sti");     // habilitar interrupciones globales
+    enable_interrupts();
 }

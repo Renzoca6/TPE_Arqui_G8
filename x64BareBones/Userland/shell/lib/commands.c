@@ -23,6 +23,7 @@ extern void sys_kill_system();
 void tron();
 void registers();
 void kill();
+void testSound();
 
 
 
@@ -35,8 +36,9 @@ const command_t COMMANDS[] = {
     { "help",  3 },
     { "kill", 11},
     { "registers", 9},
-    { "resize",4 },   
+    { "resize",4 },  
     { "testop", 5},
+    {"testsound", 12}, 
     { "testzero", 6},
     { "time",  7 },
     { "tron", 10}
@@ -58,6 +60,7 @@ int commands_Handler(int func, int argc, char *argv[]) {
         case 9: registers();                            break;
         case 10: tron();                                break;
         case 11: kill(); return 1;                      break;
+        case 12: testSound();                           break;
         default:                                        break;
     }
     return 0;
@@ -80,6 +83,19 @@ void resize(int argc, char *argv[]){
 
 void benchmark(){
     print_benchmark();
+}
+
+
+void testSound(){
+    audio_beep(440, 200);
+    sleep_ms(150);
+
+    audio_beep(523, 200);
+    sleep_ms(150);
+
+    audio_play(440);
+    sleep_ms(400);
+    audio_stop();
 }
 
 void date(){
