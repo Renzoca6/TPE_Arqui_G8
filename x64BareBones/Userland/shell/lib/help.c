@@ -101,18 +101,20 @@ static void write_boxed_line_(const char *name, const char *text){
 typedef struct { const char* name; const char* desc; const char* usage; } help_entry_t;
 
 static const help_entry_t HELP_ENTRIES[] = {
-    { "benchmark", "Run system benchmarks (FPS, FP ops, HW access).",                  "benchmark" },
-    { "clear",     "Clear the screen.",                                                "clear" },
-    { "date",      "Show the current date.",                                           "date" },
-    { "echo",      "Print the provided arguments.",                                    "echo [args...]" },
-    { "help",      "Show command help.",                                               "help [command]" },
-    { "kill",      "Shutdown the system.",                                             "kill"},
-    { "registers", "Print the register snapshot captured with SHIFT+TAB.",             "registers" },
-    { "resize",    "Change font size (1-4).",                                          "resize <1-4>" },
-    { "testop",    "Trigger an invalid opcode exception (testing).",                   "testop" },
-    { "testzero",  "Trigger a divide-by-zero exception (testing).",                    "testzero" },
-    { "time",      "Show the current time.",                                           "time" },
-    { "tron",      "Start the Tron game.",                                             "tron" },
+    { "benchmark",  "Run system benchmarks (FPS, FP ops, HW access).",                 "benchmark" },
+    { "clear",      "Clear the screen.",                                               "clear" },
+    { "date",       "Show the current date.",                                          "date" },
+    { "echo",       "Print the provided arguments.",                                   "echo [args...]" },
+    { "help",       "Show command help.",                                              "help [command]" },
+    { "kill",       "Shutdown the system.",                                            "kill"},
+    { "registers",  "Print the register snapshot captured with SHIFT+TAB.",            "registers" },
+    { "resize",     "Change font size (1-4).",                                         "resize <1-4>" },
+    { "sleep",      "Pause execution for specified milliseconds.",                     "sleep <ms>" },
+    { "testop",     "Trigger an invalid opcode exception (testing).",                  "testop" },
+    { "testsound",  "Test system sound/beep functionality.",                           "testsound" },
+    { "testzero",   "Trigger a divide-by-zero exception (testing).",                   "testzero" },
+    { "time",       "Show the current time.",                                          "time" },
+    { "tron",       "Start the Tron game.",                                            "tron" },
 };
 
 // Requiere: HELP_ENTRIES[] ORDENADO case-insensitive por 'name'

@@ -148,11 +148,11 @@ int tron_show_start_menu(void)
     print_centered_line("=== T R O N ===", sw, 7,  titleColor, bgColor, 16, false);
 
     // opciones
-    print_centered_line("A) Un jugador",    sw, 9,  textColor, bgColor, 16, false);
-    print_centered_line("B) Dos jugadores", sw, 10, textColor, bgColor, 16, false);
-    print_centered_line("Enter) Salir",     sw, 11, textColor, bgColor, 16, false);
+    print_centered_line("A) Single Player",    sw, 9,  textColor, bgColor, 16, false);
+    print_centered_line("B) Two Players", sw, 10, textColor, bgColor, 16, false);
+    print_centered_line("Enter) Exit",     sw, 11, textColor, bgColor, 16, false);
 
-    print_centered_line("Presione una tecla para continuar...", sw, 14, hintColor, bgColor, 16, false);
+    print_centered_line("Press any key to continue...", sw, 14, hintColor, bgColor, 16, false);
 
     present_fullframe();
     do_resize("1");
@@ -195,19 +195,19 @@ int tron_show_end_menu(bool coop,int won, int level)
     char *p = title;
     if (coop) {
         if (won == 1) {
-            const char *msg = "HA GANADO EL JUGADOR 1!";
+            const char *msg = "PLAYER 1 WINS!";
             while (*msg) *p++ = *msg++;
         }
         else {
-            const char *msg = "HA GANADO EL JUGADOR 2!";
+            const char *msg = "PLAYER 2 WINS!";
             while (*msg) *p++ = *msg++;
         }
     } else {
         if (won) {
-            const char *msg = "HAS GANADO! PASAS AL LEVEL ";
+            const char *msg = "YOU WIN! NEXT LEVEL ";
             while (*msg) *p++ = *msg++;
         } else {
-            const char *msg = "HAS PERDIDO. REINTENTAR LEVEL ";
+            const char *msg = "YOU LOSE. RETRY LEVEL ";
             while (*msg) *p++ = *msg++;
         }
     }
@@ -219,9 +219,9 @@ int tron_show_end_menu(bool coop,int won, int level)
 
     // --- mostrar texto ---
     print_centered_line(title, sw, 7, titleColor, bgColor, 16, false);
-    print_centered_line("A) Volver al menu principal", sw, 9,  textColor, bgColor, 16, false);
-    print_centered_line("B) Continuar jugando",        sw, 10, textColor, bgColor, 16, false);
-    print_centered_line("Presione una tecla para continuar...", sw, 13, hintColor, bgColor, 16, false);
+    print_centered_line("A) Return to main menu", sw, 9,  textColor, bgColor, 16, false);
+    print_centered_line("B) Continue playing",        sw, 10, textColor, bgColor, 16, false);
+    print_centered_line("Press any key to continue...", sw, 13, hintColor, bgColor, 16, false);
 
     present_fullframe();
     do_resize("1");

@@ -71,8 +71,8 @@ int commands_Handler(int func, int argc, char *argv[]) {
 }
 
 void sleep(int argc, char *argv[]){
-    if (argc != 2){
-        println("invalid command");
+    if (argc != 2 || !is_numeric(argv[1])){
+        println("Usage: sleep <milliseconds>");
     }
     else{
         char buf[10];
@@ -92,8 +92,8 @@ void tron(){
 
 
 void resize(int argc, char *argv[]){
-    if (argc != 2){
-        println("invalid command");
+    if (argc != 2 || !is_numeric(argv[1])){
+        println("Usage: resize <1|2|3>");
     }
     else{
         return do_resize(argv[1]);
@@ -157,16 +157,13 @@ void registers(){
 
 void kill(){
     println("");
-    println("         ______");
-    println("         |    |");
-    println("         |    O");
-    println("         |   /|\\");
-    println("         |   / \\");
-    println("         |");
-    println("        _|_");
-    println("");
-    println("          SYSTEM SHUTDOWN");
-    println("  The system has been terminated.");
+    println("  +----------------------------------------+");
+    println("  |                                        |");
+    println("  |       SYSTEM SHUTDOWN INITIATED        |");
+    println("  |                                        |");
+    println("  |    The system will halt in 5 sec...    |");
+    println("  |                                        |");
+    println("  +----------------------------------------+");
     println("");
     sleep_ms(5000);
     sys_kill_system();

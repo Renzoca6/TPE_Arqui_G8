@@ -141,11 +141,11 @@ int cr_dispatch_exact(char* buf) {
 
     // 1) primer token (sin alterar el buffer)
     cr_token_t t;
-    if (!cr_first_token(buf, &t)) { println("invalid command"); return 0; }
+    if (!cr_first_token(buf, &t)) { println("Invalid command. Type \"help\" to check available commands."); return 0; }
 
     // 2) buscar índice (CI, binario, único + nombre completo)
     int idx = cr_find_cmd_idx_ci_exact(t.token, t.len);
-    if (idx < 0) { println("invalid command"); return 0; }
+    if (idx < 0) { println("Invalid command. Type \"help\" to check available commands."); return 0; }
 
     // 3) tokenizar (alterando el buffer, poniendo /0 en los espacios) y despachar
     int argc = simple_tokenize(buf, cr_last_argv, CR_MAXARGS);
