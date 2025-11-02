@@ -3,8 +3,8 @@
 
 #include "commands.h"
 
-// Implementación del comando help en un módulo aparte.
-// Recibe la tabla, su tamaño, y los args capturados por el dispatcher.
+// Implementación del comando help.
+// Recibe la tabla, su tamaño y los argumentos capturados.
 int help_impl(const command_t *comandos, int n, int argc, char *argv[]);
 
-#endif
+#endif // HELP_H

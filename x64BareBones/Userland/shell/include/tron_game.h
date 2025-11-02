@@ -1,8 +1,8 @@
 #ifndef TRON_GAME_H
 #define TRON_GAME_H
+
 #include <stddef.h>
 
+void startGame(void);
 
-void startGame();
-
-#endif
+#endif // TRON_GAME_H

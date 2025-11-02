@@ -5,4 +5,4 @@
 
 void print_benchmark(void);
 
-#endif
+#endif // BENCHMARK_H
