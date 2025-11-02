@@ -37,6 +37,9 @@
         "game.h": "c",
         "syscall.h": "c",
         "ai.h": "c",
-        "interrupts_dispatcher.h": "c"
+        "interrupts_dispatcher.h": "c",
+        "benchmark_calculations.h": "c",
+        "ctype.h": "c",
+        "algorithm": "c"
     }
 }

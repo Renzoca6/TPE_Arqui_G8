@@ -11,7 +11,7 @@
 extern void enable_interrupts(void);
 extern void disable_interrupts(void);
 
-#define MAX_SYSCALLS 17
+#define MAX_SYSCALLS 18
 
 // Forward declarations de handlers
 static void syscall_read(uint64_t *registers);
@@ -31,6 +31,7 @@ static void syscall_get_ms_since_boot(uint64_t *registers);
 static void syscall_sleep_ms(uint64_t *registers);
 static void syscall_kill_system(uint64_t *registers);
 static void syscall_audio(uint64_t *registers);
+static void sycall_put_frame(uint64_t *registers);
 
 
 // Tipo para punteros a funciones handler
@@ -55,6 +56,7 @@ static SysCallHandler sysCallHandlers[MAX_SYSCALLS] = {
     syscall_sleep_ms,          // 14: syscall_sleep_ms
     syscall_kill_system,        //15: syscall_kill_system
     syscall_audio,              //16: sycall_audio
+    sycall_put_frame,           //17 putfrmae
 };
 
 // Dispatcher principal - recibe puntero al stack frame con registros
@@ -86,7 +88,9 @@ void syscall_handler (uint64_t rax, uint64_t *registers) {
 // ============================================================================
 // HANDLERS DE SYSCALLS
 // ============================================================================
-
+static void sycall_put_frame(uint64_t *registers){
+    putFrame();
+}
 
 static void syscall_audio(uint64_t *registers) {
     uint64_t op    = registers[13];          // RBX

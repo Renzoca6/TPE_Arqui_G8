@@ -28,7 +28,7 @@ uint64_t get_screen_width(void);
 char getchar(void);
 void sleep_ms(uint64_t ms);
 uint64_t get_ms_since_boot(void);
-
+void put_frame(void);
 void putPixel(uint32_t color, uint32_t x, uint32_t y, int target);
 int get_multiple_chars_sys(char *buf, uint64_t max_len);
 void audio_play(uint32_t freq_hz);

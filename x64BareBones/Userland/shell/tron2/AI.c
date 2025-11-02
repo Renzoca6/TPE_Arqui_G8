@@ -1,9 +1,9 @@
 #include <stdint.h>
-#include "AI.h"
-#include "map.h"            // occ_get, grid bounds (cols/rows)
-#include "types.h"          // TronGame, Grid, Player
-#include "player_Intent.h"  // player_Intent
-#include "../lib/syscall_call.h" // get_ms_since_boot()
+#include "./include/AI.h"
+#include "./include/map.h"            // occ_get, grid bounds (cols/rows)
+#include "./include/types.h"          // TronGame, Grid, Player
+#include "./include/player_Intent.h"  // player_Intent
+#include "../include/syscall_call.h" // get_ms_since_boot()
 
 /* --- Parámetro: cada cuántos pasos intento “jitter” --- */
 /*  Cambialo a 3 si querés que sea cada 3 */

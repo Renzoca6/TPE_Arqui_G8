@@ -2,7 +2,7 @@
 #include <stdbool.h>
 
 #include "./include/ui.h"
-#include "../lib/syscall_call.h"   // get_screen_width, clearwindow, getchar_sys, sleep_ms, present_fullframe
+#include "../include/syscall_call.h"   // get_screen_width, clearwindow, getchar_sys, sleep_ms, present_fullframe
 #include "../utils/utils.h"        // print_centered_line
 #include "./include/types.h"
 #include "./include/config.h"

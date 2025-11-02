@@ -1,5 +1,5 @@
-#include "./lib/syscall_call.h"
-#include "./lib/commandRead.h"
+#include "./include/syscall_call.h"
+#include "./include/commandRead.h"
 #include "./tron2/include/map.h"
 #include "./tron2/include/types.h"
 

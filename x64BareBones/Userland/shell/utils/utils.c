@@ -1,6 +1,6 @@
 #include "utils.h"
 #include <stdint.h>
-#include "syscall_call.h"
+#include "../include/syscall_call.h"
 #include <stdbool.h>
 
 
@@ -8,6 +8,15 @@
 
 void print_centered_line_Vram(const char *text, uint64_t screen_w, int row_cells, uint32_t fColor, uint32_t bgColor, int fontSize);
 void print_centered_line_Back(const char *text, uint64_t screen_w, int row_cells, uint32_t fColor, uint32_t bgColor, int fontSize);
+
+int string_to_int(const char *str) {
+    int result = 0;
+    while (*str >= '0' && *str <= '9') {
+        result = result * 10 + (*str - '0');
+        str++;
+    }
+    return result;
+}
 
 //aux = 1 vram aux != 1 back
 void print_centered_line(const char *text, uint64_t screen_w, int row_cells, uint32_t fColor, uint32_t bgColor, int fontSize,  bool vram) {

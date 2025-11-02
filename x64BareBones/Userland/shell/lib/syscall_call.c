@@ -1,4 +1,4 @@
-#include "syscall_call.h"
+#include "../include/syscall_call.h"
 
 extern void sys_resize(char * N_times);
 extern int sys_write(int fb, const char* buf);
@@ -16,10 +16,17 @@ extern int sys_print_registers(uint64_t *buffer);  // Retorna 0 si ok, -1 si no 
 extern void touch_regs();
 extern void sys_sleep_ms(uint64_t ms);
 extern uint64_t sys_get_ms_since_boot();
-extern uint64_t sys_audio(uint64_t op, uint32_t freq, uint32_t dur_ms);   // <--- NUEVO
+extern uint64_t sys_audio(uint64_t op, uint32_t freq, uint32_t dur_ms);   
+extern uint64_t sys_putframe();   
+
+
 
 #define STDIN   0
 #define STDOUT  1
+
+void put_frame(void) {
+    sys_putframe();
+}
 
 uint64_t get_ms_since_boot(void) {
     return sys_get_ms_since_boot();

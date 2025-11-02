@@ -1,4 +1,4 @@
-#include "help.h"
+#include "../include/help.h"
 
 // Traemos solo lo que necesitamos del entorno:
 extern void println(const char* s);

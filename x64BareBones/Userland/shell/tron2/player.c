@@ -1,7 +1,7 @@
 #include "./include/player.h"
 #include "./include/types.h"
 #include "./include/map.h"
-#include "../lib/syscall_call.h"
+#include "../include/syscall_call.h"
 
 
 // Dónde dibujar: 0 = VRAM directa, 1 = back buffer (ajustá si querés)

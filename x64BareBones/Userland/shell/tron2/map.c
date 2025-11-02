@@ -1,7 +1,7 @@
 #include "./include/map.h"
 #include "./include/config.h"
 #include "../utils/utils.h"
-#include "../lib/syscall_call.h"
+#include "../include/syscall_call.h"
 #include <stdbool.h>
 #include "./include/ui.h"
 

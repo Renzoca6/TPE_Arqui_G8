@@ -16,6 +16,7 @@ global sys_get_ms_since_boot
 global sys_sleep_ms
 global sys_kill_system
 GLOBAL sys_audio
+GLOBAL sys_putframe
 
 ; Generic syscall stub
 ; Userland ABI (SysV):
@@ -70,6 +71,7 @@ sys_get_ms_since_boot:  SYSCALL 13
 sys_sleep_ms:           SYSCALL 14
 sys_kill_system         SYSCALL 15
 sys_audio:              SYSCALL 16
+sys_putframe:           SYSCALL 17
 
 
 

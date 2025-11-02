@@ -1,5 +1,7 @@
 #include "video.h"
 #include "font8x16.h"
+#include "lib.h"
+
 // Buffer temporal para almacenar strings numéricos
 static char buffer[64] = { '0' };
 
@@ -106,12 +108,10 @@ void putPixel(uint32_t color, uint32_t x, uint32_t y, PixelTarget target) {
 }
 
 void putFrame(){
-    for (uint32_t y = 0; y < VBE_mode_info->height; y++) {
-        for (uint32_t x = 0; x < VBE_mode_info->width; x++) {
-                putPixel(0x000000, x, y, PIXEL_BACK); // fondo negro
-        }
-    }
+    uint32_t total_bytes = VBE_mode_info->pitch * VBE_mode_info->height;
+    memset(g_back, 0, total_bytes);
 }
+
 
 
 
@@ -304,18 +304,14 @@ inline uint32_t fb_size_bytes(void) {
 }
 
 void present_fullframe(void) {
-    uint8_t *vram  = (uint8_t*) (uintptr_t) VBE_mode_info->framebuffer;
-    uint32_t pitch = VBE_mode_info->pitch; //cantidad de byts que ocupa una fila 
+    uint8_t *vram  = (uint8_t*)(uintptr_t)VBE_mode_info->framebuffer;
+    uint32_t pitch = VBE_mode_info->pitch;
     uint32_t h     = VBE_mode_info->height;
+    uint32_t total = pitch * h;
 
-    // voy copiando fila por fila 
-    for (uint32_t y = 0; y < h; y++) {
-        uint8_t *dst = vram  + y * pitch;// vream
-        uint8_t *src = g_back + y * pitch;  // back buffer
-        // para que sea mas eficiente tendria que hacerlo es asm 
-        for (uint32_t i = 0; i < pitch; i++) dst[i] = src[i];
-    }
+    memcpy(vram, g_back, total);
 }
+
 
 
 void vdclearScreenDB(uint32_t color) {

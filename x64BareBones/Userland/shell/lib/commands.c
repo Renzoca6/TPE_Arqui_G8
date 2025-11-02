@@ -1,9 +1,9 @@
-#include "commands.h"
-#include "syscall_call.h"
-#include "help.h"
+#include "../include/commands.h"
+#include "../include/syscall_call.h"
+#include "../include/help.h"
 #include "../utils/utils.h"
-#include "../commands/benchmark.h"
-#include "../commands/tron_game.h"
+#include "../include/benchmark.h"
+#include "../include/tron_game.h"
 
 
 // —— declaraciones mínimas para que compile ——
@@ -24,6 +24,7 @@ void tron();
 void registers();
 void kill();
 void testSound();
+void sleep(int argc, char *argv[]);
 
 
 
@@ -37,6 +38,7 @@ const command_t COMMANDS[] = {
     { "kill", 11},
     { "registers", 9},
     { "resize",4 },  
+    { "sleep",  13 },
     { "testop", 5},
     {"testsound", 12}, 
     { "testzero", 6},
@@ -61,11 +63,28 @@ int commands_Handler(int func, int argc, char *argv[]) {
         case 10: tron();                                break;
         case 11: kill();                                break;
         case 12: testSound();                           break;
+        case 13: sleep(argc,argv);                      break;
         default:                                        break;
+    
     }
     return 0;
 }
 
+void sleep(int argc, char *argv[]){
+    if (argc != 2){
+        println("invalid command");
+    }
+    else{
+        char buf[10];
+        uintToBase(get_ms_since_boot(), buf, 10);
+        println(buf);
+        sleep_ms(string_to_int(argv[1]));
+        char buf1[10];
+        uintToBase(get_ms_since_boot(), buf1, 10);
+        println(buf1);
+    }
+
+}
 
 void tron(){
     startGame();
@@ -149,5 +168,6 @@ void kill(){
     println("          SYSTEM SHUTDOWN");
     println("  The system has been terminated.");
     println("");
+    sleep_ms(5000);
     sys_kill_system();
 }

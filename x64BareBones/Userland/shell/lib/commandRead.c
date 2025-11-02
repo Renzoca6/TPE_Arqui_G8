@@ -1,7 +1,7 @@
 #include <string.h>
 #include <ctype.h>
-#include "commandRead.h"
-#include "commands.h"
+#include "../include/commandRead.h"
+#include "../include/commands.h"
 extern void println(const char* s);
 
 #ifndef CR_MAXARGS
