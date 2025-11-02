@@ -1,15 +1,18 @@
-// benchmark_user.c
+// ---------------------------------------------------------------------
+// benchmark_calculations.c  (userland)
+// Benchmarks que se ejecutan desde userland y llaman a las syscalls
+// ---------------------------------------------------------------------
 #include <stdint.h>
 #include "../include/syscall_call.h"
 #include "../include/benchmark_calculations.h"
 
-/* ------------------------------------------------------------------------
- * 1) Benchmark de latencia de syscall (userland)
- *
- * Mide cuántas veces por segundo puedo llamar a una syscall muy chica.
- * Usa get_ms_since_boot() porque ya la tenés y es liviana.
- * Devuelve: llamadas por segundo.
- * --------------------------------------------------------------------- */
+// ---------------------------------------------------------------------
+// 1) Benchmark de latencia de syscall (userland)
+//
+// Mide cuántas veces por segundo puedo llamar a una syscall muy chica.
+// Usa get_ms_since_boot() porque ya la tenés y es liviana.
+// Devuelve: llamadas por segundo.
+// ---------------------------------------------------------------------
 uint64_t syscall_latency(void) {
     const uint64_t dur_ms = 100;               // medir ~100 ms
     uint64_t start  = get_ms_since_boot();
@@ -18,7 +21,7 @@ uint64_t syscall_latency(void) {
     uint64_t calls = 0;
 
     while (get_ms_since_boot() < end_ts) {
-        (void)get_ms_since_boot();             // syscall real
+        (void) get_ms_since_boot();            // syscall real
         calls++;
     }
 
@@ -30,14 +33,13 @@ uint64_t syscall_latency(void) {
     return (calls * 1000ull) / elapsed;        // llamadas por segundo
 }
 
-
-/* ------------------------------------------------------------------------
- * 2) Benchmark de putPixel desde userland
- *
- * Es la misma lógica que tu benchmark de kernel, pero pasando por syscall.
- * Dibuja bloques de PIXELS píxeles durante 50 ms.
- * Devuelve: píxeles por segundo.
- * --------------------------------------------------------------------- */
+// ---------------------------------------------------------------------
+// 2) Benchmark de putPixel desde userland
+//
+// Es la misma lógica que tu benchmark de kernel, pero pasando por syscall.
+// Dibuja bloques de PIXELS píxeles durante 50 ms.
+// Devuelve: píxeles por segundo.
+// ---------------------------------------------------------------------
 uint64_t putpixel_user(void) {
     // tamaño de pantalla desde userland
     const uint32_t W = get_screen_width();
@@ -56,7 +58,8 @@ uint64_t putpixel_user(void) {
             uint32_t y = (i / W) % H;
 
             // userland -> syscall -> kernel
-            putPixel(0x00FF00, x, y, 1);       // 1 = BACK en tu syscall
+            // en tu syscall 1 = BACK
+            putPixel(0x00FF00, x, y, 1);
             written++;
         }
     }
@@ -69,13 +72,12 @@ uint64_t putpixel_user(void) {
     return (written * 1000ull) / dt;           // píxeles por segundo
 }
 
-
-/* ------------------------------------------------------------------------
- * 3) Benchmark de escrituras de memoria desde userland
- *
- * Escribe repetidamente en un buffer estático y mide bytes/s.
- * Devuelve: bytes por segundo.
- * --------------------------------------------------------------------- */
+// ---------------------------------------------------------------------
+// 3) Benchmark de escrituras de memoria desde userland
+//
+// Escribe repetidamente en un buffer estático y mide bytes/s.
+// Devuelve: bytes por segundo.
+// ---------------------------------------------------------------------
 #define MEMWRITE_SIZE   (64u * 1024u)          // 64 KB
 
 static uint8_t mem_area[MEMWRITE_SIZE];
@@ -89,7 +91,7 @@ uint64_t memwrite_user(void) {
 
     while (get_ms_since_boot() < end_ts) {
         for (uint32_t i = 0; i < MEMWRITE_SIZE; i++) {
-            mem_area[i] = (uint8_t)i;          // escritura secuencial
+            mem_area[i] = (uint8_t) i;         // escritura secuencial
             written++;                         // 1 byte por iteración
         }
     }
@@ -102,9 +104,15 @@ uint64_t memwrite_user(void) {
     return (written * 1000ull) / elapsed;      // bytes por segundo
 }
 
+// ---------------------------------------------------------------------
+// 4) Benchmark de FPS desde userland
+//
+// Misma lógica: en cada vuelta pregunto el tiempo y dibujo un frame.
+// Devuelve: frames por segundo.
+// ---------------------------------------------------------------------
 uint64_t benchmark_fps(void) {
     uint64_t frames = 0;
-    uint64_t start = get_ms_since_boot();
+    uint64_t start  = get_ms_since_boot();
 
     // misma lógica: en CADA vuelta se pregunta la hora
     while (get_ms_since_boot() - start < 1000) {

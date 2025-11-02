@@ -1,57 +1,68 @@
+// ---------------------------------------------------------------------
+// tron_game.c
+// Lógica de arranque del juego Tron: menú, setup de partida y loop de rondas
+// ---------------------------------------------------------------------
 #include "../include/tron_game.h"
 #include "../tron2/include/game.h"
 #include "../tron2/include/map.h"
 #include "../tron2/include/player.h"
 #include "../tron2/include/types.h"
-#include "../include//syscall_call.h"
+#include "../include/syscall_call.h"     // había doble barra, la corrijo
 #include "../tron2/include/config.h"
 #include "../tron2/include/ui.h"
 #include "../tron2/include/player_Intent.h"
 #include "../tron2/include/AI.h"
 #include <stdint.h>
 
-/* Prepara el tablero para jugar rondas (borra pantalla, recalcula grilla y bordes).
-   NO toca el score. Usala antes de play_Game y también cuando el usuario elige “Continuar”. */
+// ---------------------------------------------------------------------
+// Prepara el tablero para jugar rondas (borra pantalla, recalcula grilla y bordes).
+// NO toca el score. Usala antes de play_Game y también cuando el usuario elige “Continuar”.
+// ---------------------------------------------------------------------
 static void tron_reset_board(TronGame *game) {
-
     map_init(game);
     map_draw_grid_lines(game, 1);
     map_draw_border_lines(game, 1);
 
-    // <- redibuja HUD
+    // redibuja HUD
     score_update(game);
 
-    // <- presenta (si el HUD va a back buffer, esto lo hace visible)
+    // presenta (si el HUD va a back buffer, esto lo hace visible)
     present_fullframe();
 }
 
-
-/* Setup de match (una sola vez por partida): inicializa score,
-   asocia p1/p2 al game y deja el tablero listo para arrancar. */
+// ---------------------------------------------------------------------
+// Setup de match (una sola vez por partida):
+// inicializa score, asocia p1/p2 al game y deja el tablero listo para arrancar.
+// ---------------------------------------------------------------------
 static void tron_setup_match(TronGame *game, Player *p1, Player *p2) {
     score_init(game);
     game->p1 = *p1;
     game->p2 = *p2;
 
-    tron_reset_board(game);   // esto ahora dibuja tablero + HUD + presenta
+    // esto ahora dibuja tablero + HUD + presenta
+    tron_reset_board(game);
 }
 
-
-
-/* ---------- PROTOTIPO (misma lógica, sólo sale a file-scope) ---------- */
+// ---------------------------------------------------------------------
+// Prototipo (misma lógica, sólo sale a file-scope)
+// ---------------------------------------------------------------------
 static void play_Game(TronGame *game, Player *p1, Player *p2, int mode);
 
-/* ================================ */
+// ---------------------------------------------------------------------
+// Punto de entrada del juego Tron
+// ---------------------------------------------------------------------
 void startGame(void) {
     int mode = tron_show_start_menu();
 
     TronGame game;
-    Player p1, p2;
+    Player   p1, p2;
 
-    tron_setup_match(&game, &p1, &p2);   // tablero limpio + HUD + score en 0
-    game.level = 1;                      // ← NUEVO: arrancamos siempre en nivel 1
+    // tablero limpio + HUD + score en 0
+    tron_setup_match(&game, &p1, &p2);
+    game.level = 1;                      // arrancamos siempre en nivel 1
 
-    play_Game(&game, &p1, &p2, mode);    // juega primer BO5
+    // juega el primer BO5
+    play_Game(&game, &p1, &p2, mode);
 
     // Menú final y control de “continuar”
     for (;;) {
@@ -76,19 +87,20 @@ void startGame(void) {
         }
 
         if (toGo == 2) {
-            /* “Continuar jugando” */
+            // “Continuar jugando”
 
             // Si estamos en single y el jugador REAL ganó, recién ahí subimos nivel
             if (mode == 1 && game.score.p1 == 3 && game.score.p2 < 3) {
-                if (game.level < 99)
+                if (game.level < 99) {
                     game.level++;   // subir dificultad
+                }
             }
 
             // guardo el nivel para no perderlo cuando reseteo el match
             uint8_t lvl = game.level;
 
             tron_setup_match(&game, &p1, &p2);  // esto resetea score
-            game.level = lvl;                   // ← lo vuelvo a poner
+            game.level = lvl;                   // lo vuelvo a poner
 
             play_Game(&game, &p1, &p2, mode);
             continue;
@@ -105,15 +117,19 @@ void startGame(void) {
     }
 }
 
+// ---------------------------------------------------------------------
+// Calcula el tick (delay) según el nivel actual
+// ---------------------------------------------------------------------
 static uint32_t tron_tick_for_level(const TronGame *game) {
-    uint32_t base = TRON_TICK_MS;   // lo que ya tenés en config
+    uint32_t base = TRON_TICK_MS;               // lo que ya tenés en config
     uint8_t  lvl  = game->level ? game->level : 1;
 
     // cada nivel baja 8 ms, pero no menos de 20 ms
     uint32_t dec = (uint32_t)(lvl - 1) * 8u;
 
-    if (base <= 20u)      // por si alguien puso un valor ridículo en config
+    if (base <= 20u) {                          // por si alguien puso un valor ridículo en config
         return base;
+    }
 
     if (dec >= base - 20u)
         return 20u;
@@ -121,13 +137,11 @@ static uint32_t tron_tick_for_level(const TronGame *game) {
     return base - dec;
 }
 
-
-/* =============================================================== */
-/*             MISMA LÓGICA QUE TENÍAS, FUERA DE startGame         */
-/* =============================================================== */
-static void play_Game(TronGame *game, Player *p1, Player *p2, int mode){
+// ---------------------------------------------------------------------
+// Loop de juego por rondas (misma lógica que tenías, afuera de startGame)
+// ---------------------------------------------------------------------
+static void play_Game(TronGame *game, Player *p1, Player *p2, int mode) {
     while (game->score.p1 < 3 && game->score.p2 < 3) {
-
         player_Intent p1_Intent = (player_Intent){  1, 0 };
         player_Intent p2_Intent = (player_Intent){ -1, 0 };
 
@@ -140,19 +154,23 @@ static void play_Game(TronGame *game, Player *p1, Player *p2, int mode){
         map_draw_cell(game, p1->col, p1->row, p1->color, 0);
         map_draw_cell(game, p2->col, p2->row, p2->color, 0);
 
-        bool in_game = true;
-        uint64_t start = get_ms_since_boot();
+        bool     in_game = true;
+        uint64_t start   = get_ms_since_boot();
 
-        /* NUEVO: calculo tick según el nivel actual */
+        // NUEVO: calculo tick según el nivel actual
         uint32_t tick_ms = tron_tick_for_level(game);
 
         while (in_game) {
             uint64_t now     = get_ms_since_boot();
             uint64_t elapsed = now - start;
+
             if (elapsed < tick_ms) {
+                // dormimos la diferencia para que el juego no corra demasiado rápido
                 sleep_ms(tick_ms - elapsed);
                 continue;
             }
+
+            // volver a tomar referencia de tiempo
             start = get_ms_since_boot();
 
             // INPUT según modo
@@ -165,8 +183,8 @@ static void play_Game(TronGame *game, Player *p1, Player *p2, int mode){
                     player_Intent bot_next = p2_Intent;
                     int decided = 0;
 
-                    /* primero: si ya tenemos sistema de niveles, el corte lo activamos
-                    desde nivel 3 (ajustá el número si querés) */
+                    /* antes decía “desde nivel 3”, pero el código usa >= 10
+                       así que lo corrijo para que comente lo que realmente hace */
                     if (game->level >= 10) {
                         decided = ai_choose_dir_cutoff(game, p2, p1, &bot_next);
                     } else if (game->level >= 2) {
@@ -185,6 +203,7 @@ static void play_Game(TronGame *game, Player *p1, Player *p2, int mode){
                     break;
                 }
                 case 2: {
+                    // modo coop
                     tron_handle_input_edge_coop(&p1_Intent, &p2_Intent);
                     break;
                 }
@@ -192,10 +211,11 @@ static void play_Game(TronGame *game, Player *p1, Player *p2, int mode){
                     return;
             }
 
+            // actualizo posiciones
             int p2Action = player_action_tick(game, p2, p2_Intent);
             int p1Action = player_action_tick(game, p1, p1_Intent);
-            
 
+            // chequeo de colisiones / fin de ronda
             if (p2Action == 0 || p1Action == 0) {
                 in_game = false;
 
@@ -212,15 +232,15 @@ static void play_Game(TronGame *game, Player *p1, Player *p2, int mode){
             }
         }
 
-        // Entre rondas
+        // Entre rondas (pausa hasta que el usuario toque algo)
         if (game->score.p1 < 3 && game->score.p2 < 3) {
             while (1) {
-                if (getchar() != 0) break;
+                if (getchar() != 0)
+                    break;
             }
         }
 
+        // limpio ocupación
         map_free(game);
     }
 }
-
-

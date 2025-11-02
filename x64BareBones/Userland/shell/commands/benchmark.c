@@ -1,7 +1,10 @@
+// ---------------------------------------------------------------------
+// benchmark.c (userland UI)
+// Dibuja una pantalla con los resultados de los benchs del kernel y userland
+// ---------------------------------------------------------------------
 #include "../include/syscall_call.h"
 #include "../utils/utils.h"
 #include "../include/benchmark_calculations.h"
-
 
 void print_benchmark(void) {
     // limpiar pantalla
@@ -11,11 +14,11 @@ void print_benchmark(void) {
     do_resize("2");
 
     uint64_t sw = get_screen_width();
-    int size = 16;
+    int      size = 16;
 
     const char *hline = "+--------------------------------------------+";
 
-    // filas
+    // filas (en "celdas" de texto)
     int top_row     = 2;
     int title_row   = top_row + 1;
     int blank_row   = top_row + 2;
@@ -32,9 +35,9 @@ void print_benchmark(void) {
     while (running) {
         char buf[64];
 
-        /* =========================
-         * 1) MEDICIONES DEL KERNEL
-         * ========================= */
+        // =========================================================
+        // 1) MEDICIONES DEL KERNEL
+        // =========================================================
         uint64_t k_fps = do_benchmark_fps();
         uint64_t k_hw  = do_benchmark_hardware_access();
         uint64_t k_flt = do_benchmark_floating_point();
@@ -69,10 +72,9 @@ void print_benchmark(void) {
             *p = '\0';
         }
 
-        /* =========================
-         * 2) MEDICIONES USERLAND
-         *    (las del benchmark_calculations.c)
-         * ========================= */
+        // =========================================================
+        // 2) MEDICIONES USERLAND (las de benchmark_calculations.c)
+        // =========================================================
         uint64_t u_sc  = syscall_latency();
         uint64_t u_px  = putpixel_user();
         uint64_t u_mem = memwrite_user();
@@ -107,18 +109,18 @@ void print_benchmark(void) {
             *p = '\0';
         }
 
-        /* =========================
-         * 3) DIBUJO DE LA CAJA
-         * ========================= */
+        // =========================================================
+        // 3) DIBUJO DE LA CAJA
+        // =========================================================
         print_centered_line(hline, sw, top_row, 0xFFFFFF, 0x000000, size, true);
         print_centered_line("|              SYSTEM BENCHMARK              |", sw, title_row, 0xFFFFFF, 0x000000, size, true);
         print_centered_line("|                                            |", sw, blank_row, 0xFFFFFF, 0x000000, size, true);
 
-        // KERNEL FPS
+        // -------------------- KERNEL FPS --------------------
         {
             char line_box[80] = "|                                            |";
-            int box_width = 44;
-            int text_len = 0;
+            int  box_width = 44;
+            int  text_len  = 0;
             while (line_k_fps[text_len]) text_len++;
             int start = (box_width - text_len) / 2;
             char *dst = line_box + 1 + start;
@@ -127,11 +129,11 @@ void print_benchmark(void) {
             print_centered_line(line_box, sw, k_fps_row, 0xFFFFFF, 0x000000, size, true);
         }
 
-        // KERNEL HW
+        // -------------------- KERNEL HW --------------------
         {
             char line_box[80] = "|                                            |";
-            int box_width = 44;
-            int text_len = 0;
+            int  box_width = 44;
+            int  text_len  = 0;
             while (line_k_hw[text_len]) text_len++;
             int start = (box_width - text_len) / 2;
             char *dst = line_box + 1 + start;
@@ -140,11 +142,11 @@ void print_benchmark(void) {
             print_centered_line(line_box, sw, k_hw_row, 0xFFFFFF, 0x000000, size, true);
         }
 
-        // KERNEL FLOAT
+        // -------------------- KERNEL FLOAT --------------------
         {
             char line_box[80] = "|                                            |";
-            int box_width = 44;
-            int text_len = 0;
+            int  box_width = 44;
+            int  text_len  = 0;
             while (line_k_flt[text_len]) text_len++;
             int start = (box_width - text_len) / 2;
             char *dst = line_box + 1 + start;
@@ -153,11 +155,11 @@ void print_benchmark(void) {
             print_centered_line(line_box, sw, k_flt_row, 0xFFFFFF, 0x000000, size, true);
         }
 
-        // USER SYSCALL
+        // -------------------- USER SYSCALL --------------------
         {
             char line_box[80] = "|                                            |";
-            int box_width = 44;
-            int text_len = 0;
+            int  box_width = 44;
+            int  text_len  = 0;
             while (line_u_sc[text_len]) text_len++;
             int start = (box_width - text_len) / 2;
             char *dst = line_box + 1 + start;
@@ -166,11 +168,11 @@ void print_benchmark(void) {
             print_centered_line(line_box, sw, u_sc_row, 0xFFFFFF, 0x000000, size, true);
         }
 
-        // USER PUTPX
+        // -------------------- USER PUTPX --------------------
         {
             char line_box[80] = "|                                            |";
-            int box_width = 44;
-            int text_len = 0;
+            int  box_width = 44;
+            int  text_len  = 0;
             while (line_u_px[text_len]) text_len++;
             int start = (box_width - text_len) / 2;
             char *dst = line_box + 1 + start;
@@ -179,11 +181,11 @@ void print_benchmark(void) {
             print_centered_line(line_box, sw, u_px_row, 0xFFFFFF, 0x000000, size, true);
         }
 
-        // USER MEMWRITE
+        // -------------------- USER MEMWRITE --------------------
         {
             char line_box[80] = "|                                            |";
-            int box_width = 44;
-            int text_len = 0;
+            int  box_width = 44;
+            int  text_len  = 0;
             while (line_u_mem[text_len]) text_len++;
             int start = (box_width - text_len) / 2;
             char *dst = line_box + 1 + start;
@@ -200,8 +202,9 @@ void print_benchmark(void) {
 
         // esperar tecla
         char c = getchar();
-        if (c != 0)
+        if (c != 0) {
             running = false;
+        }
 
         // volver a letra grande para la próxima iteración
         do_resize("2");
