@@ -17,7 +17,7 @@ typedef enum {
 /* ===================== */
 
 /** Dibuja un píxel en (x,y) en el target indicado. */
-void putPixel(uint32_t hexColor, uint32_t x, uint32_t y, PixelTarget target);
+void putPixel(uint32_t color, uint32_t x, uint32_t y, PixelTarget target);
 
 /**dibuja un frame completo si lo usás así. */
 void putFrame(void);

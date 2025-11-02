@@ -5,49 +5,52 @@
 #include "io.h"
 #include <string.h>
 
-#define REG_COUNT 20  // Register count matching pushState order
+#define REG_COUNT 20   // debe coincidir con el orden de pushState
 
-// --- estado para scancodes extendidos (E0) ---
+// ---------------------------------------------------------------------
+// Teclas especiales (flechas) y estado extendido
+// ---------------------------------------------------------------------
 static bool e0_prefix = false;
 
-// --- Opción B: tokens propios para flechas (recomendado) ---
-#define KEY_UP    ((char)0xF1)
-#define KEY_DOWN  ((char)0xF2)
-#define KEY_LEFT  ((char)0xF3)
-#define KEY_RIGHT ((char)0xF4)
+#define KEY_UP     ((char)0xF1)
+#define KEY_DOWN   ((char)0xF2)
+#define KEY_LEFT   ((char)0xF3)
+#define KEY_RIGHT  ((char)0xF4)
 
 extern void enable_interrupts(void);
 extern void disable_interrupts(void);
 
-// === Guardado de registros (snapshot con Shift+Tab) ===
-static char regsSaved = 0;
-static uint64_t savedRegisters[REG_COUNT]; 
-static uint64_t * lastRegsState = NULL;
+// ---------------------------------------------------------------------
+// Guardado de registros (snapshot con Shift+Tab)
+// ---------------------------------------------------------------------
+static char     regsSaved = 0;
+static uint64_t savedRegisters[REG_COUNT];
+static uint64_t *lastRegsState = NULL;
 
-void updateRegs(uint64_t * registers){
-    for(int i = 0; i < REG_COUNT; i++){
+void updateRegs(uint64_t *registers) {
+    for (int i = 0; i < REG_COUNT; i++) {
         savedRegisters[i] = registers[i];
     }
-    lastRegsState = savedRegisters; 
+    lastRegsState = savedRegisters;
 }
 
-bool areRegsSaved(){
+bool areRegsSaved(void) {
     return regsSaved;
 }
 
-uint64_t* getSavedRegs(){
+uint64_t *getSavedRegs(void) {
     return lastRegsState;
 }
 
-// === Fin guardado de registros ===
-
-
+// ---------------------------------------------------------------------
+// Tablas de scancodes
+// ---------------------------------------------------------------------
 static char scancode_to_ascii[128] = {
-    0,  27, '1','2','3','4','5','6','7','8','9','0','-','=', '\b', // 0x00-0x0E
-    '\t','q','w','e','r','t','y','u','i','o','p','[',']','\n', 0,   // 0x0F-0x1D
+    0,  27, '1','2','3','4','5','6','7','8','9','0','-','=', '\b',    // 0x00-0x0E
+    '\t','q','w','e','r','t','y','u','i','o','p','[',']','\n', 0,     // 0x0F-0x1D
     'a','s','d','f','g','h','j','k','l',';','\'','`', 0,'\\','z','x', // 0x1E-0x2D
-    'c','v','b','n','m',',','.','/', 0, '*', 0, ' ',                // 0x2E-0x39
-    // el resto lo podés completar si querés (F1–F12, etc.)
+    'c','v','b','n','m',',','.','/', 0, '*', 0, ' ',                  // 0x2E-0x39
+    // resto F1..F12 si hace falta
 };
 
 static char scancode_to_ascii_mayus[128] = {
@@ -57,60 +60,64 @@ static char scancode_to_ascii_mayus[128] = {
     'C','V','B','N','M', 0, 0, 0, 0, 0, 0, ' ',
 };
 
+// ---------------------------------------------------------------------
+// Buffer circular de teclado
+// ---------------------------------------------------------------------
 #define BUFFER_MAXLENGTH 32
+
 static KeyBufferStruct buf[BUFFER_MAXLENGTH];
-static int lastkey = 0;   
-static int nextkey = 0;   
-static int count = 0;  //dim
+static int lastkey = 0;
+static int nextkey = 0;
+static int count   = 0;
 
-static bool capsLock = false;
-static bool shiftPressed = false;  // Track shift state
+static bool capsLock     = false;
+static bool shiftPressed = false;
 
-static inline bool bufferFull(void) {
-    return count == BUFFER_MAXLENGTH;
-}
-static inline bool bufferEmpty(void) { 
-    return count == 0;
-}
+static inline bool bufferFull(void)  { return count == BUFFER_MAXLENGTH; }
+static inline bool bufferEmpty(void) { return count == 0; }
 
 static void pushEvent(KeyBufferStruct ev) {
     if (bufferFull()) {
         nextkey = (nextkey + 1) % BUFFER_MAXLENGTH;
         count--;
     }
+
     buf[lastkey] = ev;
     lastkey = (lastkey + 1) % BUFFER_MAXLENGTH;
     count++;
 }
 
-void addKeyToBuffer(uint8_t scancode, uint64_t * registers) {
-    // Manejar shift (press y release)
-    if (scancode == 0x2A || scancode == 0x36) {  // Left/Right Shift press
+// ---------------------------------------------------------------------
+// Carga de tecla normal (no E0)
+// ---------------------------------------------------------------------
+void addKeyToBuffer(uint8_t scancode, uint64_t *registers) {
+    // Shift press
+    if (scancode == 0x2A || scancode == 0x36) {
         shiftPressed = true;
         return;
     }
-    if (scancode == 0xAA || scancode == 0xB6) {  // Left/Right Shift release
+    // Shift release
+    if (scancode == 0xAA || scancode == 0xB6) {
         shiftPressed = false;
         return;
     }
-    
     // CapsLock toggle
-    if (scancode == 0x3A) { 
+    if (scancode == 0x3A) {
         capsLock = !capsLock;
-        return; 
+        return;
     }
 
-    // Shift+Tab: Guardar snapshot de registros
-    if (scancode == 0x0F) {  // Tab
+    // Shift + Tab → guardar registros
+    if (scancode == 0x0F) {     // Tab
         if (shiftPressed && registers != NULL) {
             regsSaved = 1;
             updateRegs(registers);
             return;
         }
-        // Si no hay shift, procesar tab normalmente (continúa abajo)
+        // si no hay shift, sigue y procesa Tab normal
     }
 
-    // Ignorar release events
+    // Ignorar release (break codes)
     if (scancode & 0x80) {
         return;
     }
@@ -119,19 +126,22 @@ void addKeyToBuffer(uint8_t scancode, uint64_t * registers) {
     ev.scancode   = scancode;
     ev.is_pressed = true;
 
-    // depende si son mayus o normales
-    char ch = capsLock ? scancode_to_ascii_mayus[scancode]:scancode_to_ascii[scancode];
+    char ch = capsLock
+                ? scancode_to_ascii_mayus[scancode]
+                : scancode_to_ascii[scancode];
 
-    // si no esta en la tabla retorno, TALVEZ PODEMOS HACER UNA EXCEPCION
-    if (ch == 0) return;
+    if (ch == 0)
+        return;
 
     ev.key = ch;
     pushEvent(ev);
 }
 
-void keyboardPressed(uint64_t * registers) {
+// ---------------------------------------------------------------------
+// Handler principal de IRQ1
+// ---------------------------------------------------------------------
+void keyboardPressed(uint64_t *registers) {
     uint8_t sc = inb(0x60);
-
 
     // 1) Prefijo extendido
     if (sc == 0xE0) {
@@ -139,76 +149,81 @@ void keyboardPressed(uint64_t * registers) {
         return;
     }
 
-    // 2) Break code (release)
-    bool released = (sc & 0x80) != 0;
-    uint8_t code  = sc & 0x7F;
+    // 2) Break code
+    bool    released = (sc & 0x80) != 0;
+    uint8_t code     = sc & 0x7F;
 
     if (e0_prefix) {
         // Flechas set 1: E0 48 (UP), E0 50 (DOWN), E0 4B (LEFT), E0 4D (RIGHT)
         if (!released) {
             char out = 0;
 
-            // --- ELEGIR UNA OPCIÓN ---
-            // Opción A: mapear flechas -> WASD (todo ASCII, fácil)
-            // switch (code) {
-            //     case 0x48: out = 'w'; break; // UP
-            //     case 0x50: out = 's'; break; // DOWN
-            //     case 0x4B: out = 'a'; break; // LEFT
-            //     case 0x4D: out = 'd'; break; // RIGHT
-            // }
-
-            // Opción B: usar tokens propios 0xF1..0xF4
+            // Mapeo a tokens propios
             switch (code) {
                 case 0x48: out = KEY_UP;    break;
-                case 0x4B: out = KEY_DOWN;  break;
-                case 0x50: out = KEY_LEFT;  break;
+                case 0x4B: out = KEY_DOWN;  break;   
+                case 0x50: out = KEY_LEFT;  break;   
                 case 0x4D: out = KEY_RIGHT; break;
             }
 
             if (out) {
                 KeyBufferStruct ev = {0};
-                ev.scancode   = sc;     // informativo
-                ev.is_pressed = true;   // solo el edge “press”
-                ev.key        = out;    // ¡clave!
+                ev.scancode   = sc;
+                ev.is_pressed = true;
+                ev.key        = out;
                 pushEvent(ev);
             }
         }
-        e0_prefix = false; // siempre limpiar el prefijo
+
+        e0_prefix = false;
         return;
     }
-    
+
+    // Si no era E0 → procesar como tecla normal
     addKeyToBuffer(sc, registers);
 }
 
+// ---------------------------------------------------------------------
+// API de lectura desde userland/kernel
+// ---------------------------------------------------------------------
 bool hasNextKey(void) {
     return !bufferEmpty();
 }
 
 KeyBufferStruct getNextKey(void) {
-    KeyBufferStruct empty = (KeyBufferStruct){0,0,false};
-    if (bufferEmpty()) return empty;
+    KeyBufferStruct empty = (KeyBufferStruct){0, 0, false};
+
+    if (bufferEmpty())
+        return empty;
 
     KeyBufferStruct ev = buf[nextkey];
     nextkey = (nextkey + 1) % BUFFER_MAXLENGTH;
     count--;
     return ev;
 }
+
 void clearKeyboardBuffer(void) {
-    lastkey = nextkey = count = 0;
+    lastkey = 0;
+    nextkey = 0;
+    count   = 0;
 }
 
+// ---------------------------------------------------------------------
+// Espera bloqueante hasta ENTER
+// ---------------------------------------------------------------------
 void waitForEnter(void) {
-    clearKeyboardBuffer();      //limpio cualquier tecla previa
-    enable_interrupts(); 
+    clearKeyboardBuffer();
+    enable_interrupts();
+
     while (1) {
-        if (!hasNextKey()) continue;
+        if (!hasNextKey())
+            continue;
 
         KeyBufferStruct ev = getNextKey();
-
         if (ev.is_pressed && ev.key == '\n') {
-            break; // Se presionó Enter → salir
+            break;
         }
     }
-    disable_interrupts();    
-}
 
+    disable_interrupts();
+}

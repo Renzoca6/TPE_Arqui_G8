@@ -40,6 +40,7 @@
         "interrupts_dispatcher.h": "c",
         "benchmark_calculations.h": "c",
         "ctype.h": "c",
-        "algorithm": "c"
+        "algorithm": "c",
+        "interrupts.h": "c"
     }
 }
