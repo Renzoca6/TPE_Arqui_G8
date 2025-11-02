@@ -66,6 +66,7 @@ uint64_t timer_ms_since_boot(void) {
 // Sleep activo con hlt
 // ---------------------------------------------------------------------
 // un sleep
+#include "interrupts.h"
 void sleep_ms(uint64_t ms) {
     if (g_tick_hz == 0)
         return;
@@ -74,6 +75,6 @@ void sleep_ms(uint64_t ms) {
     uint64_t ticks_to_wait = (ms * g_tick_hz) / 1000;
 
     while ((g_ticks - start) < ticks_to_wait) {
-        __asm__ __volatile__("hlt");
+       _hlt();
     }
 }
