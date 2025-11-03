@@ -1,61 +1,56 @@
 #include "./include/player_Intent.h"
-#include "./include/config.h"   // KEY_W, etc.
+#include "./include/config.h"     // KEY_W, KEY_S, KEY_A, KEY_D, KEY_UP, ...
 #include "../include/syscall_call.h"
 #include <stdint.h>
 #include <stdbool.h>
-// Por defecto: P1 va a la derecha; P2 va a la izquierda
 
-
+/* Singleplayer: decide con la última tecla WASD del batch */
 void tron_handle_input_edge(player_Intent *p1) {
     char buf[20];
-    int buf_dim = get_multiple_chars_sys(buf,5);
-    bool flag = true;
-    while (buf_dim != 0 && flag){
-        switch (buf[buf_dim-1]) {
-            case KEY_W: *p1 = (player_Intent){  0, -1 };
-            flag = false;
-            break;
-            case KEY_S: *p1 = (player_Intent){  0,  1 };
-            flag = false;
-            break;
-            case KEY_A: *p1 = (player_Intent){ -1,  0 };
-            flag = false;
-            break;
-            case KEY_D: *p1 = (player_Intent){  1,  0 }; 
-            flag = false;
-            break;
+    int n = get_multiple_chars_sys(buf, 20);
+    for (int i = n - 1; i >= 0; --i) {
+        switch (buf[i]) {
+            case KEY_W: *p1 = (player_Intent){  0, -1 }; return;
+            case KEY_S: *p1 = (player_Intent){  0,  1 }; return;
+            case KEY_A: *p1 = (player_Intent){ -1,  0 }; return;
+            case KEY_D: *p1 = (player_Intent){  1,  0 }; return;
         }
-        buf_dim--;
     }
+    // si no apareció nada válido, se mantiene la intención anterior
 }
 
-
-void tron_handle_input_edge_coop(player_Intent *p1, player_Intent *p2){
+/* Coop: en un solo barrido decide P1 (WASD) y P2 (flechas).
+   Se frena cuando ambos decidieron o se agotó el batch. */
+void tron_handle_input_edge_coop(player_Intent *p1, player_Intent *p2) {
     char buf[20];
-    int buf_dim = get_multiple_chars_sys(buf,20);
-    
+    int n = get_multiple_chars_sys(buf, 20);
+
     bool p1decided = false;
     bool p2decided = false;
 
-    while (buf_dim != 0 && !p1decided && !p2decided){
-        switch (buf[buf_dim-1]) {
-            // --- Player 1 (WASD)
-            if (!p1decided){
-            case KEY_W: *p1 = (player_Intent){  0, -1 }; break;
-            case KEY_S: *p1 = (player_Intent){  0,  1 }; break;
-            case KEY_A: *p1 = (player_Intent){ -1,  0 }; break;
-            case KEY_D: *p1 = (player_Intent){  1,  0 }; break;
-            }
+    for (int i = n - 1; i >= 0 && (!p1decided || !p2decided); --i) {
+        char k = buf[i];
 
-            // --- Player 2 (Flechas)
-            if (!p2decided){
-            case KEY_UP:    *p2 = (player_Intent){  0, -1 }; break;  
-            case KEY_DOWN:  *p2 = (player_Intent){  0,  1 }; break;
-            case KEY_LEFT:  *p2 = (player_Intent){ -1,  0 }; break;
-            case KEY_RIGHT: *p2 = (player_Intent){  1,  0 }; break;
+        if (!p1decided) {
+            switch (k) {
+                case KEY_W: *p1 = (player_Intent){  0, -1 }; p1decided = true; break;
+                case KEY_S: *p1 = (player_Intent){  0,  1 }; p1decided = true; break;
+                case KEY_A: *p1 = (player_Intent){ -1,  0 }; p1decided = true; break;
+                case KEY_D: *p1 = (player_Intent){  1,  0 }; p1decided = true; break;
+                default: break;
+            }
+            if (p1decided && p2decided) break;
+        }
+
+        if (!p2decided) {
+            switch (k) {
+                case KEY_UP:    *p2 = (player_Intent){  0, -1 }; p2decided = true; break;
+                case KEY_DOWN:  *p2 = (player_Intent){  0,  1 }; p2decided = true; break;
+                case KEY_LEFT:  *p2 = (player_Intent){ -1,  0 }; p2decided = true; break;
+                case KEY_RIGHT: *p2 = (player_Intent){  1,  0 }; p2decided = true; break;
+                default: break;
             }
         }
-        buf_dim--;
     }
-
+    // si alguno no decidió, mantiene su intención anterior
 }
