@@ -70,7 +70,6 @@ void startGame(void) {
         int toGo = 0;
         switch (mode) {
             case 1: { // SINGLE
-                int gano_p1_y_p2 = (game.score.p1 == 3 && game.score.p2);
                 // ahora sí pasamos el level real
                 toGo = tron_show_end_menu(0, (game.score.p1 == 3 && game.score.p2 == 3) ? 2 : (game.score.p1 == 3) ? 1 : 0, game.level);
                 break;
@@ -183,11 +182,11 @@ static void play_Game(TronGame *game, Player *p1, Player *p2, int mode) {
 
                     /* antes decía “desde nivel 3”, pero el código usa >= 10
                        así que lo corrijo para que comente lo que realmente hace */
-                    if (game->level >= 3) {
-                        decided = ai_choose_dir_cutoff(game, p2, p1, &bot_next);
+                    if (game->level >= 2) {
+                        decided = ai_choose_dir_track(game, p2, p1, &bot_next);
                     } else {
                         // nivel 2: solo trackea
-                        decided = ai_choose_dir_track(game, p2, p1, &bot_next);
+                        decided = ai_choose_dir_simple(game,p2, &bot_next);
                     }
 
 

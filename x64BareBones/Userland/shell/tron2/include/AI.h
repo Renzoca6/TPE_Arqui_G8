@@ -20,9 +20,4 @@ int ai_choose_dir_simple(const TronGame *G, const Player *bot, player_Intent *ou
  */
 int ai_choose_dir_track(const TronGame *G, const Player *bot, const Player *target, player_Intent *out);
 
-/**
- * Estrategia de corte: intenta interceptar el camino del target.
- */
-int ai_choose_dir_cutoff(const TronGame *G, const Player *bot,const Player *target, player_Intent *out);
-
 #endif /* AI_H */
