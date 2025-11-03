@@ -18,10 +18,14 @@ try_qemu() {
     local label=$1
     shift
     echo "Intentando QEMU con $label..."
-    if "$@"; then
+    "$@"
+    local exit_code=$?
+    # isa-debug-exit retorna (valor << 1) | 1
+    # Valor 0 enviado por outb(0xF4, 0x00) resulta en código de salida 1
+    if [[ $exit_code -eq 0 || $exit_code -eq 1 ]]; then
         exit 0
     fi
-    echo "Falló el arranque con $label" >&2
+    echo "Falló el arranque con $label (código: $exit_code)" >&2
 }
 
 OS=$(uname -s)

@@ -23,7 +23,7 @@ extern void disable_interrupts(void);
 // ---------------------------------------------------------------------
 // Guardado de registros (snapshot con Shift+Tab)
 // ---------------------------------------------------------------------
-static char     regsSaved = 0;
+static bool     regsSaved = 0;
 static uint64_t savedRegisters[REG_COUNT];
 static uint64_t *lastRegsState = NULL;
 
@@ -32,6 +32,7 @@ void updateRegs(uint64_t *registers) {
         savedRegisters[i] = registers[i];
     }
     lastRegsState = savedRegisters;
+    regsSaved = 1;
 }
 
 bool areRegsSaved(void) {
