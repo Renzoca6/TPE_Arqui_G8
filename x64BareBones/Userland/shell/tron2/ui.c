@@ -168,11 +168,12 @@ int tron_show_end_menu(bool coop, int won, int level) {
     if (coop) {
         const char *msg = (won == 1) ? "PLAYER 1 WINS!" : "PLAYER 2 WINS!";
         while (*msg) *p++ = *msg++;
+        *p = '\0';
     } else {
         const char *msg = won ? "YOU WIN! NEXT LEVEL " : "YOU LOSE. RETRY LEVEL ";
         while (*msg) *p++ = *msg++;
+        char *n = numBuf; while (*n) *p++ = *n++; *p = '\0';
     }
-    char *n = numBuf; while (*n) *p++ = *n++; *p = '\0';
 
     print_centered_line(title, sw, 7,  titleColor, bgColor, 16, false);
     print_centered_line("A) Return to main menu", sw, 9,  textColor, bgColor, 16, false);
