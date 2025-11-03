@@ -72,7 +72,7 @@ int commands_Handler(int func, int argc, char *argv[]) {
         case 11: kill();                                 break;
         case 12: testSound();                            break;
         case 13: sleep(argc, argv);                      break;
-        case 14: testsyscalls();                        break;
+        case 14: testsyscalls();                         break;
         default:                                         break;
     }
     return 0;
