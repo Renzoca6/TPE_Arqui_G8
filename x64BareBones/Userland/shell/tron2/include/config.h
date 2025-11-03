@@ -20,7 +20,7 @@
 #define TRON_P2_COLOR          0x1A9BA0
 #define TRON_BG_COLOR          0x000000
 
-#define TRON_TICK_MS           70
+#define TRON_TICK_MS           50
 #define TRON_BAND              4
 
 /* ===================== */

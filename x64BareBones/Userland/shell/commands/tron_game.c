@@ -184,17 +184,13 @@ static void play_Game(TronGame *game, Player *p1, Player *p2, int mode) {
 
                     /* antes decía “desde nivel 3”, pero el código usa >= 10
                        así que lo corrijo para que comente lo que realmente hace */
-                    if (game->level >= 10) {
+                    if (game->level >= 3) {
                         decided = ai_choose_dir_cutoff(game, p2, p1, &bot_next);
-                    } else if (game->level >= 2) {
+                    } else {
                         // nivel 2: solo trackea
                         decided = ai_choose_dir_track(game, p2, p1, &bot_next);
                     }
 
-                    // si todavía no decidió (o no tenés level implementado), usa la simple
-                    if (!decided) {
-                        decided = ai_choose_dir_simple(game, p2, &bot_next);
-                    }
 
                     if (decided) {
                         p2_Intent = bot_next;

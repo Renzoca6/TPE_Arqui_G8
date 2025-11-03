@@ -1,10 +1,17 @@
+// =====================================================================
+// player_Intent.c
+// Lectura de entradas y decisión de intención para 1P y 2P
+// =====================================================================
+
 #include "./include/player_Intent.h"
-#include "./include/config.h"     // KEY_W, KEY_S, KEY_A, KEY_D, KEY_UP, ...
+#include "./include/config.h"       // KEY_W, KEY_S, KEY_A, KEY_D, KEY_UP, ...
 #include "../include/syscall_call.h"
 #include <stdint.h>
 #include <stdbool.h>
 
-/* Singleplayer: decide con la última tecla WASD del batch */
+// ---------------------------------------------------------------------
+// Singleplayer: toma la última tecla válida (WASD) de un batch
+// ---------------------------------------------------------------------
 void tron_handle_input_edge(player_Intent *p1) {
     char buf[20];
     int n = get_multiple_chars_sys(buf, 20);
@@ -19,8 +26,9 @@ void tron_handle_input_edge(player_Intent *p1) {
     // si no apareció nada válido, se mantiene la intención anterior
 }
 
-/* Coop: en un solo barrido decide P1 (WASD) y P2 (flechas).
-   Se frena cuando ambos decidieron o se agotó el batch. */
+// ---------------------------------------------------------------------
+// Coop: en un barrido decide P1 (WASD) y P2 (flechas)
+// ---------------------------------------------------------------------
 void tron_handle_input_edge_coop(player_Intent *p1, player_Intent *p2) {
     char buf[20];
     int n = get_multiple_chars_sys(buf, 20);
