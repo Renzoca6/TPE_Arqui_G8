@@ -163,17 +163,25 @@ int tron_show_end_menu(bool coop, int won, int level) {
     char title[64], numBuf[16];
     uintToBase(won ? level + 1 : level, numBuf, 10);
 
-    // Construir mensaje
+        // Construir mensaje
     char *p = title;
     if (coop) {
-        const char *msg = (won == 1) ? "PLAYER 1 WINS!" : "PLAYER 2 WINS!";
+        const char *msg;
+        if (won == 1)       msg = "PLAYER 1 WINS!";
+        else if (won == 0)  msg = "PLAYER 2 WINS!";
+        else /* won == 2 */ msg = "TIE!";
         while (*msg) *p++ = *msg++;
         *p = '\0';
     } else {
-        const char *msg = won ? "YOU WIN! NEXT LEVEL " : "YOU LOSE. RETRY LEVEL ";
+        const char *msg;
+        if (won == 1)       msg = "YOU WIN! NEXT LEVEL ";
+        else if (won == 0)  msg = "YOU LOSE. RETRY LEVEL ";
+        else /* won == 2 */ msg = "TIE. RETRY LEVEL ";
         while (*msg) *p++ = *msg++;
-        char *n = numBuf; while (*n) *p++ = *n++; *p = '\0';
+        char *n = numBuf; while (*n) *p++ = *n++;
+        *p = '\0';
     }
+
 
     print_centered_line(title, sw, 7,  titleColor, bgColor, 16, false);
     print_centered_line("A) Return to main menu", sw, 9,  textColor, bgColor, 16, false);

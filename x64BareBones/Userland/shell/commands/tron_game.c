@@ -52,10 +52,6 @@ static void play_Game(TronGame *game, Player *p1, Player *p2, int mode);
 // ---------------------------------------------------------------------
 void startGame(void) {
     int mode = tron_show_start_menu();
-        if (mode == 0){
-        clearwindow(0x000000);
-        return;
-    }
 
     TronGame game;
     Player   p1, p2;
@@ -74,15 +70,14 @@ void startGame(void) {
         int toGo = 0;
         switch (mode) {
             case 1: { // SINGLE
-                int gano_p1 = (game.score.p1 == 3 && game.score.p2 < 3);
+                int gano_p1_y_p2 = (game.score.p1 == 3 && game.score.p2);
                 // ahora sí pasamos el level real
-                toGo = tron_show_end_menu(0, gano_p1 ? 1 : 0, game.level);
+                toGo = tron_show_end_menu(0, (game.score.p1 == 3 && game.score.p2 == 3) ? 2 : (game.score.p1 == 3) ? 1 : 0, game.level);
                 break;
             }
             case 2: { // COOP
-                int gano_p1 = (game.score.p1 == 3);
                 // en coop no vamos a escalar dificultad, pero igual pasamos level
-                toGo = tron_show_end_menu(1, gano_p1 ? 1 : 2, game.level);
+                toGo = tron_show_end_menu(1, (game.score.p1 == 3 && game.score.p2 == 3) ? 2 : (game.score.p1 == 3) ? 1 : 0, game.level);
                 break;
             }
             default:
