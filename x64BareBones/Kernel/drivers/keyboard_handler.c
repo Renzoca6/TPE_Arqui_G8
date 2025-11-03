@@ -1,5 +1,4 @@
 #include "keyboard_handler.h"
-#include <stdio.h>
 #include <stdbool.h>
 #include <stdint.h>
 #include "io.h"
@@ -155,7 +154,7 @@ void keyboardPressed(uint64_t *registers) {
     uint8_t code     = sc & 0x7F;
 
     if (e0_prefix) {
-        // Flechas set 1: E0 48 (UP), E0 50 (DOWN), E0 4B (LEFT), E0 4D (RIGHT)
+        // Flechas set 1: E0 48 (UP), E0 4B (DOWN), E0 50 (LEFT), E0 4D (RIGHT)
         if (!released) {
             char out = 0;
 

@@ -46,7 +46,4 @@ bool areRegsSaved(void);
 /** Devuelve el puntero al snapshot guardado. */
 uint64_t *getSavedRegs(void);
 
-/** Limpia el snapshot guardado. */
-void clearRegsSaved(void);
-
 #endif /* KEYBOARD_HANDLER_H */

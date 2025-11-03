@@ -10,10 +10,7 @@
 #include "../include/benchmark.h"
 #include "../include/tron_game.h"
 
-// ---------------------------------------------------------------------
-// Declaraciones mínimas para que compile
-// ---------------------------------------------------------------------
-extern void syscall_clear(void);                  // no parece que lo uses
+
 void clear(void);
 void echo(int argc, char *argv[]);
 int  help(const command_t *comandos, int n, int argc, char *argv[]);
@@ -46,7 +43,7 @@ const command_t COMMANDS[] = {
     { "registers",  9 },
     { "resize",     4 },
     { "sleep",     13 },
-    { "testop",     5 },
+    { "testinvalidop",     5 },
     { "testsound", 12 },
     { "testsyscalls",14 },  
     { "testzero",   6 },
@@ -205,7 +202,7 @@ void kill(void) {
     println("  |                                        |");
     println("  |       SYSTEM SHUTDOWN INITIATED        |");
     println("  |                                        |");
-    println("  |    The system will halt in 5 sec...    |");
+    println("  |   The system will shutdown in 5 sec... |");
     println("  |                                        |");
     println("  +----------------------------------------+");
     println("");

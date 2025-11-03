@@ -307,8 +307,6 @@ static void syscall_read(uint64_t *registers) {
             }
         }
     }
-
-    disable_interrupts();
 }
 
 // ---------------------------------------------------------------------

@@ -39,7 +39,6 @@ void vdPrintStyled_AT(const char *str, int col, int fil, uint32_t fColor, uint32
 void vdPrintChar(char c, PixelTarget target);
 void vdBackSpace(PixelTarget target);
 void vdPrintCharStyled(char c, uint32_t fColor, uint32_t bgColor, PixelTarget target);
-/* Nota: esta no recibe target, la podés unificar si querés. */
 void vdNewline(void);
 
 /* ===================== */

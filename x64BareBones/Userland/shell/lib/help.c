@@ -152,7 +152,7 @@ static const help_entry_t HELP_ENTRIES[] = {
     { "registers",   "Print the register snapshot captured with SHIFT+TAB.", "registers" },
     { "resize",      "Change font size (1-4).",                              "resize <1-4>" },
     { "sleep",       "Pause execution for specified milliseconds.",          "sleep <ms>" },
-    { "testop",      "Trigger an invalid opcode exception (testing).",       "testop" },
+    { "testinvalidop", "Trigger an invalid opcode exception (testing).",     "testinvalidop" },
     { "testsound",   "Test system sound/beep functionality.",                "testsound" },
     { "testsyscalls","Run a complete test of all system calls.",             "testsyscalls" },
     { "testzero",    "Trigger a divide-by-zero exception (testing).",        "testzero" },

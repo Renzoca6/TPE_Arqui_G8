@@ -18,35 +18,35 @@ global sys_kill_system
 GLOBAL sys_audio
 GLOBAL sys_putframe
 
-; Generic syscall stub
-; Userland ABI (SysV):
+; Stub genérico para syscalls
+; ABI de Userland (SysV):
 ;   arg0=rdi, arg1=rsi, arg2=rdx, arg3=rcx, arg4=r8, arg5=r9
-; Kernel expects args snapshot in registers as:
+; El kernel espera los argumentos en los registros:
 ;   arg0=rbx, arg1=rcx, arg2=rdx, arg3=rsi, arg4=rdi
-; We must reshuffle registers before triggering int 0x80 and
-; preserve callee-saved rbx for the C caller.
+; Debemos reorganizar los registros antes de disparar int 0x80 y
+; preservar rbx (callee-saved) para el llamador en C.
 %macro SYSCALL 1
     push rbp
     mov rbp, rsp
 
-    ; Preserve callee-saved used below
+    ; Preservar registro callee-saved usado a continuación
     push rbx
 
-    ; Save arg3 (in RCX) temporarily
+    ; Guardar arg3 (en RCX) temporalmente
     mov r10, rcx
 
-    ; Re-map arguments to what the kernel expects
+    ; Remapear argumentos a lo que espera el kernel
     mov rbx, rdi     ; arg0 -> RBX
     mov rcx, rsi     ; arg1 -> RCX
-    ; RDX already holds arg2
+    ; RDX ya contiene arg2
     mov rsi, r10     ; arg3 -> RSI
     mov rdi, r8      ; arg4 -> RDI
 
-    ; Syscall number
+    ; Número de syscall
     mov rax, %1
     int 0x80
 
-    ; Restore callee-saved register
+    ; Restaurar registro callee-saved
     pop rbx
 
     mov rsp, rbp

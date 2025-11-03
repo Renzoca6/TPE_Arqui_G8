@@ -44,7 +44,7 @@ void print_centered_line(const char *text, uint64_t screen_w, int row_cells, uin
 
 void print_centered_line_Vram(const char *text, uint64_t screen_w, int row_cells, uint32_t fColor, uint32_t bgColor, int fontSize) {
     // ancho estimado de un caracter en píxeles
-    const int char_w = fontSize;  // ajustá si tu driver usa otro
+    const int char_w = fontSize;  
 
     // convertir ancho de pantalla en "columnas" aproximadas
     int cols = (int)(screen_w / char_w);
@@ -65,7 +65,7 @@ void print_centered_line_Vram(const char *text, uint64_t screen_w, int row_cells
 
 void print_centered_line_Back(const char *text, uint64_t screen_w, int row_cells, uint32_t fColor, uint32_t bgColor, int fontSize) {
     // ancho estimado de un caracter en píxeles
-    const int char_w = fontSize;  // ajustá si tu driver usa otro
+    const int char_w = fontSize;  
 
     // convertir ancho de pantalla en "columnas" aproximadas
     int cols = (int)(screen_w / char_w);

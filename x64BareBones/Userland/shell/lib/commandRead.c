@@ -4,7 +4,6 @@
 // Usa búsqueda binaria por prefijo (case-insensitive) sobre COMMANDS[]
 // ---------------------------------------------------------------------
 #include <string.h>
-#include <ctype.h>                         // <-- no lo usás porque hiciste tus helpers
 #include "../include/commandRead.h"
 #include "../include/commands.h"
 
@@ -16,8 +15,6 @@ extern void println(const char *s);
 int   cr_last_cmd_id = -1;
 int   cr_last_argc   = 0;
 char *cr_last_argv[CR_MAXARGS];
-
-// asumo que ya tenés cr_first_token(...) y cr_match_prefix_range(...)
 
 // ---------------------------------------------------------------------
 // Helpers sin libc (compatibles bare-metal)

@@ -8,7 +8,7 @@
 #include "./include/map.h"
 #include "../include/syscall_call.h"
 
-// Dónde dibujar: 0 = VRAM directa, 1 = back buffer (ajustá si querés)
+// Dónde dibujar: 0 = VRAM directa, 1 = back buffer 
 #ifndef DRAW_TARGET
 #define DRAW_TARGET 0
 #endif
