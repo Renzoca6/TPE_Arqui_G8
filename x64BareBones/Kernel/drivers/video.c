@@ -94,9 +94,7 @@ void putPixel(uint32_t color, uint32_t x, uint32_t y, PixelTarget target) {
 
     const uint32_t pitch = VBE_mode_info->pitch;
     const uint8_t  bpp   = 3;
-    uint8_t *base = (target == PIXEL_BACK && g_back)
-                        ? g_back
-                        : (uint8_t *)(uintptr_t)VBE_mode_info->framebuffer;
+    uint8_t *base = (target == PIXEL_BACK && g_back) ? g_back : (uint8_t *)(uintptr_t)VBE_mode_info->framebuffer;
 
     uint8_t *px = base + y * pitch + x * bpp;
     px[0] =  color        & 0xFF;
@@ -106,7 +104,7 @@ void putPixel(uint32_t color, uint32_t x, uint32_t y, PixelTarget target) {
 
 void putFrame(void) {
     uint32_t total_bytes = VBE_mode_info->pitch * VBE_mode_info->height;
-    memset(g_back, 0, total_bytes);
+    memset(g_back, 0x00, total_bytes);
 }
 
 // ---------------------------------------------------------------------

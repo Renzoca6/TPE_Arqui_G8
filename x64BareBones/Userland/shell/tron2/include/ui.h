@@ -17,9 +17,6 @@
 /** Muestra el menú de inicio. Retorna selección del usuario. */
 int tron_show_start_menu(void);
 
-/** Interpolación lineal entre dos colores. */
-uint32_t lerp_color(uint32_t c1, uint32_t c2, uint32_t num, uint32_t den);
-
 /** Inicializa el marcador. */
 void score_init(TronGame *G);
 

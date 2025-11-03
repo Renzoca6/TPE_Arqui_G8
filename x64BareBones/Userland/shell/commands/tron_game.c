@@ -3,7 +3,6 @@
 // Lógica de arranque del juego Tron: menú, setup de partida y loop de rondas
 // ---------------------------------------------------------------------
 #include "../include/tron_game.h"
-#include "../tron2/include/game.h"
 #include "../tron2/include/map.h"
 #include "../tron2/include/player.h"
 #include "../tron2/include/types.h"
