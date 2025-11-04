@@ -81,8 +81,7 @@ SECTION .text
 ; exceptionHandler macro
 ; args:
 ;   1 = id exception
-;   2 = skip bytes (number of bytes to advance saved RIP so faulting
-;       instruction is not re-executed). Optional, default 0.
+;   2 = skip bytes 
 
 %macro exceptionHandler 1
 	pushState
