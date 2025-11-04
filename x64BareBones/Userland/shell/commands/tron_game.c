@@ -141,7 +141,7 @@ static uint32_t tron_tick_for_level(const TronGame *game) {
 }
 
 // ---------------------------------------------------------------------
-// Loop de juego por rondas (misma lógica que tenías, afuera de startGame)
+// Loop de juego por rondas
 // ---------------------------------------------------------------------
 static void play_Game(TronGame *game, Player *p1, Player *p2, int mode) {
     while (game->score.p1 < 3 && game->score.p2 < 3) {
@@ -186,8 +186,6 @@ static void play_Game(TronGame *game, Player *p1, Player *p2, int mode) {
                     player_Intent bot_next = p2_Intent;
                     int decided = 0;
 
-                    /* antes decía “desde nivel 3”, pero el código usa >= 10
-                       así que lo corrijo para que comente lo que realmente hace */
                     if (game->level >= 2) {
                         decided = ai_choose_dir_track(game, p2, p1, &bot_next);
                     } else {

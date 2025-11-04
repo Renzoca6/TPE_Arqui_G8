@@ -23,7 +23,7 @@ extern uint64_t sys_get_ms_since_boot(void);
 extern uint64_t sys_audio(uint64_t op, uint32_t freq, uint32_t dur_ms);
 extern uint64_t sys_putframe(void);
 
-#define STDIN   0
+#define STDERR   0
 #define STDOUT  1
 
 // ---------------------------------------------------------------------
@@ -94,8 +94,7 @@ void write_at_vram(const char *str, int col, int fil, uint32_t fColor, uint32_t 
 // Errores / entrada
 // ---------------------------------------------------------------------
 int printError(const char *buf) {
-    // OJO: acá estás escribiendo en STDIN. Lo dejo como lo tenías.
-    return (sys_write(STDIN, buf) && write("\n"));
+    return (sys_write(STDERR, buf) && write("\n"));
 }
 
 int read(char *buf) {

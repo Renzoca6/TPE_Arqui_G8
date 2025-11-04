@@ -10,7 +10,6 @@
 // 1) Benchmark de latencia de syscall (userland)
 //
 // Mide cuántas veces por segundo puedo llamar a una syscall muy chica.
-// Usa get_ms_since_boot() porque es liviana y simple.
 // Devuelve: llamadas por segundo.
 // ---------------------------------------------------------------------
 uint64_t syscall_latency(void) {
