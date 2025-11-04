@@ -73,6 +73,8 @@ void sleep_ms(uint64_t ms) {
     uint64_t start         = g_ticks;
     uint64_t ticks_to_wait = (ms * g_tick_hz) / 1000;
 
+    //_hlt() ejecuta la instrucción de CPU HLT (halt). Esa instrucción detiene (suspende) 
+    //la ejecución del procesador hasta que ocurra la próxima interrupción externa
     while ((g_ticks - start) < ticks_to_wait) {
        _hlt();
     }
