@@ -10,7 +10,7 @@
 // ---------------------------------------------------------------------
 #define REG_COUNT 20
 
-// Register indices (matching pushState order)
+// Register indices machea el orden de pushState 
 enum {
     REG_R15 = 0, REG_R14, REG_R13, REG_R12, REG_R11, REG_R10, REG_R9, REG_R8,
     REG_RSI, REG_RDI, REG_RBP, REG_RDX, REG_RCX, REG_RBX, REG_RAX,
@@ -44,9 +44,7 @@ static const struct {
     { EXC_INVALID_OPCODE, "Invalid Operation Code" }
 };
 
-// ---------------------------------------------------------------------
-// Helper: print a 64-bit value as 16 hex digits (zero-padded)
-// ---------------------------------------------------------------------
+
 static void printHexPadded(uint64_t v) {
     char buf[17];
     const char *hex = "0123456789ABCDEF";
@@ -60,7 +58,7 @@ static void printHexPadded(uint64_t v) {
 }
 
 // ---------------------------------------------------------------------
-// Print registers for exceptions
+// Imprime los registros para excepciones
 // ---------------------------------------------------------------------
 static void print_registers(void) {
     const uint64_t *regs = getSavedRegs();
@@ -71,31 +69,31 @@ static void print_registers(void) {
         return;
     }
 
-    /* Decorative box header */
+    //Encabezado decorativo de la caja 
     vdPrint("+----------------------------------------------------+", PIXEL_VRAM); vdNewline();
     vdPrint("|                  REGISTER SNAPSHOT                 |", PIXEL_VRAM); vdNewline();
     vdPrint("+----------------------------------------------------+", PIXEL_VRAM); vdNewline();
 
-    /* Print registers in two columns */
+    ///Imprime los registros en dos columnas 
     for (int i = 0; i < REG_COUNT; i += 2) {
         char namebuf[10];
 
-        /* start left border */
+       //inicio: borde izquierdo 
         vdPrint("|", PIXEL_VRAM);
 
-        /* Left column name (pad to 6 chars) */
+        // Nombre columna izquierda (rellenar a 6 caracteres) 
         const char *n = REG_NAMES[i];
         int j = 0;
         while (j < 6 && n[j]) { namebuf[j] = n[j]; j++; }
         while (j < 6)          { namebuf[j++] = ' '; }
         namebuf[6] = ':'; namebuf[7] = ' '; namebuf[8] = '\0';
         vdPrint(namebuf, PIXEL_VRAM);
-        printHexPadded(regs[i]);   // prints 16 hex chars
+        printHexPadded(regs[i]);   // imprime 16 caracteres hexadecimales
 
-        /* spacing between columns */
+        // espacio entre columnas 
         vdPrint("    ", PIXEL_VRAM);
 
-        /* Right column */
+        // Columna derecha 
         if (i + 1 < REG_COUNT) {
             const char *n2 = REG_NAMES[i + 1];
             int k = 0;
@@ -106,12 +104,12 @@ static void print_registers(void) {
             printHexPadded(regs[i + 1]);
         }
 
-        /* end right border */
+        ///fin: borde derecho 
         vdPrint("|", PIXEL_VRAM);
         vdNewline();
     }
 
-    /* Decorative footer */
+    
     vdPrint("+----------------------------------------------------+", PIXEL_VRAM);
     vdNewline();
 }

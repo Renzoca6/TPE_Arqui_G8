@@ -15,8 +15,8 @@
 // Inicialización
 // ---------------------------------------------------------------------
 void pic_init(void) {
-    // Ya está remapeado (el BareBones lo suele hacer supuestamente)
-}
+    // Ya está remapeado 
+    }
 
 // ---------------------------------------------------------------------
 // Habilita (desenmascara) una IRQ específica en el PIC 8259A.
