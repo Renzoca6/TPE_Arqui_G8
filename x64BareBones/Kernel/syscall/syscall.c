@@ -224,6 +224,7 @@ static void syscall_benchmark(uint64_t *registers) {
         case 0: res = benchmark_fps();             break;
         case 1: res = benchmark_floating_point();  break;
         case 2: res = benchmark_hardware_access(); break;
+        case 3: res = benchmark_timer_latency();   break;
         default: res = (uint64_t)-1;               break;
     }
 

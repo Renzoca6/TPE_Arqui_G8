@@ -160,6 +160,10 @@ uint64_t do_benchmark_hardware_access(void) {
     return sys_benchmark(2);
 }
 
+uint64_t do_benchmark_timer_latency(void) {
+    return sys_benchmark(3);
+}
+
 // ---------------------------------------------------------------------
 // Lectura de varios chars
 // ---------------------------------------------------------------------

@@ -22,13 +22,14 @@ void print_benchmark(void) {
     int top_row     = 2;
     int title_row   = top_row + 1;
     int blank_row   = top_row + 2;
-    int k_fps_row   = top_row + 3;
-    int k_hw_row    = top_row + 4;
-    int k_flt_row   = top_row + 5;
-    int u_sc_row    = top_row + 6;
-    int u_px_row    = top_row + 7;
-    int u_mem_row   = top_row + 8;
-    int bottom_row  = top_row + 9;
+    int k_flt_row   = top_row + 3;    // KERNEL FLOAT
+    int k_fps_row   = top_row + 4;    // KERNEL FPS
+    int k_hw_row    = top_row + 5;    // KERNEL PUTPX (HW)
+    int u_px_row    = top_row + 6;    // USER PUTPX
+    int k_tmr_row   = top_row + 7;    // KERNEL TIMER
+    int u_sc_row    = top_row + 8;    // USER SYSCALL TIMER
+    int u_mem_row   = top_row + 9;    // USER MEMWRITE
+    int bottom_row  = top_row + 10;
 
     bool running = true;
 
@@ -41,6 +42,7 @@ void print_benchmark(void) {
         uint64_t k_fps = do_benchmark_fps();
         uint64_t k_hw  = do_benchmark_hardware_access();
         uint64_t k_flt = do_benchmark_floating_point();
+        uint64_t k_tmr = do_benchmark_timer_latency();
 
         char line_k_fps[64] = "KERNEL FPS: ";
         uintToBase(k_fps, buf, 10);
@@ -72,6 +74,16 @@ void print_benchmark(void) {
             *p = '\0';
         }
 
+        char line_k_tmr[64] = "KERNEL TIMER: ";
+        uintToBase(k_tmr, buf, 10);
+        {
+            char *p = line_k_tmr;
+            while (*p) p++;
+            char *q = buf;
+            while (*q) *p++ = *q++;
+            *p = '\0';
+        }
+
         // =========================================================
         // 2) MEDICIONES USERLAND (las de benchmark_calculations.c)
         // =========================================================
@@ -79,7 +91,7 @@ void print_benchmark(void) {
         uint64_t u_px  = putpixel_user();
         uint64_t u_mem = memwrite_user();
 
-        char line_u_sc[64] = "USER SYSCALL: ";
+        char line_u_sc[64] = "USER SYSCALL TIMER: ";
         uintToBase(u_sc, buf, 10);
         {
             char *p = line_u_sc;
@@ -116,6 +128,19 @@ void print_benchmark(void) {
         print_centered_line("|              SYSTEM BENCHMARK              |", sw, title_row, 0xFFFFFF, 0x000000, size, true);
         print_centered_line("|                                            |", sw, blank_row, 0xFFFFFF, 0x000000, size, true);
 
+        // -------------------- KERNEL FLOAT --------------------
+        {
+            char line_box[80] = "|                                            |";
+            int  box_width = 44;
+            int  text_len  = 0;
+            while (line_k_flt[text_len]) text_len++;
+            int start = (box_width - text_len) / 2;
+            char *dst = line_box + 1 + start;
+            const char *src = line_k_flt;
+            while (*src) *dst++ = *src++;
+            print_centered_line(line_box, sw, k_flt_row, 0xFFFFFF, 0x000000, size, true);
+        }
+
         // -------------------- KERNEL FPS --------------------
         {
             char line_box[80] = "|                                            |";
@@ -142,17 +167,30 @@ void print_benchmark(void) {
             print_centered_line(line_box, sw, k_hw_row, 0xFFFFFF, 0x000000, size, true);
         }
 
-        // -------------------- KERNEL FLOAT --------------------
+        // -------------------- USER PUTPX --------------------
         {
             char line_box[80] = "|                                            |";
             int  box_width = 44;
             int  text_len  = 0;
-            while (line_k_flt[text_len]) text_len++;
+            while (line_u_px[text_len]) text_len++;
             int start = (box_width - text_len) / 2;
             char *dst = line_box + 1 + start;
-            const char *src = line_k_flt;
+            const char *src = line_u_px;
             while (*src) *dst++ = *src++;
-            print_centered_line(line_box, sw, k_flt_row, 0xFFFFFF, 0x000000, size, true);
+            print_centered_line(line_box, sw, u_px_row, 0xFFFFFF, 0x000000, size, true);
+        }
+
+        // -------------------- KERNEL TIMER --------------------
+        {
+            char line_box[80] = "|                                            |";
+            int  box_width = 44;
+            int  text_len  = 0;
+            while (line_k_tmr[text_len]) text_len++;
+            int start = (box_width - text_len) / 2;
+            char *dst = line_box + 1 + start;
+            const char *src = line_k_tmr;
+            while (*src) *dst++ = *src++;
+            print_centered_line(line_box, sw, k_tmr_row, 0xFFFFFF, 0x000000, size, true);
         }
 
         // -------------------- USER SYSCALL --------------------
@@ -166,19 +204,6 @@ void print_benchmark(void) {
             const char *src = line_u_sc;
             while (*src) *dst++ = *src++;
             print_centered_line(line_box, sw, u_sc_row, 0xFFFFFF, 0x000000, size, true);
-        }
-
-        // -------------------- USER PUTPX --------------------
-        {
-            char line_box[80] = "|                                            |";
-            int  box_width = 44;
-            int  text_len  = 0;
-            while (line_u_px[text_len]) text_len++;
-            int start = (box_width - text_len) / 2;
-            char *dst = line_box + 1 + start;
-            const char *src = line_u_px;
-            while (*src) *dst++ = *src++;
-            print_centered_line(line_box, sw, u_px_row, 0xFFFFFF, 0x000000, size, true);
         }
 
         // -------------------- USER MEMWRITE --------------------

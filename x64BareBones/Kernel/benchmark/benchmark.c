@@ -73,3 +73,25 @@ uint64_t benchmark_hardware_access(void) {
 
     return (written * 1000ull) / dt;
 }
+
+// ---------------------------------------------------------------------
+// Benchmark 4: Latencia de acceso al timer del sistema
+// ---------------------------------------------------------------------
+uint64_t benchmark_timer_latency(void) {
+    const uint64_t dur_ms = 100;               // medir durante ~100 ms
+    uint64_t start  = timer_ms_since_boot();
+    uint64_t end_ts = start + dur_ms;
+    uint64_t calls  = 0;
+
+    while (timer_ms_since_boot() < end_ts) {
+        (void)timer_ms_since_boot();           // llamada directa al timer
+        calls++;
+    }
+
+    uint64_t elapsed = timer_ms_since_boot() - start;
+    if (elapsed == 0) {
+        elapsed = 1;                           // evitar división por cero
+    }
+
+    return (calls * 1000ull) / elapsed;        // llamadas por segundo
+}

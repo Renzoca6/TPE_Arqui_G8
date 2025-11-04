@@ -23,6 +23,7 @@ void printRegisters(void);
 uint64_t do_benchmark_fps(void);
 uint64_t do_benchmark_floating_point(void);
 uint64_t do_benchmark_hardware_access(void);
+uint64_t do_benchmark_timer_latency(void);
 
 // Escritura en pantalla
 void write_at_back(const char *str, int col, int fil, uint32_t fColor, uint32_t bgColor);

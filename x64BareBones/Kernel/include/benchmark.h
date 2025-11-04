@@ -22,4 +22,10 @@ uint64_t benchmark_floating_point(void);
  */
 uint64_t benchmark_hardware_access(void);
 
+/**
+ * Mide la latencia de acceso al timer del sistema.
+ * Retorna la cantidad de lecturas del timer por segundo.
+ */
+uint64_t benchmark_timer_latency(void);
+
 #endif /* BENCHMARK_H */
