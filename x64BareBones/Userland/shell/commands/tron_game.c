@@ -52,6 +52,12 @@ static void play_Game(TronGame *game, Player *p1, Player *p2, int mode);
 // ---------------------------------------------------------------------
 void startGame(void) {
     int mode = tron_show_start_menu();
+    if (mode == 0){
+        clearwindow(0x000000);
+        return;
+    }
+    
+
 
     TronGame game;
     Player   p1, p2;

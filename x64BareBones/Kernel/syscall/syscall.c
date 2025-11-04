@@ -112,8 +112,6 @@ static void syscall_audio(uint64_t *registers) {
             break;
 
         case 2: // beep
-            // beep probablemente use sleep_ms, así que habilitamos IRQs
-            enable_interrupts();
             beep(freq, dur);
             registers[14] = 0;
             break;
@@ -144,11 +142,6 @@ static void syscall_write_at(uint64_t *registers, PixelTarget target) {
 static void syscall_sleep_ms(uint64_t *registers) {
     // El userland te manda el tiempo en ms por RBX → registers[13]
     uint64_t ms = registers[13];
-
-    // Muy importante: estamos dentro de una interrupción, así que
-    // debemos habilitar las interrupciones para que el timer pueda
-    // seguir incrementando g_ticks.
-    enable_interrupts();
 
     sleep_ms(ms);
 }
@@ -235,6 +228,7 @@ static void syscall_benchmark(uint64_t *registers) {
     }
 
     registers[14] = res;  // Resultado en RAX
+    disable_interrupts();
 }
 
 // ---------------------------------------------------------------------
