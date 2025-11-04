@@ -14,7 +14,7 @@ extern void disable_interrupts(void);
 #define MAX_SYSCALLS 18
 
 // ---------------------------------------------------------------------
-// Forward declarations de handlers
+// Handlers de cada syscall
 // ---------------------------------------------------------------------
 static void syscall_read(uint64_t *registers);
 static void syscall_write(uint64_t *registers);
