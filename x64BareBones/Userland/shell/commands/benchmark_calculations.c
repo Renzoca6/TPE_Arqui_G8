@@ -20,7 +20,7 @@ uint64_t syscall_latency(void) {
     uint64_t calls = 0;
 
     while (get_ms_since_boot() < end_ts) {
-        (void) get_ms_since_boot();            // syscall real
+        (void) get_ms_since_boot();            // llamado  a syscall 
         calls++;
     }
 
@@ -35,7 +35,7 @@ uint64_t syscall_latency(void) {
 // ---------------------------------------------------------------------
 // 2) Benchmark de putPixel desde userland
 //
-// Es la misma lógica que tu benchmark de kernel, pero pasando por syscall.
+// Es la misma lógica que el benchmark de kernel, pero pasando por syscall.
 // Dibuja bloques de PIXELS píxeles durante 50 ms.
 // Devuelve: píxeles por segundo.
 // ---------------------------------------------------------------------
@@ -57,7 +57,7 @@ uint64_t putpixel_user(void) {
             uint32_t y = (i / W) % H;
 
             // userland -> syscall -> kernel
-            // en tu syscall 1 = BACK
+            // 1 = BACK
             putPixel(0x00FF00, x, y, 1);
             written++;
         }
@@ -106,8 +106,7 @@ uint64_t memwrite_user(void) {
 // ---------------------------------------------------------------------
 // 4) Benchmark de FPS desde userland
 //
-// Misma lógica: en cada vuelta pregunto el tiempo y dibujo un frame.
-// Devuelve: frames por segundo.
+// Misma lógica que el del kernel.
 // ---------------------------------------------------------------------
 uint64_t benchmark_fps(void) {
     uint64_t frames = 0;

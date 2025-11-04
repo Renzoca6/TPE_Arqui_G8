@@ -33,7 +33,7 @@ void score_init(TronGame *G) {
 void score_update(const TronGame *G) {
     char buf[8];
 
-    // aumentar tamaño temporalmente para que se vea claro
+    // aumentar tamaño de letra
     do_resize("2");
 
     // Player 1
@@ -99,10 +99,13 @@ void draw_top_bottom_bands(int target) {
 void tron_scanlines(int target) {
     uint32_t w = get_screen_width();
     uint32_t h = get_screen_height();
-    for (uint32_t y = 0; y < h; y++)
-        if ((y % 3) == 0)
-            for (uint32_t x = 0; x < w; x++)
+    for (uint32_t y = 0; y < h; y++){
+        if ((y % 3) == 0){
+            for (uint32_t x = 0; x < w; x++){
                 putPixel(0x000000, x, y, target);
+            }
+        }
+    }
 }
 
 // ---------------------------------------------------------------------

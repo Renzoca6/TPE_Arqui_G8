@@ -6,7 +6,7 @@
 #include "../tron2/include/map.h"
 #include "../tron2/include/player.h"
 #include "../tron2/include/types.h"
-#include "../include/syscall_call.h"     // había doble barra, la corrijo
+#include "../include/syscall_call.h"     
 #include "../tron2/include/config.h"
 #include "../tron2/include/ui.h"
 #include "../tron2/include/player_Intent.h"
@@ -15,7 +15,6 @@
 
 // ---------------------------------------------------------------------
 // Prepara el tablero para jugar rondas (borra pantalla, recalcula grilla y bordes).
-// NO toca el score. Usala antes de play_Game y también cuando el usuario elige “Continuar”.
 // ---------------------------------------------------------------------
 static void tron_reset_board(TronGame *game) {
     map_init(game);
@@ -25,7 +24,7 @@ static void tron_reset_board(TronGame *game) {
     // redibuja HUD
     score_update(game);
 
-    // presenta (si el HUD va a back buffer, esto lo hace visible)
+    // presenta el HUD
     present_fullframe();
 }
 
@@ -43,7 +42,7 @@ static void tron_setup_match(TronGame *game, Player *p1, Player *p2) {
 }
 
 // ---------------------------------------------------------------------
-// Prototipo (misma lógica, sólo sale a file-scope)
+// Prototipo de play_Game
 // ---------------------------------------------------------------------
 static void play_Game(TronGame *game, Player *p1, Player *p2, int mode);
 
@@ -76,12 +75,12 @@ void startGame(void) {
         int toGo = 0;
         switch (mode) {
             case 1: { // SINGLE
-                // ahora sí pasamos el level real
+                
                 toGo = tron_show_end_menu(0, (game.score.p1 == 3 && game.score.p2 == 3) ? 2 : (game.score.p1 == 3) ? 1 : 0, game.level);
                 break;
             }
             case 2: { // COOP
-                // en coop no vamos a escalar dificultad, pero igual pasamos level
+                // en coop no vamos a escalar dificultad
                 toGo = tron_show_end_menu(1, (game.score.p1 == 3 && game.score.p2 == 3) ? 2 : (game.score.p1 == 3) ? 1 : 0, game.level);
                 break;
             }
@@ -124,13 +123,13 @@ void startGame(void) {
 // Calcula el tick (delay) según el nivel actual
 // ---------------------------------------------------------------------
 static uint32_t tron_tick_for_level(const TronGame *game) {
-    uint32_t base = TRON_TICK_MS;               // lo que ya tenés en config
+    uint32_t base = TRON_TICK_MS;               // valor base desde config
     uint8_t  lvl  = game->level ? game->level : 1;
 
     // cada nivel baja 8 ms, pero no menos de 20 ms
     uint32_t dec = (uint32_t)(lvl - 1) * 8u;
 
-    if (base <= 20u) {                          // por si alguien puso un valor ridículo en config
+    if (base <= 20u) {                         
         return base;
     }
 
@@ -160,7 +159,7 @@ static void play_Game(TronGame *game, Player *p1, Player *p2, int mode) {
         bool     in_game = true;
         uint64_t start   = get_ms_since_boot();
 
-        // NUEVO: calculo tick según el nivel actual
+        //calculo tick según el nivel actual
         uint32_t tick_ms = tron_tick_for_level(game);
 
         while (in_game) {
@@ -187,9 +186,10 @@ static void play_Game(TronGame *game, Player *p1, Player *p2, int mode) {
                     int decided = 0;
 
                     if (game->level >= 2) {
+                        // nivel 2 o más: sigue al jugador
                         decided = ai_choose_dir_track(game, p2, p1, &bot_next);
                     } else {
-                        // nivel 2: solo trackea
+                        // nivel 1: movimientos aleatorios
                         decided = ai_choose_dir_simple(game,p2, &bot_next);
                     }
 

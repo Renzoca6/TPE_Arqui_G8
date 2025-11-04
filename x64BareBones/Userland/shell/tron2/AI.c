@@ -18,7 +18,7 @@
 
 
 // ---------------------------------------------------------------------
-// Helpers pequeños
+// Helpers 
 // ---------------------------------------------------------------------
 static inline void dir_left (int dx, int dy, int *ox, int *oy)  { *ox =  dy; *oy = -dx; }
 static inline void dir_right(int dx, int dy, int *ox, int *oy)  { *ox = -dy; *oy =  dx; }
@@ -102,7 +102,7 @@ int ai_choose_dir_simple(const TronGame *G, const Player *bot, player_Intent *ou
 }
 
 // ---------------------------------------------------------------------
-// IA: “perseguir” al jugador (track)
+// IA: sigue  al jugador (track)
 // ---------------------------------------------------------------------
 static inline int iabs(int x) { return x < 0 ? -x : x; }
 
@@ -115,10 +115,8 @@ int ai_choose_dir_track(const TronGame *G, const Player *bot, const Player *targ
     int dc = (int)target->col - (int)bot->col;   // + → player a la derecha
     int dr = (int)target->row - (int)bot->row;   // + → player abajo
 
-    // Candidatas en orden de preferencia
     int cand_dx[4], cand_dy[4]; int n = 0;
 
-    // Elegir eje principal (el de mayor distancia)
     if (iabs(dc) >= iabs(dr)) {
         if (dc > 0) { cand_dx[n]= 1; cand_dy[n]= 0; n++; } else if (dc < 0) { cand_dx[n]=-1; cand_dy[n]= 0; n++; }
         if (dr > 0) { cand_dx[n]= 0; cand_dy[n]= 1; n++; } else if (dr < 0) { cand_dx[n]= 0; cand_dy[n]=-1; n++; }
@@ -127,10 +125,9 @@ int ai_choose_dir_track(const TronGame *G, const Player *bot, const Player *targ
         if (dc > 0) { cand_dx[n]= 1; cand_dy[n]= 0; n++; } else if (dc < 0) { cand_dx[n]=-1; cand_dy[n]= 0; n++; }
     }
 
-    // También la dirección actual
     cand_dx[n] = bot->dx; cand_dy[n] = bot->dy; n++;
 
-    // Probar en ese orden
+
     for (int i = 0; i < n; i++) {
         int nx = (int)bot->col + cand_dx[i];
         int ny = (int)bot->row + cand_dy[i];

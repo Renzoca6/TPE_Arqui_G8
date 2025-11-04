@@ -9,7 +9,7 @@ extern void println(const char *s);
 extern int  write(const char *s);
 
 // ---------------------------------------------------------------------
-// Helpers locales (sin libc)
+// Helpers 
 // ---------------------------------------------------------------------
 static int my_tolower_(int c) {
     return (c >= 'A' && c <= 'Z') ? c + ('a' - 'A') : c;
@@ -94,7 +94,7 @@ static void write_boxed_line_(const char *name, const char *text) {
     int inner = BOX_WIDTH - 2;
     int used  = 0;
 
-    // un espacio inicial para respirar
+
     write(" ");
     used += 1;
 

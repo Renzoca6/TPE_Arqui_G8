@@ -137,24 +137,15 @@ void map_draw_cell(const TronGame *G, uint16_t col, uint16_t row, uint32_t color
             putPixel(color, x, y, target);
 }
 
-// ---------------------------------------------------------------------
-// Conversión celda → píxel
-// ---------------------------------------------------------------------
 void cell_to_pixel(const Grid *g, uint16_t col, uint16_t row, uint32_t *px, uint32_t *py) {
     if (px) *px = g->x0 + (uint32_t)col * g->cell_px;  // x = origen_x + col * tamaño
     if (py) *py = g->y0 + (uint32_t)row * g->cell_px;  // y = origen_y + fila * tamaño
 }
 
-// ---------------------------------------------------------------------
-// Chequeo de pertenencia a la grilla
-// ---------------------------------------------------------------------
 bool grid_contains_cell(const Grid *g, uint16_t col, uint16_t row) {
     return (col < g->cols && row < g->rows);
 }
 
-// ---------------------------------------------------------------------
-// Índice lineal en occ[]
-// ---------------------------------------------------------------------
 uint32_t occ_idx(const Grid *g, uint16_t col, uint16_t row) {
     return (uint32_t)row * g->cols + col;
 }
@@ -177,7 +168,7 @@ void occ_set(TronGame *G, uint16_t col, uint16_t row, uint8_t v) {
 }
 
 // ---------------------------------------------------------------------
-// Limpia una celda dejando 1 px de borde (para rearmar la grilla)
+// Limpia una celda dejando 1 px de borde (para rearmar la grilla con solo las celdas usadas)
 // ---------------------------------------------------------------------
 static void tron_clear_cell(const TronGame *G, uint16_t col, uint16_t row, int target) {
     const Grid *g = &G->grid;

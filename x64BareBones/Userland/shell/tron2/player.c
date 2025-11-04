@@ -44,7 +44,7 @@ void player_spawn_center_right(const TronGame *G, Player *p, uint8_t id, uint32_
 }
 
 // ---------------------------------------------------------------------
-// Dirección: valida giros 90° y evita reversa
+// Dirección: valida giros 90° y evita que valla para atras
 // ---------------------------------------------------------------------
 void player_set_dir(Player *p, int8_t dx, int8_t dy) {
     if (!p) return;
@@ -53,7 +53,7 @@ void player_set_dir(Player *p, int8_t dx, int8_t dy) {
     if (!((dx == 0 && (dy == 1 || dy == -1)) || (dy == 0 && (dx == 1 || dx == -1))))
         return;
 
-    // Evitar reversa exacta
+    // Evito que valla para atras exacta
     if (dx == -p->dx && dy == -p->dy) return;
 
     p->dx = dx;

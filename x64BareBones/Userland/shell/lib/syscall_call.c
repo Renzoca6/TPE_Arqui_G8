@@ -25,6 +25,7 @@ extern uint64_t sys_putframe(void);
 
 #define STDERR   0
 #define STDOUT  1
+#define REG_COUNT 20
 
 // ---------------------------------------------------------------------
 // Video / frame
@@ -52,7 +53,7 @@ void putPixel(uint32_t color, uint32_t x, uint32_t y, int target) {
 }
 
 // ---------------------------------------------------------------------
-// IO de texto
+// printeo de texto
 // ---------------------------------------------------------------------
 int write(const char *buf) {
     return sys_write(STDOUT, buf);
@@ -62,6 +63,22 @@ int println(const char *buf) {
     sys_write(STDOUT, buf);
     write("\n");
     return 1;
+}
+
+int printError(const char *buf) {
+    return (sys_write(STDERR, buf) && write("\n"));
+}
+
+static void printHexPadded(uint64_t v) {
+    char        buf[17];
+    const char *hex = "0123456789ABCDEF";
+
+    for (int i = 0; i < 16; i++) {
+        uint8_t nibble = (v >> ((15 - i) * 4)) & 0xF;
+        buf[i] = hex[nibble];
+    }
+    buf[16] = '\0';
+    write(buf);
 }
 
 // ---------------------------------------------------------------------
@@ -90,11 +107,18 @@ void write_at_vram(const char *str, int col, int fil, uint32_t fColor, uint32_t 
     sys_write_at_vram(str, col, fil, fColor, bgColor);
 }
 
+
 // ---------------------------------------------------------------------
-// Errores / entrada
+// Lectura de  chars
 // ---------------------------------------------------------------------
-int printError(const char *buf) {
-    return (sys_write(STDERR, buf) && write("\n"));
+int get_multiple_chars_sys(char *buf, uint64_t max_len) {
+    return (int)sys_getchar(buf, max_len);
+}
+
+char getchar(void) {
+    char c;
+    int  n = sys_getchar(&c, 1);
+    return (n > 0) ? c : 0;
 }
 
 int read(char *buf) {
@@ -163,43 +187,14 @@ uint64_t do_benchmark_timer_latency(void) {
     return sys_benchmark(3);
 }
 
-// ---------------------------------------------------------------------
-// Lectura de varios chars
-// ---------------------------------------------------------------------
-int get_multiple_chars_sys(char *buf, uint64_t max_len) {
-    return (int)sys_getchar(buf, max_len);
-}
 
-char getchar(void) {
-    char c;
-    int  n = sys_getchar(&c, 1);
-    return (n > 0) ? c : 0;
-}
-
-// ---------------------------------------------------------------------
-// REGISTER PRINTING (moved from kernel to userland)
-// ---------------------------------------------------------------------
-#define REG_COUNT 20
-
-/* Register names matching pushState order */
+// orde de los registros según pushState
 static const char *const REG_NAMES[REG_COUNT] = {
     "R15", "R14", "R13", "R12", "R11", "R10", "R9", "R8",
     "RSI", "RDI", "RBP", "RDX", "RCX", "RBX", "RAX",
     "RIP", "CS", "RFLAGS", "RSP", "SS"
 };
 
-/* Helper: print a 64-bit value as 16 hex digits (zero-padded) */
-static void printHexPadded(uint64_t v) {
-    char        buf[17];
-    const char *hex = "0123456789ABCDEF";
-
-    for (int i = 0; i < 16; i++) {
-        uint8_t nibble = (v >> ((15 - i) * 4)) & 0xF;
-        buf[i] = hex[nibble];
-    }
-    buf[16] = '\0';
-    write(buf);
-}
 
 void print_registers(void) {
     uint64_t regs[REG_COUNT];
@@ -212,12 +207,12 @@ void print_registers(void) {
         return;
     }
 
-    /* Decorative box header */
+    /* Encabezado decorativo de la caja */
     println("+----------------------------------------------------+");
     println("|                  REGISTER SNAPSHOT                 |");
     println("+----------------------------------------------------+");
 
-    /* Print registers in two columns */
+    /* Imprime los registros en dos columnas */
     for (int i = 0; i < REG_COUNT; i += 2) {
         char namebuf[10];
 
@@ -252,7 +247,7 @@ void print_registers(void) {
         write("\n");
     }
 
-    /* Decorative footer */
+    /* Pie decorativo (final de la caja) */
     println("+----------------------------------------------------+");
 }
 
