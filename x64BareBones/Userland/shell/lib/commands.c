@@ -117,8 +117,6 @@ void benchmark(void) {
     print_benchmark();
 }
 
-/* fps() moved to commands/benchmark.c */
-
 void testSound(void) {
     audio_beep(440, 200);
     sleep_ms(150);
