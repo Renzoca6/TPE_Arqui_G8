@@ -147,6 +147,7 @@ static const help_entry_t HELP_ENTRIES[] = {
     { "clear",       "Clear the screen.",                                    "clear" },
     { "date",        "Show the current date.",                               "date" },
     { "echo",        "Print the provided arguments.",                        "echo [args...]" },
+    { "fps",         "Run kernel FPS benchmark separately.",               "fps" },
     { "help",        "Show command help.",                                   "help [command]" },
     { "kill",        "Shutdown the system.",                                 "kill" },
     { "registers",   "Print the register snapshot captured with SHIFT+TAB.", "registers" },

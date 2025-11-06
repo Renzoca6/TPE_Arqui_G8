@@ -13,6 +13,7 @@
 
 void clear(void);
 void echo(int argc, char *argv[]);
+void fps(void);
 int  help(const command_t *comandos, int n, int argc, char *argv[]);
 void date(void);
 void time(void);
@@ -38,6 +39,7 @@ const command_t COMMANDS[] = {
     { "clear",      0 },
     { "date",       1 },
     { "echo",       2 },
+    { "fps",        15 },
     { "help",       3 },
     { "kill",      11 },
     { "registers",  9 },
@@ -61,7 +63,8 @@ int commands_Handler(int func, int argc, char *argv[]) {
         case 0:  clear();                                break;
         case 1:  date();                                 break; 
         case 2:  echo(argc, argv);                       break;
-        case 3:  help(COMMANDS, N_COMMANDS, argc, argv); break;
+    case 3:  help(COMMANDS, N_COMMANDS, argc, argv); break;
+    case 15: fps();                                   break;
         case 4:  resize(argc, argv);                     break;   
         case 5:  testInvalidOpcode();                    break;
         case 6:  testZeroDivision();                     break;
@@ -113,6 +116,8 @@ void resize(int argc, char *argv[]) {
 void benchmark(void) {
     print_benchmark();
 }
+
+/* fps() moved to commands/benchmark.c */
 
 void testSound(void) {
     audio_beep(440, 200);

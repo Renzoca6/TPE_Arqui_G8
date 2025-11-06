@@ -11,9 +11,19 @@ uint64_t benchmark_fps(void) {
     uint64_t frames = 0;
     uint64_t start = timer_ms_since_boot();
 
-    // Dibuja por 1 segundo completo
+    // Dibuja por 1 segundo completo en el back y despues lo pone en la vram 
+    // pintamos cada frame con un color distinto y presentamos al framebuffer
+    // reusamos vdclearScreenDB que llena el backbuffer
+    // y llama a present_fullframe().
     while (timer_ms_since_boot() - start < 1000) {
-        putFrame();
+        uint32_t r = (uint32_t)((frames * 97) & 0xFF);
+        uint32_t g = (uint32_t)((frames * 57) & 0xFF);
+        uint32_t b = (uint32_t)((frames * 31) & 0xFF);
+        uint32_t color = (r << 16) | (g << 8) | b;
+
+        // Limpiar el backbuffer al color y presentar (pone en front)
+        vdclearScreenDB(color);
+
         frames++;
     }
 
